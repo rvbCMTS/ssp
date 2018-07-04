@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Persondosimetri{% endblock title %}
+
+{% load static %}
+
+{% block extra-styles %}
+  <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+  <script src="{% static 'js/plotly.min.js' %}"></script>
+  <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+{% endblock extra-scripts %}
+
+<!-- Main Content -->
+{% block main %}
+  <h1>Persondosimetri</h1>
+  <p>Nedan presenteras uppmätta persondosimetrivärden.</p>
+  <p>Uppmätta värden med dosimeter från Landauer presenteras som 0 mSv om de understiger det lägsta detekterbara värdet. För båldosimetrar betyder det  värden under 0,05 mSv.</p>
+  <p>Vid frågor, kontakta lokal persondosimetriansvarig eller persondosimetriansvarig fysiker (<a href="mailto:josef.lundman@vll.se">Josef Lundman</a>).</p>
+
+  <!-- Filter -->
+  <div class="row">
+    <div class="container card-container">
+      <div class="card text-white bg-dark mb-3 form-card">
+        <div class="card-header">Filter</div>
+
+        <div class="card-body">
+          <div class="row form-row">
+            <div class="col-lg-4 col-md-4 col-sm-12">
+              <div class="form-stacked filter-select">
+                <label for="idTime">Tidsintervall</label>
+                <select id="idTime" name="TimeInterval">
+                  <option value="0">Senaste 12 månaderna</option>
+                  {% for year in filter_years %}
+                  <option value="{{ year }}">År {{ year }}</option>
+                  {% endfor %}
+                  <option value="1">Ingen begränsning</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-2 col-sm-1">
+              <div class="form-stacked filter-select">
+                <label for="idClinic">Klinik</label>
+                <select id="idClinic" name="Clinic">
+                  <option value="null">Välj klinik</option>
+                  {% for obj in clinic %}
+                  <option value="{{ obj.id }}">{{ obj.name }}</option>
+                  {% endfor %}
+                  <option value="all">Alla</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-2 col-sm-1">
+              <div class="filter-select">
+                <label for="idPersonnelCategory">Personalkategori</label>
+                <select id="idPersonnelCategory" name="PersonnelCategory">
+                  <option value="null">Välj personalkategori</option>
+                  {% for obj in personnel_category %}
+                  <option value="{{ obj.id }}">{{ obj.name }}</option>
+                  {% endfor %}
+                  <option value="all">Alla</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row form-row">
+            <div class="col-lg-4 col-md-2 col-sm-1">
+              <div class="filter-select">
+                <label for="idPersonnel">Personal</label>
+                <select id="idPersonnel" name="Personnel">
+                  <option value="0">Alla</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-2 col-sm-1">
+              <div class="filter-select">
+                <label for="idDosimeterPlacement">Dosimeterplacering</label>
+                <select id="idDosimeterPlacement" name="DosimeterPlacement">
+                  <option value="0">Alla</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-2 col-sm-1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plots -->
+  <div class="row" id="idPlotRow">
+
+  </div>
+
+  <!-- Table -->
+  <div class="row">
+    <div id="idSummaryTable"></div>
+  </div>
+{% endblock main %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrera genomlysning{% endblock title %}
+
+{% load static %}
+{% block extra-styles %}
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+{% endblock extra-scripts %}
+
+<!-- Main Content -->
+{% block main %}
+  <h1>Registrera genomlysningstid</h1>
+  <div class="row">
+    <div class="container card-container">
+      <div class="card text-white bg-dark mb-3 form-card">
+
+        <div class="card-body">
+          <!-- Clinic and Modality and Operator -->
+          <div class="row form-row">
+
+            <div class="col col-lg-4 col-md-6 col-sm-12">
+              <div class="form-stacked filter-select">
+                <label for="idClinic">Klinik</label>
+                <select id="idClinic" name="Clinic">
+                  <option value="None">Välj klinik</option>
+                  {% for clinic in clinics %}
+                  <option value="{{ clinic.id }}">{{ clinic.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="col col-lg-4 col-md-6 col-sm-12">
+              <div class="form-stacked filter-select">
+                <label for="idModality">Modalitet</label>
+                <select id="idModality" name="Modality">
+                  <option value="None">Välj modalitet</option>
+                  {% for modality in modalities %}
+                  <option value="{{ modality.id }}">{{ modality.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="col col-lg-4 col-md-6 col-sm-12">
+              <div class="form-stacked filter-select">
+                <label for="idOperator">Operatör</label>
+                <select id="idOperator" name="Operator">
+                  <option value="None">Välj operatör</option>
+                  {% for operator in opeartors %}
+                  <option value="{{ operator.id }}">{{ operator.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-space-top">
+                <input type="checkbox" class="custom-control-input" id="idShowAllOperatorsCheck">
+                <label class="custom-control-label" for="idShowAllOperatorsCheck">Visa alla operatörer</label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hidden">
+    <div id="idPresetClinic">{{ preset_clinic }}</div>
+    <div id="idOperators">{{ operators }}</div>
+    <div id="idClinicOperatorMap">{{ clinic_operator_map }}</div>
+    <div id="idModalityOperatorMap">{{ clinic_modality_map }}</div>
+    <div id="idSaveUrl">{% url 'fluoro_times:save_exam' %}</div>
+  </div>
+
+{% endblock main %}

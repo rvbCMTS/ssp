@@ -1,0 +1,49 @@
+.navbar-logo {
+  max-height: 38px;
+  color: #fff;
+  padding-right: 5px;
+}
+
+.hidden {
+  display: None;
+}
+
+.bg-vll {
+  background-color: #0050A0 !important;
+}
+
+.form-stacked {
+  flex-direction: column;
+}
+
+.form-stacked > label, select, input {
+  display: block;
+}
+
+.form-row {
+  padding-bottom: 1em;
+}
+
+.form-row:last-of-type {
+  padding-bottom: 0;
+}
+
+.form-card {
+  margin-top: 1em;
+}
+
+.form-space-top {
+  margin-top: 0.5em;
+}
+
+.card-container {
+  margin-bottom: 1.5em;
+}
+
+@media (min-width: 992px) {
+
+}
+
+.card {
+  height: 100%;
+}

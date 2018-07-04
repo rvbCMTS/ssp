@@ -1,0 +1,7 @@
+django
+djangorestframework
+django-webpack-loader
+markdown
+django-filter
+numpy
+pandas

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Datastädning{% endblock title %}
+
+{% load static %}
+{% block extra-styles %}
+  <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+  <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+{% endblock extra-scripts %}
+
+<!-- Main Content -->
+{% block main %}
+  <h1>Genomlysningstider - Datastädning</h1>
+
+{% endblock main %}
