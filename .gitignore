@@ -1,0 +1,62 @@
+db.sqlite3
+
+### Development & IDE ###
+venv/
+.idea/
+.vscode/
+
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+production_settings.py
+development_settings.py
+local_settings.py
+.env
+migrations/[0-9]*
+
+### Python ###
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
