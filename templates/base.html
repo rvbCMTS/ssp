@@ -45,7 +45,7 @@
               <a class="nav-link" href="{% url 'pd:pd-result' %}">Persondosimetri</a>
             </li>
 
-            <li class="nav-item dropdown {% active 'gls' %}">
+            <li class="nav-item dropdown {% active 'genomlysning' %}">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFluoroLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Genomlysningstider</a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdownFluoroLink">
                 <a class="dropdown-item" href="{% url 'fluoro_times:index' %}">Sammanställning</a>
@@ -62,6 +62,10 @@
 
             <li class="nav-item {% active 'mrqa' %}">
               <a class="nav-link" href="#">MR QA</a>
+            </li>
+
+            <li class="nav-item {% active 'skelettprotokoll' %}">
+              <a class="nav-link" href="{% url 'sp:sp-results' %}" >Skelettprotokoll</a>
             </li>
 
             <li class="nav-item {% active 'log' %}">

@@ -27,6 +27,7 @@ urlpatterns = [
     path('', include('apps.frontpage.urls', namespace='home')),
     path('persondosimetri/', include('apps.personnel_dosimetry.urls', namespace='pd')),
     path('genomlysning/', include('apps.fluoro_times.urls', namespace='gls')),
+    path('skelettprotokoll/', include('apps.skeleton_protocols.urls', namespace='sp')),
     path('api/routers', include(router.urls)),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

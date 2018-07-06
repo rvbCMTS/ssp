@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Persondosimetri{% endblock title %}
+
+{% load static %}
+
+<!-- Widget-tweaks for form layout -->
+{% load widget_tweaks %}
+
+{% block main %}
+  <h1>Skelettprotokoll</h1>
+  <p>Skelettprotokoll på maskiner i VLL</p>
+
+
+<form method="get">
+        <h4>Filter</h4>
+
+
+            {{ filter.form.ris_name.label_tag }}
+            {% render_field filter.form.ris_name class="form-control" placeholder="Search"%}
+
+            {{ filter.form.machine.label_tag }}
+            {% render_field filter.form.machine class="form-control" %}
+
+            {{ filter.form.technique.label_tag }}
+            {% render_field filter.form.technique class="form-control" %}
+
+            {{ filter.form.kv__gt.label_tag }}
+            {% render_field filter.form.kv__gt class="form-control" %}
+
+            {{ filter.form.kv__lt.label_tag }}
+            {% render_field filter.form.kv__lt class="form-control" %}
+
+            {{ filter.form.sensitivity.label_tag }}
+            {% render_field filter.form.sensitivity class="form-control" %}
+
+         <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+
+<table id="DataTable" class="table-bordered">
+        <thead>
+            <tr>
+                <th colspan="11"></th>
+                <th colspan="2">Edge filter</th>
+                <th colspan="2">Harmonization</th>
+                <th colspan="2">Amplification</th>
+            </tr>
+                <th>machine</th>
+                <th>ris name</th>
+                <th>technique</th>
+                <th>sensitivity</th>
+                <th>kV</th>
+                <th>mAs</th>
+                <th>filter Cu</th>
+                <th>focus</th>
+                <th>lut</th>
+                <th>diamond view</th>
+                <th>noise reduction</th>
+                <th>kernel size</th>
+                <th>gain</th>
+                <th>kernel size</th>
+                <th>gain</th>
+                <th>auto</th>
+                <th>gain</th>
+        </thead>
+        <tbody>
+            {% for obj in filter.qs %}
+            <tr>
+                <td>{{ obj.machine }}</td>
+                <td>{{ obj.ris_name}}</td>
+                <td>{{ obj.technique}}</td>
+                <td>{{ obj.sensitivity}}</td>
+                <td>{{ obj.kv }} </td>
+                <td>{{ obj.mas }}</td>
+                <td>{{ obj.filter_cu}} </td>
+                <td>{{ obj.focus}} </td>
+                <td>{{ obj.lut}}</td>
+                <td>{{ obj.diamond_view}} </td>
+                <td>{{ obj.noise_reduction}}</td>
+                <td>{{ obj.edge_filter_kernel_size}}</td>
+                <td>{{ obj.edge_filter_gain}}</td>
+                <td>{{ obj.harmonization_kernel_size}}</td>
+                <td>{{ obj.harmonization_gain}}</td>
+                <td>{{ obj.image_auto_amplification}}</td>
+                <td>{{ obj.image_amplification_gain}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock main %}
