@@ -4,6 +4,7 @@ from django.db import models
 
 
 class Profession(models.Model):
+    landauer_profession_id = models.IntegerField(blank=True, null=True)
     profession = models.TextField(blank=False, null=False)
 
     def __str__(self):
@@ -14,7 +15,7 @@ class Personnel(models.Model):
     dosimetry_vendor_id = models.TextField(blank=True, null=True)
     person_id = models.TextField(blank=True, null=True)
     person_name = models.TextField(blank=False, null=False)
-    profession = models.ForeignKey(Profession, on_delete=models.DO_NOTHING)
+    profession = models.ForeignKey(Profession, on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
         return '{} ({})'.format(self.person_name, self.profession)
@@ -27,9 +28,14 @@ class DosimeterPlacement(models.Model):
         return self.dosimeter_placement
 
 
+class DosimeterLaterality(models.Model):
+    dosimeter_laterality = models.CharField(max_length=100)
+
+
 class VendorDosimeterPlacement(models.Model):
     vendor_dosimeter_placement = models.TextField(blank=False, null=False)
-    dosimeter_placement = models.ForeignKey(DosimeterPlacement, on_delete=models.DO_NOTHING)
+    dosimeter_placement = models.ForeignKey(DosimeterPlacement, on_delete=models.DO_NOTHING, blank=True, null=True)
+    dosimeter_laterality = models.ForeignKey(DosimeterLaterality, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.vendor_dosimeter_placement
@@ -49,6 +55,7 @@ class Clinic(models.Model):
 class Result(models.Model):
     dosimetry_vendor = models.TextField(blank=True, null=True)
     personnel = models.ForeignKey(Personnel, on_delete=models.CASCADE)
+    dosimeter_type = models.CharField(max_length=400, null=True, blank=True)
     vendor_dosimetry_placement = models.ForeignKey(VendorDosimeterPlacement, on_delete=models.DO_NOTHING)
     clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE)
     report = models.TextField(blank=True, null=True)
@@ -92,3 +99,14 @@ class PersonnelDosimetryUsers(models.Model):
 
     class Meta:
         ordering = ('user',)
+
+
+class NotReturnedDosimeters(models.Model):
+    personnel = models.ForeignKey(Personnel, on_delete=models.CASCADE)
+    report = models.TextField(blank=False, null=False)
+
+    def __str__(self):
+        return f'{self.personnel.person_name} ({self.report})'
+
+    class Meta:
+        ordering = ['personnel', 'report']
