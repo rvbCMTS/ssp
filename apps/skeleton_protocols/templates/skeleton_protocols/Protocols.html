@@ -4,6 +4,10 @@
 
 {% load static %}
 
+{% block extra-styles %}
+<link href="{% static 'skeleton_protocols/skeleton_protocols.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
 <!-- Widget-tweaks for form layout -->
 {% load widget_tweaks %}
 
@@ -19,7 +23,7 @@
             <div class="card-body">
                 <div class="row form-row">
 
-                    <form method="get">
+                    <form class="form-inline">
                         <div class="col-lg-12 col-md-12 col-sm-12">
                             {{ filter.form.ris_name.label_tag }}
                             {% render_field filter.form.ris_name class="form-control" placeholder="Search"%}
