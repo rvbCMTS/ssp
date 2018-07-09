@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+from django.conf import settings
 from django.db.models.functions import TruncYear
 from django.shortcuts import render
 from django.http import Http404
@@ -8,6 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from .functions import import_personnel_dosimetry_report
 from .models import Clinic, Profession, Personnel, DosimeterPlacement, VendorDosimeterPlacement, Result
 from .permissions import IsPersonnelDosimetryAdministrator
 from .serializers import ProfessionSerializer, AnonymousPersonnelSerializer, PersonnelSerializer,\
@@ -32,6 +34,16 @@ def personnel_dosimatery_results(request):
                       'clinic': clinics,
                       'personnel_category': profession
                   })
+
+
+def api_parse_new_landauer_reports(request):
+    test = import_personnel_dosimetry_report(
+        vendor='Landauer',
+        input_file_directory=settings.PERSONNEL_DOSIMETRY_DIRS['Landauer']['incoming'],
+        output_file_directory=settings.PERSONNEL_DOSIMETRY_DIRS['Landauer']['outgoing']
+    )
+
+    return Response(test)
 
 
 class PersonnelDosimetryResultList(APIView):

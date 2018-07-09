@@ -14,3 +14,11 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+
+PERSONNEL_DOSIMETRY_DIRS = {
+    'Landauer': {
+        'incoming': '<path-to-incoming-directory-for-Landauer-reports>',
+        'outgoing': '<path-to-outgoing-directory-for-Landauer-reports>'
+    }
+}
