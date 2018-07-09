@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'apps.frontpage',
     'apps.personnel_dosimetry',
     'apps.fluoro_times',
+    'apps.skeleton_protocols',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
