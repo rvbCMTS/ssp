@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block main %}
+
+{% if form.errors %}
+<p>Ditt användarnamn och lösenord matchade inte. Försök igen.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Din användare har inte rättigheter till denna sida. För att fortsätta, vänligen logga in med ett annat konto som har dessa rättigheter.</p>
+    {% else %}
+    <p>Logga in för att få se denna sida.</p>
+    {% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+
+<div>
+  <td>{{ form.username.label_tag }}</td>
+  <td>{{ form.username }}</td>
+</div>
+<div>
+  <td>{{ form.password.label_tag }}</td>
+  <td>{{ form.password }}</td>
+</div>
+
+<div>
+  <input type="submit" value="login" />
+  <input type="hidden" name="next" value="{{ next }}" />
+</div>
+</form>
+
+{% endblock main %}

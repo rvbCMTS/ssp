@@ -5,12 +5,14 @@
 {% load static %}
 
 {% block extra-styles %}
+  <link href="{% static 'personnel_dosimetry/pd.css' %}" rel="stylesheet">
   <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
 {% endblock extra-styles %}
 
 {% block extra-scripts %}
   <script src="{% static 'js/plotly.min.js' %}"></script>
   <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+  <script src="{% static 'personnel_dosimetry/pd.js' %}"></script>
 {% endblock extra-scripts %}
 
 <!-- Main Content -->
@@ -28,10 +30,10 @@
 
         <div class="card-body">
           <div class="row form-row">
-            <div class="col-lg-4 col-md-4 col-sm-12">
+            <div class="col-lg-4 col-md-6 col-sm-12">
               <div class="form-stacked filter-select">
                 <label for="idTime">Tidsintervall</label>
-                <select id="idTime" name="TimeInterval">
+                <select id="idTime" name="TimeInterval" class="update-filter-choices">
                   <option value="0">Senaste 12 månaderna</option>
                   {% for year in filter_years %}
                   <option value="{{ year }}">År {{ year }}</option>
@@ -41,10 +43,10 @@
               </div>
             </div>
 
-            <div class="col-lg-4 col-md-2 col-sm-1">
+            <div class="col-lg-4 col-md-6 col-sm-12">
               <div class="form-stacked filter-select">
                 <label for="idClinic">Klinik</label>
-                <select id="idClinic" name="Clinic">
+                <select id="idClinic" name="Clinic" class="update-data update-filter-choices">
                   <option value="null">Välj klinik</option>
                   {% for obj in clinic %}
                   <option value="{{ obj.id }}">{{ obj.name }}</option>
@@ -54,53 +56,108 @@
               </div>
             </div>
 
-            <div class="col-lg-4 col-md-2 col-sm-1">
+            <div class="col-lg-4 col-md-6 col-sm-12">
               <div class="filter-select">
                 <label for="idPersonnelCategory">Personalkategori</label>
-                <select id="idPersonnelCategory" name="PersonnelCategory">
-                  <option value="null">Välj personalkategori</option>
+                <select id="idPersonnelCategory" name="PersonnelCategory" class="update-data update-filter-choices">
+                  <option value="all">Alla</option>
                   {% for obj in personnel_category %}
                   <option value="{{ obj.id }}">{{ obj.name }}</option>
                   {% endfor %}
-                  <option value="all">Alla</option>
                 </select>
               </div>
             </div>
           </div>
 
-          <div class="row form-row">
-            <div class="col-lg-4 col-md-2 col-sm-1">
+          <div class="row align-items-end">
+            <div class="col-lg-4 col-md-6 col-sm-12">
               <div class="filter-select">
                 <label for="idPersonnel">Personal</label>
-                <select id="idPersonnel" name="Personnel">
+                <select id="idPersonnel" name="Personnel" class="update-data update-filter-choices">
                   <option value="0">Alla</option>
+                  {% for obj in personnel %}
+                  <option value="{{ obj.id }}">{{ obj.name }}</option>
+                  {% endfor %}}
                 </select>
               </div>
             </div>
 
-            <div class="col-lg-4 col-md-2 col-sm-1">
+            <div class="col-lg-4 col-md-6 col-sm-12">
               <div class="filter-select">
                 <label for="idDosimeterPlacement">Dosimeterplacering</label>
-                <select id="idDosimeterPlacement" name="DosimeterPlacement">
+                <select id="idDosimeterPlacement" name="DosimeterPlacement" class="update-data update-filter-choices">
                   <option value="0">Alla</option>
+                  {% for obj in dosimeter_placement %}
+                  <option value="{{ obj.id }}">{{ obj.placement }}</option>
+                  {% endfor %}}
                 </select>
               </div>
             </div>
 
-            <div class="col-lg-4 col-md-2 col-sm-1"></div>
+            <div class="col-lg-4 col-md-6 col-sm-12">
+              <div class="form-inline">
+                <div class="form-check-inline">
+                  <input class="form-check-inline update-data update-filter-choices" type="checkbox" id="idSpotcheck" name="spotchecks" value="1" />
+                  <label for="idSpotcheck">Stickprov</label>
+                </div>
+                <div class="form-check-inline">
+                  <input class="form-check-inline update-data update-filter-choices" type="checkbox" id="idAreaMeasurement" name="areameasurement" value="1" />
+                  <label for="idAreaMeasurement">Area</label>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
     </div>
   </div>
 
+  <div id="idLoaderRow" class="row justify-content-center hidden">
+    <div class="loader"></div>
+  </div>
+
   <!-- Plots -->
   <div class="row" id="idPlotRow">
-
+    <div class="col-lg-12">
+      <h2>Uppmätt dos under vald tidsperiod</h2>
+    </div>
+      <div class="col-lg-6 col-md-6 col-sm-12">
+        <div id="hp10Plot"></div>
+      </div>
+      <div class="col-lg-6 col-md-6 col-sm-12">
+        <div id="hp007Plot"></div>
+      </div>
+      <div class="col-lg-6 col-md-6 col-sm-12">
+        <div id="hp10tnPlot"></div>
+      </div>
+      <div class="col-lg-6 col-md-6 col-sm-12">
+        <div id="hp10fnPlot"></div>
+      </div>
   </div>
 
   <!-- Table -->
   <div class="row">
-    <div id="idSummaryTable"></div>
+    <div class="col-lg-12">
+      <h2>Total dos för vald tidsperiod</h2>
+    </div>
+    <div class="col-lg-12">
+      <table id="idSummaryTable" class="stripe hover compact">
+        <thead>
+          <tr>
+            <th>Person (dosimeterplacering)</th>
+            <th>Hp(10)</th>
+            <th>Hp(0,07)</th>
+            <th>Hp(10)tn</th>
+            <th>Hp(10)fn</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+
+  <div class="hidden">
+    <div id="idFilterChoicesUrl">{% url 'pd:pd-result-update-filter-list' %}</div>
+    <div id="idUpdatePlotsUrl">{% url 'pd:pd-result-list' %}</div>
   </div>
 {% endblock main %}

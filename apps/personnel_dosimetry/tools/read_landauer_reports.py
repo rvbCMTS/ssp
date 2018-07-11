@@ -195,10 +195,12 @@ def _insert_results_to_db(results: pd.DataFrame, list_type: str, log: logging.Lo
     vendor_dosimeter_placement_in_db = pd.DataFrame(list(VendorDosimeterPlacement.objects.all().values()))
     clinics_in_db = pd.DataFrame(list(Clinic.objects.all().values()))
 
-    if len(personnel_in_db) > 0:
-        results['newpers'] = [0 if str(row.DeltagarId) in personnel_in_db.dosimetry_vendor_id.values else
-                              (1 if (row.Personnummer in personnel_in_db.person_id.values) else 2)
-                              for _, row in results.iterrows()]
+    #if len(personnel_in_db) > 0:
+    #    results['newpers'] = [0 if str(row.DeltagarId) in personnel_in_db.dosimetry_vendor_id.values else
+    #                          (1 if (str(row.Personnummer).strip() in personnel_in_db.person_id.values) else 2)
+    #                          for _, row in results.iterrows()]
+    #else:
+    #    results['newpers'] = [0] * len(results)
 
     for _, row in results.iterrows():
         # Get Personnel object
@@ -209,15 +211,15 @@ def _insert_results_to_db(results: pd.DataFrame, list_type: str, log: logging.Lo
                 profession = None
 
             personnel = Personnel(dosimetry_vendor_id=row.DeltagarId, person_id=row.Personnummer,
-                                  person_name=row.Namn, profession=profession)
+                                  person_name=row.Namn.title(), profession=profession)
             personnel.save()
             personnel_in_db = pd.DataFrame(list(Personnel.objects.all().values()))
-            results['newpers'] = [0 if str(row2.DeltagarId) in personnel_in_db.dosimetry_vendor_id.values else
-                                  (1 if (row2.Personnummer in personnel_in_db.person_id.values) else 2)
-                                  for _, row2 in results.iterrows()]
+            #results['newpers'] = [0 if str(row2.DeltagarId) in personnel_in_db.dosimetry_vendor_id.values else
+            #                     (1 if (row2.Personnummer in personnel_in_db.person_id.values) else 2)
+            #                      for _, row2 in results.iterrows()]
         else:
             personnel = Personnel.objects.get(dosimetry_vendor_id=row.DeltagarId)
-            if row.newpers == 2:
+            if len(str(row.Personnummer).strip()) > 0 and str(row.Personnummer).strip() not in personnel_in_db.person_id.values:
                 personnel.person_id = row.Personnummer
                 personnel.save()
             if personnel.profession is None and not np.isnan(row.Yrkeskod):
@@ -229,19 +231,19 @@ def _insert_results_to_db(results: pd.DataFrame, list_type: str, log: logging.Lo
                 personnel.save()
 
         # Get vendor dosimeter placement
-        if len(vendor_dosimeter_placement_in_db) < 1 or row.Dosimeterplacering not in vendor_dosimeter_placement_in_db.vendor_dosimeter_placement.values:
-            vdp = VendorDosimeterPlacement(vendor_dosimeter_placement=row.Dosimeterplacering)
+        if len(vendor_dosimeter_placement_in_db) < 1 or str(row.Dosimeterplacering).strip() not in vendor_dosimeter_placement_in_db.vendor_dosimeter_placement.values:
+            vdp = VendorDosimeterPlacement(vendor_dosimeter_placement=str(row.Dosimeterplacering).strip())
             vdp.save()
             vendor_dosimeter_placement_in_db = pd.DataFrame(list(VendorDosimeterPlacement.objects.all().values()))
         else:
-            vdp = VendorDosimeterPlacement.objects.get(vendor_dosimeter_placement=row.Dosimeterplacering)
+            vdp = VendorDosimeterPlacement.objects.get(vendor_dosimeter_placement=str(row.Dosimeterplacering).strip())
 
         # Get clinic
-        clinic_string = (f'{row.Kundnummer}:{row.Avdelningsnummer}:{row.Underavdelningsnr} '
-                         f'{row.Kundtext1} - {row.Kundtext2}')
+        clinic_string = (f'{str(row.Kundnummer).strip()}:{str(row.Avdelningsnummer).strip()}:{str(row.Underavdelningsnr).strip()} '
+                         f'{str(row.Kundtext1).strip()} - {str(row.Kundtext2).strip()}')
 
         if len(clinics_in_db) < 1 or clinic_string not in clinics_in_db.clinic.values:
-            clinic = Clinic(clinic=clinic_string)
+            clinic = Clinic(clinic=clinic_string, display_clinic=clinic_string)
             clinic.save()
             clinics_in_db = pd.DataFrame(list(Clinic.objects.all().values()))
         else:

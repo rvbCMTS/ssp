@@ -1,0 +1,36 @@
+[
+ {
+  "model": "personnel_dosimetry.dosimeterplacement",
+  "pk": 1,
+  "fields": {"dosimeter_placement": "B\u00e5l"}
+ },
+ {
+  "model": "personnel_dosimetry.dosimeterplacement",
+  "pk": 2,
+  "fields": {"dosimeter_placement": "Hand"}
+ },
+ {
+  "model": "personnel_dosimetry.dosimeterplacement",
+  "pk": 3,
+  "fields": {"dosimeter_placement": "Arm"}
+ },
+ {
+  "model": "personnel_dosimetry.dosimeterplacement",
+  "pk": 4,
+  "fields": {"dosimeter_placement": "\u00d6ga"}
+ },
+ {
+  "model": "personnel_dosimetry.dosimeterlaterality",
+  "pk": 1,
+  "fields": {"dosimeter_laterality": "H\u00f6ger"}
+ },
+ {
+  "model": "personnel_dosimetry.dosimeterlaterality",
+  "pk": 2,
+  "fields": {"dosimeter_laterality": "V\u00e4nster"}
+ },
+ {
+  "model": "personnel_dosimetry.dosimeterlaterality",
+  "pk": 3,
+  "fields": {"dosimeter_laterality": "Mitt"}
+ }]
