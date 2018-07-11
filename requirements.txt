@@ -6,3 +6,4 @@ django-filter
 numpy
 pandas
 django-widget-tweaks
+pyodbc
