@@ -14,7 +14,8 @@ production_settings.py
 development_settings.py
 local_settings.py
 .env
-migrations/[0-9]*
+**/migrations
+!**/migrations/__ini__.py
 
 ### Python ###
 __pycache__/

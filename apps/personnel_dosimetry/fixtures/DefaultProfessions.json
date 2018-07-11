@@ -1,0 +1,136 @@
+[
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 1,
+  "fields": {"landauer_profession_id": 1, "profession": "Servicepersonal"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 2,
+  "fields": {"landauer_profession_id": 2, "profession": "Str\u00e5lskyddspersonal"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 3,
+  "fields": {"landauer_profession_id": 3, "profession": "Administrat\u00f6r"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 4,
+  "fields": {"landauer_profession_id": 4, "profession": "Assistent"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 5,
+  "fields": {"landauer_profession_id": 5, "profession": "L\u00e4kare"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 6,
+  "fields": {"landauer_profession_id": 6, "profession": "Sk\u00f6terska"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 7,
+  "fields": {"landauer_profession_id": 7, "profession": "Framaceut"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 8,
+  "fields": {"landauer_profession_id": 8, "profession": "Naturvetare"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 9,
+  "fields": {"landauer_profession_id": 9, "profession": "Tekniker"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 10,
+  "fields": {"landauer_profession_id": 10, "profession": "Sjukhusfysiker"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 11,
+  "fields": {"landauer_profession_id": 11, "profession": "Tandl\u00e4kare"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 12,
+  "fields": {"landauer_profession_id": 12, "profession": "Veterin\u00e4r"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 13,
+  "fields": {"landauer_profession_id": 13, "profession": "Industripersonal"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 14,
+  "fields": {"landauer_profession_id": 14, "profession": "Transport\u00f6r"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 15,
+  "fields": {"landauer_profession_id": 15, "profession": "Pilot"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 16,
+  "fields": {"landauer_profession_id": 16, "profession": "Kabinpersonal"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 17,
+  "fields": {"landauer_profession_id": 17, "profession": "Driftspersonal"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 18,
+  "fields": {"landauer_profession_id": 18, "profession": "Mek reparat\u00f6r"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 19,
+  "fields": {"landauer_profession_id": 19, "profession": "St\u00e4llningsbyggare"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 20,
+  "fields": {"landauer_profession_id": 20, "profession": "Isolerare"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 21,
+  "fields": {"landauer_profession_id": 21, "profession": "Materialprovare"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 22,
+  "fields": {"landauer_profession_id": 22, "profession": "Kemister"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 23,
+  "fields": {"landauer_profession_id": 23, "profession": "\u00d6vrig k\u00e4rnteknisk personal"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 24,
+  "fields": {"landauer_profession_id": 24, "profession": "Undersk\u00f6terska/-bitr\u00e4de"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 25,
+  "fields": {"landauer_profession_id": 25, "profession": "Djursjukv\u00e5rdare/-sk\u00f6tare"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 26,
+  "fields": {"landauer_profession_id": 26, "profession": "Biomedicinsk analytiker"}
+ },
+ {
+  "model": "personnel_dosimetry.profession",
+  "pk": 27,
+  "fields": {"landauer_profession_id": 27, "profession": "\u00d6vrig personal"}
+ }]

@@ -20,6 +20,12 @@ class Personnel(models.Model):
     def __str__(self):
         return '{} ({})'.format(self.person_name, self.profession)
 
+    class Meta:
+        permissions = (
+            ("view_personnel_names", "Can see name of personnel"),
+            ("view_personnel_pid", "Can see pid of the personnel"),
+        )
+
 
 class DosimeterPlacement(models.Model):
     dosimeter_placement = models.TextField(blank=False, null=False)
@@ -30,6 +36,9 @@ class DosimeterPlacement(models.Model):
 
 class DosimeterLaterality(models.Model):
     dosimeter_laterality = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.dosimeter_laterality
 
 
 class VendorDosimeterPlacement(models.Model):

@@ -35,6 +35,7 @@ class PersonnelDosimetryResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Result
+        fields = '__all__'
 
 
 class DeviationSerializer(serializers.ModelSerializer):
