@@ -30,15 +30,5 @@ class Protocols(models.Model):
     last_modification = models.TextField(blank=False, null=False)
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
 
-    technique_choices = (
-        ('1 pt', '1 pt'),
-        ('2 pt', '2 pt'),
-    )
-
-    sensitivity_choices = (
-        (400, '400'),
-        (800, '800'),
-    )
-
     def __str__(self):
         return self.ris_name

@@ -5,98 +5,158 @@
 {% load static %}
 
 {% block extra-styles %}
-<link href="{% static 'skeleton_protocols/skeleton_protocols.css' %}" rel="stylesheet">
+    <link href="{% static 'skeleton_protocols/sp.css' %}" rel="stylesheet">
+    <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
 {% endblock extra-styles %}
+
+{% block extra-scripts %}
+    <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+    <script src="{% static 'skeleton_protocols/sp.js' %}"></script>
+{% endblock extra-scripts %}
 
 <!-- Widget-tweaks for form layout -->
 {% load widget_tweaks %}
 
 {% block main %}
-  <h1>Skelettprotokoll</h1>
-  <p>Skelettprotokoll på maskiner i VLL</p>
+<h1>Skelettprotokoll</h1>
+<p>Skelettprotokoll på maskiner i VLL</p>
 
+
+<!-- Filter -->
 <div class="row">
     <div class="container card-container">
-        <div class="card text-white bg-dark mb-3 form-card">
+        <div class="card text-black bg-light mb-3 form-card">
             <div class="card-header">Filter</div>
 
-            <div class="card-body">
-                <div class="row form-row">
+                <form>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-12">
+                                {% render_field filter.form.ris_name class="form-control" placeholder="Sök protokoll..."%}
+                            </div>
 
-                    <form class="form-inline">
-                        <div class="col-lg-12 col-md-12 col-sm-12">
-                            {{ filter.form.ris_name.label_tag }}
-                            {% render_field filter.form.ris_name class="form-control" placeholder="Search"%}
+                            <div class="col-lg-4 col-md-4 col-sm-10">
+                                {% render_field filter.form.machine class="form-control" %}
+                            </div>
+
+                            <div class="col-lg-2 col-md-2 col-sm-2">
+                                <button type="submit" class="btn btn-primary">Sök</button>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="col-lg-4 col-md-4 col-sm-12">
-                            {{ filter.form.machine.label_tag }}
-                            {% render_field filter.form.machine class="form-control" %}
+                    <div class="card-body">
+                        <h6>Exponeringsinställningar</h6>
+                        <div class="row">
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.kv_min class="form-control" %}
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.mas_min class="form-control" %}
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.technique class="form-control" %}
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.sensitivity class="form-control" %}
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.filter_cu class="form-control" %}
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.focus class="form-control" %}
+                            </div>
                         </div>
-
-                        <div class="col-lg-4 col-md-4 col-sm-12">
-                            {{ filter.form.technique.label_tag }}
-                            {% render_field filter.form.technique class="form-control" %}
+                        <div class="row">
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.kv_max class="form-control" %}
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.mas_max class="form-control" %}
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="col-lg-4 col-md-4 col-sm-12">
-                            {{ filter.form.kv__gt.label_tag }}
-                            {% render_field filter.form.kv__gt class="form-control" %}
+                    <div class="card-body">
+                        <h6>Postprocessinginställningar</h6>
+                        <div class="row">
+                             <div class="col-lg-4 col-md-4 col-sm-12">
+                                {% render_field filter.form.lut class="form-control" %}
+                            </div>
+                             <div class="col-lg-4 col-md-4 col-sm-12">
+                                {% render_field filter.form.diamond_view class="form-control" %}
+                            </div>
+
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.image_auto_amplification class="form-control" %}
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="col-lg-4 col-md-4 col-sm-12">
-                            {{ filter.form.kv__lt.label_tag }}
-                            {% render_field filter.form.kv__lt class="form-control" %}
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.edge_filter_kernel_size_min class="form-control" %}
+                            </div>
+
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.edge_filter_gain_min class="form-control" %}
+                            </div>
+
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.harmonization_kernel_size_min class="form-control" %}
+                            </div>
+
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.harmonization_gain_min class="form-control" %}
+                            </div>
                         </div>
-
-                        <div class="col-lg-4 col-md-4 col-sm-12">
-                            {{ filter.form.sensitivity.label_tag }}
-                            {% render_field filter.form.sensitivity class="form-control" %}
+                        <div class="row">
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.edge_filter_kernel_size_max class="form-control" %}
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.edge_filter_gain_max class="form-control" %}
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.harmonization_kernel_size_max class="form-control" %}
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.harmonization_gain_max class="form-control" %}
+                            </div>
                         </div>
-
-                        <div class="col-lg-4 col-md-4 col-sm-12">
-                            <button type="submit" class="btn btn-primary">Search</button>
-                        </div>
-                    </form>
-
-                </div>
+                    </div>
+                </form>
             </div>
-        </div>
     </div>
 </div>
+<!-- End Filter -->
 
 
-<table id="DataTable" class="table-bordered">
+<!-- Results -->
+<table id="idResultTable" class="stripe hover compact">
         <thead>
             <tr>
-                <th colspan="11"></th>
-                <th colspan="2">Edge filter</th>
-                <th colspan="2">Harmonization</th>
-                <th colspan="2">Amplification</th>
-            </tr>
-                <th>machine</th>
                 <th>ris name</th>
-                <th>technique</th>
-                <th>sensitivity</th>
+                <th>machine</th>
+                <th>T</th>
+                <th>S</th>
                 <th>kV</th>
                 <th>mAs</th>
-                <th>filter Cu</th>
+                <th>filter</th>
                 <th>focus</th>
                 <th>lut</th>
                 <th>diamond view</th>
-                <th>noise reduction</th>
-                <th>kernel size</th>
-                <th>gain</th>
-                <th>kernel size</th>
-                <th>gain</th>
-                <th>auto</th>
-                <th>gain</th>
+                <th>Amp</th>
+                <th>Edge Filter</th>
+                <th>Harmonization</th>
+            </tr>
         </thead>
         <tbody>
             {% for obj in filter.qs %}
             <tr>
-                <td>{{ obj.machine }}</td>
                 <td>{{ obj.ris_name}}</td>
+                <td>{{ obj.machine }}</td>
                 <td>{{ obj.technique}}</td>
                 <td>{{ obj.sensitivity}}</td>
                 <td>{{ obj.kv }} </td>
@@ -105,16 +165,35 @@
                 <td>{{ obj.focus}} </td>
                 <td>{{ obj.lut}}</td>
                 <td>{{ obj.diamond_view}} </td>
-                <td>{{ obj.noise_reduction}}</td>
-                <td>{{ obj.edge_filter_kernel_size}}</td>
-                <td>{{ obj.edge_filter_gain}}</td>
-                <td>{{ obj.harmonization_kernel_size}}</td>
-                <td>{{ obj.harmonization_gain}}</td>
-                <td>{{ obj.image_auto_amplification}}</td>
-                <td>{{ obj.image_amplification_gain}}</td>
+                {% if obj.image_auto_amplification %}
+                    <td>auto</td>
+                {% else %}
+                    <td>{{ obj.image_amplification_gain}}</td>
+                {% endif %}
+                <td>{{ obj.edge_filter_kernel_size}} | {{ obj.edge_filter_gain}}</td>
+                <td>{{ obj.harmonization_kernel_size}} | {{ obj.harmonization_gain}}</td>
             </tr>
             {% endfor %}
         </tbody>
+        <tfoot>
+            <tr>
+                <th>ris name</th>
+                <th>machine</th>
+                <th>T</th>
+                <th>S</th>
+                <th>kV</th>
+                <th>mAs</th>
+                <th>filter</th>
+                <th>focus</th>
+                <th>lut</th>
+                <th>diamond view</th>
+                <th>Amp</th>
+                <th>Edge Filter</th>
+                <th>Harmonization</th>
+            </tr>
+        </tfoot>
     </table>
+<!-- End Results -->
+
 
 {% endblock main %}
