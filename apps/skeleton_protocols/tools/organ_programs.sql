@@ -20,7 +20,7 @@ FROM OGP
 INNER JOIN BodyPart ON BodyPart.Id = OGP.Id_bodypart
 INNER JOIN OGP_kV  ON OGP_kV.ID = OGP.ID_kV
 INNER JOIN RAD_OGP ON RAD_OGP.ID = OGP.ID
-INNER JOIN RADOGP_mAs ON RAD_OGP.Id_mas = RADOGP_mAs.Id
+LEFT OUTER JOIN RADOGP_mAs ON RAD_OGP.Id_mas = RADOGP_mAs.Id
 INNER JOIN Technique ON RAD_OGP.Id_technique = Technique.Id
 INNER JOIN FilterType ON OGP.Id_filtertype = FilterType.Id
 INNER JOIN Focus ON OGP.Id_focus = Focus.Id
@@ -33,4 +33,4 @@ INNER JOIN Dose_RAD ON RAD_OGP.Id_dose = Dose_RAD.Id
 INNER JOIN GradationParameter ON RAD_OGP.Id_imagegradation = GradationParameter.Ids
 
 
-WHERE OGP.status=2 AND OGP.Type='SIEMENSDEFAULT';
+WHERE OGP.status=2 AND OGP.Type='SIEMENSDEFAULT' AND NOT OGP.Id_bodypart=57;
