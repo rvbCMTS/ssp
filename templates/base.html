@@ -21,6 +21,9 @@
     <link href="{% static 'css/ssp.css' %}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
 
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+
     {% block extra-styles %}{% endblock extra-styles %}
 
   </head>
@@ -60,8 +63,12 @@
               <a class="nav-link" href="{% url 'sp:sp-results' %}">Skelettprotokoll</a>
             </li>
 
-            <li class="nav-item {% active 'mgqa' %}">
-              <a class="nav-link" href="#">Mammografi QA</a>
+            <li class="nav-item dropdown {% active 'mgqa' %}">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMGQALink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Mammografi QA</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownMGQALink">
+                <a class="dropdown-item" href="{% url 'mg:mg-weekly-qa-result' %}">QA Resultat</a>
+                <a class="dropdown-item" href="{% url 'mg:mg-weekly-measurement' %}">Veckokontroll</a>
+              </div>
             </li>
 
             <li class="nav-item {% active 'mrqa' %}">
@@ -222,7 +229,6 @@
     </footer>
 
     <!-- Bootstrap core JavaScript -->
-    <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'bootstrap4/js/bootstrap.js' %}"></script>
     <script src="{% static 'fontawesome5/js/all.js' %}"></script>
