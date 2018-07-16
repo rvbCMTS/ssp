@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}QA Mammo{% endblock title %}
+
+{% load static %}
+
+{% block extra-styles %}
+    <link href="{% static 'mammography/mg.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+    <script src="{% static 'mammography/mg_weekly_form.js' %}"></script>
+    {{ form.media }}
+{% endblock extra-scripts %}
+
+<!-- Main Content -->
+{% block main %}
+    <h1>Mammografi QA</h1>
+
+    <form action="{% url 'mg:mg-weekly-measurement' %}" method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="form-group">
+                    {{ form.modality.errors }}
+                    {{ form.modality.label_tag }}{{ form.modality }}
+                </div>
+            </div>
+        </div>
+        <div id="defaultFields" class="hidden">
+            <div class="row">
+                <div class="container card-container">
+                    <div class="card text-white bg-dark mb-3">
+                        <div id="idInstructionHeader" class="card-header" data-toggle="collapse" data-target="#idInstruction" aria-expanded="true"><h4>Instruktioner</h4></div>
+                        <div id="idInstruction" class="card-body"></div>
+                        <ul id="idMeasurementInfo" class="list-group list-group-flush bg-dark">
+                            <li id="idMeasurementInfoFirstRow" class="list-group-item bg-dark">När värden med en tolerans fylls i markeras de som <em class="mg-alert-instruction alert-success">inom tolerans</em>, <em class="mg-alert-instruction alert-warning">utanför tolerans</em> eller <em class="mg-alert-instruction alert-danger">inte ett tal</em>.</li>
+                            <li class="list-group-item bg-dark">Om ett värde är utanför tolerans kan det fortfarande sparas men man bör kontrollera att det inte är t ex en felplacerad decimalsepartor som ger att det är utanför tolerans.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12"><h3>Mätresultat</h3></div>
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        {{ form.measurement_date.errors }}
+                        {{ form.measurement_date.label_tag }}{{ form.measurement_date }}
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        {{ form.mas.errors }}
+                        {{ form.mas.label_tag }}{{ form.mas }}
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="form-group">
+                        {{ form.entrance_dose.errors }}
+                        {{ form.entrance_dose.label_tag }}{{ form.entrance_dose }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="idRoiFormFields">
+        </div>
+
+        {% if roiForm.rois > 0 %}
+        <h1>Yeay</h1>
+        <div id="defaultFields2" class="">
+        {% else %}
+        <div id="defaultFields2" class="hidden">
+        {% endif %}
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        {{ form.comment.errors }}
+                        {{ form.comment.label_tag }}{{ form.comment }}
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        {{ form.signature.errors }}
+                        {{ form.signature.label_tag }}{{ form.signature }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="idSubmitContainer">
+
+        </div>
+    </form>
+    <div id="idFormUpdateUrl" class="hidden">{% url 'mg:mg-weekly-measurement' %}</div>
+    <div id="idReferences" class="hidden"></div>
+    <!--<div id="idFormUpdateUrl" class="hidden">{% url 'mg:mg-update-weekly-form' %}</div>-->
+{% endblock %}

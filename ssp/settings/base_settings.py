@@ -43,7 +43,10 @@ INSTALLED_APPS = [
     'apps.personnel_dosimetry',
     'apps.fluoro_times',
     'apps.skeleton_protocols',
+    'apps.mammography',
     'widget_tweaks',
+    'ckeditor',
+    'ckeditor_uploader',
 ]
 
 MIDDLEWARE = [
@@ -147,3 +150,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
+CKEDITOR_UPLOAD_PATH = 'ckeditor/'
