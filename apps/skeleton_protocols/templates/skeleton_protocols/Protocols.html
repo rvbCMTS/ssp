@@ -74,6 +74,9 @@
                             <div class="col-lg-2 col-md-2 col-sm-12">
                                 {% render_field filter.form.mas_max class="form-control" %}
                             </div>
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                {% render_field filter.form.grid class="form-control" %}
+                            </div>
                         </div>
                     </div>
 
@@ -145,6 +148,7 @@
                 <th>mAs</th>
                 <th>filter</th>
                 <th>focus</th>
+                <th>raster</th>
                 <th>lut</th>
                 <th>diamond view</th>
                 <th>Amp</th>
@@ -163,6 +167,7 @@
                 <td>{{ obj.mas }}</td>
                 <td>{{ obj.filter_cu}} </td>
                 <td>{{ obj.focus}} </td>
+                <td>{{ obj.grid}} </td>
                 <td>{{ obj.lut}}</td>
                 <td>{{ obj.diamond_view}} </td>
                 {% if obj.image_auto_amplification %}
@@ -185,6 +190,7 @@
                 <th>mAs</th>
                 <th>filter</th>
                 <th>focus</th>
+                <th>raster</th>
                 <th>lut</th>
                 <th>diamond view</th>
                 <th>Amp</th>

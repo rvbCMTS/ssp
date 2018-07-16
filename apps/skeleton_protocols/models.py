@@ -17,6 +17,7 @@ class Protocols(models.Model):
     mas = models.DecimalField(null=True, decimal_places=2, max_digits=5)
     filter_cu = models.DecimalField(null=False, decimal_places=1, max_digits=2)
     focus = models.IntegerField(null=False)
+    grid = models.IntegerField(null=True)
     diamond_view = models.TextField(blank=False, null=False)
     edge_filter_kernel_size = models.IntegerField(null=False)
     edge_filter_gain = models.DecimalField(null=False, decimal_places=2, max_digits=4)
