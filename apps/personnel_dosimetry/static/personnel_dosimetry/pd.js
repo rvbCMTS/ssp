@@ -16,10 +16,10 @@ $('.update-filter-choices').change(function(event) {
 
 function updateFilterValues(triggeringId) {
     const timeInterval = $("#idTime").val();
-    const clinic = $("idClinic").val();
-    const profession = $("idPersonnelCategory").val();
-    const personnel = $("idPersonnel").val();
-    const dosimeterPlacement = $("idDosimeterPlacement").val();
+    const clinic = $("#idClinic").val();
+    const profession = $("#idPersonnelCategory").val();
+    const personnel = $("#idPersonnel").val();
+    const dosimeterPlacement = $("#idDosimeterPlacement").val();
 
     $.ajax({
         url: $("#idFilterChoicesUrl").html(),
