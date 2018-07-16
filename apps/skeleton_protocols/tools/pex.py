@@ -119,17 +119,33 @@ def _parse_pex_db():
     # Open temporary database
     conn = sqlite3.connect('apps\\skeleton_protocols\\tools\\temp.sqlite3')
 
-    # Open and read the sql query
+    # Find which machine - query to db and conversion to dataframe
     fd = open('apps\\skeleton_protocols\\tools\\machine.sql', 'r')
     sql_machine = fd.read()
     fd.close()
-    fd = open('apps\\skeleton_protocols\\tools\\organ_programs.sql', 'r')
-    sql_organ_programs = fd.read()
-    fd.close()
-
-    # Read from db to dataframe
     machine = pandas.read_sql_query(sql_machine, conn)
-    df = pandas.read_sql_query(sql_organ_programs, conn)
+
+    # Find database version (grid parameter not in all database versions)
+    sql_db_version = """SELECT * FROM GlobalVars """
+    global_vars = pandas.read_sql_query(sql_db_version, conn)
+    db_version = global_vars.loc[1, ['Varvalue']][0]
+
+    # call correct sql-query
+    if db_version == '60':
+        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv60.sql', 'r')
+        sql_organ_programs = fd.read()
+        fd.close()
+        # Read from db to dataframe
+        df = pandas.read_sql_query(sql_organ_programs, conn)
+    elif db_version == '45':
+        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv45.sql', 'r')
+        sql_organ_programs = fd.read()
+        fd.close()
+        # Read from db to dataframe
+        df = pandas.read_sql_query(sql_organ_programs, conn)
+        # Add None for grid
+        df['grid'] = [float('nan')]*len(df)
+
 
     # Correcting kV och mAs
     df.kv = df.kv/10
@@ -170,6 +186,7 @@ def _prot2db(machine, df):
                                 mas=row.mas,
                                 filter_cu=row.filter_cu,
                                 focus=row.focus,
+                                grid=row.grid,
                                 diamond_view=row.diamond_view,
                                 edge_filter_kernel_size=row.edge_filter_kernel_size,
                                 edge_filter_gain=row.edge_filter_gain,

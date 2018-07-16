@@ -14,6 +14,7 @@ class ProtocolsFilter(django_filters.FilterSet):
     sensitivity = django_filters.AllValuesFilter(name='sensitivity', empty_label='Sensitivity')
     filter_cu = django_filters.AllValuesFilter(name='filter_cu', empty_label='Kopparfilter')
     focus = django_filters.AllValuesFilter(name='focus', empty_label='Fokus')
+    grid = django_filters.AllValuesFilter(name='grid', empty_label='Raster')
     lut = django_filters.AllValuesFilter(name='lut', empty_label='Lut')
     diamond_view = django_filters.AllValuesFilter(label='Diamond View', empty_label='Diamond View')
     image_auto_amplification = django_filters.AllValuesFilter(label='Amp auto', empty_label='Auto Amp')
