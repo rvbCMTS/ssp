@@ -22,6 +22,9 @@ def parse_db(input_directory: str):
             # parse temporary sqlite database
             [machine, df] = _parse_pex_db()
 
+            # clean data before insert to new database
+            df = _clean_df(df)
+
             # place dataframe in new database
             _prot2db(machine, df)
 
@@ -158,6 +161,35 @@ def _parse_pex_db():
     conn.close()
 
     return machine, df
+
+def _clean_df(df):
+    # Distinct Lut names
+
+    lut_names = {
+        '1':'01 Service Bone Black',
+        '2':'02 Service Bone White',
+        '3':'03 Low Contrast',
+        '4':'04 Extremity/Skull',
+        '4 Extremity/Skull': '04 Extremity/Skull',
+        '5':'05 Chest',
+        '6':'06 Extremity/Skull',
+        '6 Extremity/Skull': '06 Extremity/Skull',
+        '7':'07',
+        '8':'08 Chest',
+        '9':'09 Low Contrast',
+        '10':'10 Abdomen/Ribs',
+        '11':'11 Abdomen/Ribs',
+        '12':'12 Extremity',
+        '13':'13 Spine/Abdomen',
+        '14':'14 Chest Mediastinum',
+        '15':'15 Spine/Abdomen',
+    }
+
+    # Replace lut number with lut string
+    for ind in lut_names:
+        df.lut.replace(ind,lut_names[ind], inplace=True)
+
+    return df
 
 def _prot2db(machine, df):
 
