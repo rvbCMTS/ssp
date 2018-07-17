@@ -28,20 +28,18 @@
         <div class="card text-black bg-light mb-3 form-card">
             <div class="card-header">Filter</div>
 
-                <form>
+            <!-- javascript:void(); to prevent form to reload -->
+                <form action="javascript:void(0);" id="form" method="get">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-12">
+                            <div class="col-lg-8 col-md-8 col-sm-12">
                                 {% render_field filter.form.ris_name class="form-control" placeholder="Sök protokoll..."%}
                             </div>
 
-                            <div class="col-lg-4 col-md-4 col-sm-10">
+                            <div class="col-lg-4 col-md-4 col-sm-12">
                                 {% render_field filter.form.machine class="form-control" %}
                             </div>
 
-                            <div class="col-lg-2 col-md-2 col-sm-2">
-                                <button type="submit" class="btn btn-primary">Sök</button>
-                            </div>
                         </div>
                     </div>
 
@@ -135,6 +133,9 @@
 </div>
 <!-- End Filter -->
 
+<div id="idLoaderRow" class="row justify-content-center">
+    <div class="loader"></div>
+</div>
 
 <!-- Results -->
 <table id="idResultTable" class="stripe hover compact">
@@ -156,30 +157,6 @@
                 <th>Harmonization</th>
             </tr>
         </thead>
-        <tbody>
-            {% for obj in filter.qs %}
-            <tr>
-                <td>{{ obj.ris_name}}</td>
-                <td>{{ obj.machine }}</td>
-                <td>{{ obj.technique}}</td>
-                <td>{{ obj.sensitivity}}</td>
-                <td>{{ obj.kv }} </td>
-                <td>{{ obj.mas }}</td>
-                <td>{{ obj.filter_cu}} </td>
-                <td>{{ obj.focus}} </td>
-                <td>{{ obj.grid}} </td>
-                <td>{{ obj.lut}}</td>
-                <td>{{ obj.diamond_view}} </td>
-                {% if obj.image_auto_amplification %}
-                    <td>auto</td>
-                {% else %}
-                    <td>{{ obj.image_amplification_gain}}</td>
-                {% endif %}
-                <td>{{ obj.edge_filter_kernel_size}} | {{ obj.edge_filter_gain}}</td>
-                <td>{{ obj.harmonization_kernel_size}} | {{ obj.harmonization_gain}}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
         <tfoot>
             <tr>
                 <th>ris name</th>
@@ -201,5 +178,9 @@
     </table>
 <!-- End Results -->
 
+
+<div class="hidden">
+    <div id="idUpdateResults">{% url 'sp:sp-results-list' %}</div>
+</div>
 
 {% endblock main %}
