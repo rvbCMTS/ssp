@@ -22,3 +22,14 @@ PERSONNEL_DOSIMETRY_DIRS = {
         'outgoing': '<path-to-outgoing-directory-for-Landauer-reports>'
     }
 }
+
+FLUORO_TIME_DB_ENGINE = {
+    'DRIVER': r'{ODBC Driver 13 for SQL Server}',
+    'SERVER': r'<server-name>',
+    'DATABASE': r'<db-name>',
+    'Trusted_Connection': True,
+    'UID': r'',
+    'PWD': r''
+}
+
+FLUORO_TIME_ORBIT_TABLE = '<table/view-name-in-orbit>'

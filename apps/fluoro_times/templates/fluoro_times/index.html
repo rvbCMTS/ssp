@@ -5,15 +5,43 @@
 {% load static %}
 {% block extra-styles %}
   <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+  <link href="{% static 'fluoro_times/fluoro_time.css' %}" rel="stylesheet">
 {% endblock extra-styles %}
 
 {% block extra-scripts %}
   <script src="{% static 'js/plotly.min.js' %}"></script>
   <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+  <script src="{% static 'fluoro_times/fluoro_time_index.js' %}"></script>
 {% endblock extra-scripts %}
 
 <!-- Main Content -->
 {% block main %}
   <h1>Genomlysningstider</h1>
 
+  <div id="idLoaderRow" class="row justify-content-center">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Pie Charts -->
+  <div class="row">
+    <div id="idCurrentYearPie" class="col-lg-12"></div>
+    <div id="idPreviousYearPie" class="col-lg-12"></div>
+  </div>
+
+  <!-- Median plot -->
+  <div class="row">
+    <div id="idMedianPlot" class="col-lg-12"></div>
+  </div>
+
+  <!-- Table -->
+  <div id="idTableRow" class="row">
+    <div class="col-lg-12">
+      <h4>Tid och antal undersökningar per område och sjukhus för innevarande år</h4>
+    </div>
+    <div class="col-lg-12">
+      <table id="idSummaryTable" class="stripe hover compact"></table>
+    </div>
+  </div>
+
+  <div id="idUpdateDataUrl" class="hidden">{% url 'gls:dashboard_data' %}</div>
 {% endblock main %}
