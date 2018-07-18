@@ -2,7 +2,8 @@ from django.db import models
 
 
 class Hospital(models.Model):
-    name = models.TextField(blank=False, null=False)
+    name = models.CharField(max_length=4000, blank=False, null=False)
+    active = models.BooleanField(blank=False, null=False, default=True)
 
     def __str__(self):
         return self.name
@@ -12,7 +13,7 @@ class Hospital(models.Model):
 
 
 class ClinicCategory(models.Model):
-    name = models.TextField(blank=False, null=False)
+    name = models.CharField(max_length=4000, blank=False, null=False)
 
     def __str__(self):
         return self.name
@@ -22,43 +23,51 @@ class ClinicCategory(models.Model):
 
 
 class Clinic(models.Model):
-    name = models.TextField(blank=False, null=False)
+    name = models.CharField(max_length=4000, blank=False, null=False)
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, null=True)
-    clinic_category = models.ForeignKey(ClinicCategory, on_delete=models.SET_NULL, null=True)
+    clinic_category = models.ForeignKey(ClinicCategory, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.name} - {self.hospital.name}'
+        if self.hospital is not None:
+            msg = f'{self.name} - {self.hospital.name}'
+        else:
+            msg = f'{self.name} - Okänt sjukhus'
+        return msg
 
     class Meta:
         ordering = ['name', 'hospital']
 
 
 class DirtyClinic(models.Model):
-    dirty_name = models.TextField(blank=False, null=False)
-    clinic = models.ForeignKey(Clinic, on_delete=models.SET_NULL, null=True)
+    dirty_name = models.CharField(max_length=4000, blank=False, null=False)
+    clinic = models.ForeignKey(Clinic, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.name} ({self.clinic})'
+        return f'{self.dirty_name} ({self.clinic})'
 
     class Meta:
         ordering = ['clinic', 'dirty_name']
 
 
 class Operator(models.Model):
-    first_name = models.TextField(blank=False, null=False)
-    last_name = models.TextField(blank=False, null=False)
-    clinic = models.ForeignKey(Clinic, on_delete=models.SET_NULL, null=True)
+    first_name = models.CharField(max_length=4000, blank=False, null=False)
+    last_name = models.CharField(max_length=4000, blank=False, null=False)
+    clinic = models.ForeignKey(Clinic, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.last_name}, {self.last_name} ({self.clinic.name})'
+        if self.clinic is not None:
+            msg = f'{self.last_name}, {self.last_name} ({self.clinic.name})'
+        else:
+            msg = f'{self.last_name}, {self.last_name} ()'
+        return msg
 
     class Meta:
         ordering = ['last_name', 'first_name']
 
 
 class DirtyOperator(models.Model):
-    dirty_name = models.TextField(blank=False, null=False)
-    operator = models.ForeignKey(Operator, on_delete=models.SET_NULL, null=True)
+    dirty_name = models.CharField(max_length=4000, blank=False, null=False)
+    operator = models.ForeignKey(Operator, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.dirty_name
@@ -93,7 +102,7 @@ DOSE_CONV_FACTOR = {
 
 
 class Modality(models.Model):
-    name = models.TextField(blank=False, null=False)
+    name = models.CharField(max_length=4000, blank=False, null=False)
     dose_unit = models.CharField(max_length=4, choices=DOSE_UNITS, null=True)
     active = models.BooleanField(null=False, default=True)
 
@@ -105,8 +114,8 @@ class Modality(models.Model):
 
 
 class DirtyModality(models.Model):
-    dirty_name = models.TextField(blank=False, null=False)
-    modality = models.ForeignKey(Modality, on_delete=models.SET_NULL, null=True)
+    dirty_name = models.CharField(max_length=4000, blank=False, null=False)
+    modality = models.ForeignKey(Modality, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.dirty_name
@@ -116,7 +125,7 @@ class DirtyModality(models.Model):
 
 
 class AnatomyRegion(models.Model):
-    region = models.TextField(blank=False, null=False)
+    region = models.CharField(max_length=4000, blank=False, null=False)
 
     def __str__(self):
         return self.region
@@ -126,8 +135,8 @@ class AnatomyRegion(models.Model):
 
 
 class ExamDescription(models.Model):
-    description = models.TextField(blank=False, null=False)
-    anatomy_region = models.ForeignKey(AnatomyRegion, on_delete=models.SET_NULL, null=True)
+    description = models.CharField(max_length=4000, blank=False, null=False)
+    anatomy_region = models.ForeignKey(AnatomyRegion, on_delete=models.SET_NULL, blank=True, null=True)
     pediatric = models.BooleanField(null=False, default=False)
 
     def __str__(self):
@@ -138,7 +147,7 @@ class ExamDescription(models.Model):
 
 
 class Exam(models.Model):
-    exam_no = models.TextField(blank=False, null=False)
+    exam_no = models.CharField(max_length=4000, blank=False, null=False)
     exam_description = models.ForeignKey(ExamDescription, on_delete=models.CASCADE)
     exam_date = models.DateTimeField(blank=False, null=False)
     dirty_clinic = models.ForeignKey(DirtyClinic, on_delete=models.PROTECT)
@@ -152,6 +161,7 @@ class Exam(models.Model):
 
     class Meta:
         ordering = ['-exam_date']
+        unique_together = ('exam_no', 'exam_date', 'dirty_operator', 'dirty_modality')
 
 
 class ModalityClinicMap(models.Model):
@@ -174,3 +184,12 @@ class OperatorClinicMap(models.Model):
 
     class Meta:
         ordering = ['clinic', 'operator']
+
+
+class Updates(models.Model):
+    updated = models.DateTimeField()
+    server = models.CharField(max_length=4000)
+    successful = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-updated']
