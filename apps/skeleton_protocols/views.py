@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Protocols
+from .models import Protocol, Machine, Backup
 from .filter import ProtocolsFilter
 from .tools.pex import parse_db
 
@@ -20,8 +20,22 @@ def test_pex_databse(request):
                     )
 
 def ajax_protocols_results(request):
-    f = ProtocolsFilter(request.GET, queryset=Protocols.objects.all().order_by('ris_name'))
+    # if history checkbox is on
+    if request.GET.get('history', False) == 'on':
+        db_query = Protocol.objects.all()
+    else:
+        # query to get the latest backup for each machine
+        all_machines = Machine.objects.all()
+        backup_list = []
+        for m in all_machines:
+            # for each machine find the latest backup
+            backup_list += ([ Backup.objects.all().filter(machine=m).latest() ])
+        db_query = Protocol.objects.all().filter(backup__in=backup_list)
 
+    # filter using django_filters
+    f = ProtocolsFilter(request.GET, queryset=db_query.order_by('ris_name'))
+
+    # make data format for Json response
     tt = []
     for obj in f.qs:
         tt.append([obj.ris_name,

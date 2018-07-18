@@ -1,6 +1,5 @@
 import django_filters
-from .models import Protocols, Machine
-from django import forms
+from .models import Protocol, Machine
 
 
 class ProtocolsFilter(django_filters.FilterSet):
@@ -28,5 +27,5 @@ class ProtocolsFilter(django_filters.FilterSet):
     edge_filter_gain_min = django_filters.AllValuesFilter(name='edge_filter_gain', label='Edge gain', lookup_expr='lte', empty_label='Edge G min')
 
     class Meta:
-        model = Protocols
+        model = Protocol
         fields = ['ris_name', 'machine', 'technique', 'kv', 'sensitivity', 'mas', 'filter_cu']
