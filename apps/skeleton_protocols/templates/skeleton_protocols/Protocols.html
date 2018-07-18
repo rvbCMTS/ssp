@@ -32,14 +32,16 @@
                 <form action="javascript:void(0);" id="form" method="get">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-8 col-md-8 col-sm-12">
+                            <div class="col-lg-6 col-md-6 col-sm-12">
                                 {% render_field filter.form.ris_name class="form-control" placeholder="Sök protokoll..."%}
                             </div>
-
                             <div class="col-lg-4 col-md-4 col-sm-12">
                                 {% render_field filter.form.machine class="form-control" %}
                             </div>
-
+                            <div class="col-lg-2 col-md-2 col-sm-12">
+                                <input type="checkbox" class="form-check-input" id="id_history" name="history">
+                                <label class="form-check-label" for="id_history">Historik</label>
+                            </div>
                         </div>
                     </div>
 
@@ -141,38 +143,38 @@
 <table id="idResultTable" class="stripe hover compact">
         <thead>
             <tr>
-                <th>ris name</th>
-                <th>machine</th>
+                <th>Protokoll</th>
+                <th>Modalitet</th>
                 <th>T</th>
                 <th>S</th>
                 <th>kV</th>
                 <th>mAs</th>
-                <th>filter</th>
-                <th>focus</th>
-                <th>raster</th>
-                <th>lut</th>
-                <th>diamond view</th>
+                <th>Filter</th>
+                <th>Focus</th>
+                <th>Raster</th>
+                <th>Lut</th>
+                <th>Diamond</th>
                 <th>Amp</th>
-                <th>Edge Filter</th>
-                <th>Harmonization</th>
+                <th>Edge</th>
+                <th>Harmo</th>
             </tr>
         </thead>
         <tfoot>
             <tr>
-                <th>ris name</th>
-                <th>machine</th>
+                <th>Protokoll</th>
+                <th>Modalitet</th>
                 <th>T</th>
                 <th>S</th>
                 <th>kV</th>
                 <th>mAs</th>
-                <th>filter</th>
-                <th>focus</th>
-                <th>raster</th>
-                <th>lut</th>
-                <th>diamond view</th>
+                <th>Filter</th>
+                <th>Focus</th>
+                <th>Raster</th>
+                <th>Lut</th>
+                <th>Diamond</th>
                 <th>Amp</th>
-                <th>Edge Filter</th>
-                <th>Harmonization</th>
+                <th>Edge</th>
+                <th>Harmo</th>
             </tr>
         </tfoot>
     </table>

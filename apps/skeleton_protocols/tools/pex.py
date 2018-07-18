@@ -4,7 +4,7 @@ import sqlite3
 from collections import namedtuple
 import re
 import pandas
-from ..models import Machine, Protocols
+from ..models import Machine, Protocol, Backup
 
 
 def parse_db(input_directory: str):
@@ -193,44 +193,48 @@ def _clean_df(df):
 
 def _prot2db(machine, df):
 
-    # create machine entry
+    # make machine entry
     machine_entry = Machine(hospital_name=machine.hospital_name[0],
-                         host_identifier=machine.host_identifier[0])
+                            host_identifier=machine.host_identifier[0])
 
-    # Check if machine_entry already exits in database
-    if not Machine.objects.filter(host_identifier=machine_entry.host_identifier):
-        # add machine entry
-        machine_entry.save()
+    # if exits (check only host_identifier), get entry, otherwise create it
+    if Machine.objects.filter(host_identifier = machine_entry.host_identifier).exists():
+        machine_entry = Machine.objects.get(host_identifier = machine_entry.host_identifier)
     else:
-        # get machine entry
-        machine_entry = Machine.objects.get(host_identifier=machine_entry.host_identifier)
+        machine_entry.save()
 
 
-    # Check if protocols already in database by comparing machine_id and last_modification
-    if not Protocols.objects.filter(machine=machine_entry, last_modification=machine.last_modification[0]):
-        # add each row in dataframe
-        for index, row in df.iterrows():
-            # Creates and saves entry to database
-            Protocols.objects.create(ris_name=row.ris_name,
-                                body_part=row.body_part,
-                                technique=row.technique,
-                                kv=row.kv,
-                                mas=row.mas,
-                                filter_cu=row.filter_cu,
-                                focus=row.focus,
-                                grid=row.grid,
-                                diamond_view=row.diamond_view,
-                                edge_filter_kernel_size=row.edge_filter_kernel_size,
-                                edge_filter_gain=row.edge_filter_gain,
-                                harmonization_kernel_size=row.harmonization_kernel_size,
-                                harmonization_gain=row.harmonization_gain,
-                                noise_reduction=row.noise_reduction,
-                                image_auto_amplification=row.image_auto_amplification,
-                                image_amplification_gain=row.image_amplification_gain,
-                                sensitivity=row.sensitivity,
-                                lut=row.lut,
-                                last_modification=machine.last_modification[0],
-                                machine=machine_entry)
+    # get or create protocol_list_entry
+    backup_entry, dummy = Backup.objects.get_or_create(machine=machine_entry,
+                                                       datum=machine.last_modification[0])
+
+    for index, row in df.iterrows():
+        # get or create protocol_entry
+        protocol_entry, protocol_created = Protocol.objects.get_or_create(ris_name=row.ris_name,
+                                                        body_part=row.body_part,
+                                                        technique=row.technique,
+                                                        kv=row.kv,
+                                                        mas=row.mas,
+                                                        filter_cu=row.filter_cu,
+                                                        focus=row.focus,
+                                                        grid=row.grid,
+                                                        diamond_view=row.diamond_view,
+                                                        edge_filter_kernel_size=row.edge_filter_kernel_size,
+                                                        edge_filter_gain=row.edge_filter_gain,
+                                                        harmonization_kernel_size=row.harmonization_kernel_size,
+                                                        harmonization_gain=row.harmonization_gain,
+                                                        noise_reduction=row.noise_reduction,
+                                                        image_auto_amplification=row.image_auto_amplification,
+                                                        image_amplification_gain=row.image_amplification_gain,
+                                                        sensitivity=row.sensitivity,
+                                                        lut=row.lut,
+                                                        machine=machine_entry,
+                                                        )
+        # associate backup with protocol
+        backup_entry.protocol.add(protocol_entry)
+
+
+
 
 
 

@@ -8,8 +8,7 @@ class Machine(models.Model):
     def __str__(self):
         return self.hospital_name
 
-
-class Protocols(models.Model):
+class Protocol(models.Model):
     ris_name = models.TextField(blank=False, null=False)
     body_part = models.TextField(blank=False, null=False)
     technique = models.TextField(blank=False, null=False)
@@ -28,8 +27,18 @@ class Protocols(models.Model):
     image_amplification_gain = models.DecimalField(null=True, decimal_places=1, max_digits=3)
     sensitivity = models.IntegerField(null=False)
     lut = models.TextField(blank=False, null=False)
-    last_modification = models.TextField(blank=False, null=False)
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.ris_name
+
+class Backup(models.Model):
+    machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
+    datum = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
+    protocol = models.ManyToManyField(Protocol)
+
+    class Meta:
+        get_latest_by = 'datum'
+
+    def __str__(self):
+        return f'{self.machine} {self.datum}'
