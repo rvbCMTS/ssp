@@ -27,6 +27,7 @@ class Protocol(models.Model):
     image_amplification_gain = models.DecimalField(null=True, decimal_places=1, max_digits=3)
     sensitivity = models.IntegerField(null=False)
     lut = models.TextField(blank=False, null=False)
+    datum = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -34,8 +35,8 @@ class Protocol(models.Model):
 
 class Backup(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
-    datum = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
     protocol = models.ManyToManyField(Protocol)
+    datum = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
 
     class Meta:
         get_latest_by = 'datum'

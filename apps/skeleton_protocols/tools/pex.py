@@ -192,46 +192,88 @@ def _clean_df(df):
     return df
 
 def _prot2db(machine, df):
-
-    # make machine entry
-    machine_entry = Machine(hospital_name=machine.hospital_name[0],
-                            host_identifier=machine.host_identifier[0])
+    # date time for backup in UTC time
+    tzdate = machine.last_modification[0]+'+02:00'
 
     # if exits (check only host_identifier), get entry, otherwise create it
-    if Machine.objects.filter(host_identifier = machine_entry.host_identifier).exists():
-        machine_entry = Machine.objects.get(host_identifier = machine_entry.host_identifier)
+    if Machine.objects.filter(host_identifier = machine.host_identifier[0]).exists():
+        machine_entry = Machine.objects.get(host_identifier = machine.host_identifier[0])
     else:
-        machine_entry.save()
+        machine_entry = Machine.objects.create(hospital_name=machine.hospital_name[0],
+                                               host_identifier=machine.host_identifier[0])
 
 
-    # get or create protocol_list_entry
-    backup_entry, dummy = Backup.objects.get_or_create(machine=machine_entry,
-                                                       datum=machine.last_modification[0])
+    # get or create backup entry
+    backup_entry, backup_created = Backup.objects.get_or_create(machine=machine_entry,
+                                                       datum=tzdate)
+    if backup_created:
+        for index, row in df.iterrows():
+            # check if exists (all fields except datum), get it, otherwise create it.
+            if Protocol.objects.filter(ris_name=row.ris_name,
+                                      body_part=row.body_part,
+                                      technique=row.technique,
+                                      kv=row.kv,
+                                      mas=row.mas,
+                                      filter_cu=row.filter_cu,
+                                      focus=row.focus,
+                                      grid=row.grid,
+                                      diamond_view=row.diamond_view,
+                                      edge_filter_kernel_size=row.edge_filter_kernel_size,
+                                      edge_filter_gain=row.edge_filter_gain,
+                                      harmonization_kernel_size=row.harmonization_kernel_size,
+                                      harmonization_gain=row.harmonization_gain,
+                                      noise_reduction=row.noise_reduction,
+                                      image_auto_amplification=row.image_auto_amplification,
+                                      image_amplification_gain=row.image_amplification_gain,
+                                      sensitivity=row.sensitivity,
+                                      lut=row.lut,
+                                      machine=machine_entry,
+                                     ).exists():
+                protocol_entry = Protocol.objects.get(ris_name=row.ris_name,
+                                                      body_part=row.body_part,
+                                                      technique=row.technique,
+                                                      kv=row.kv,
+                                                      mas=row.mas,
+                                                      filter_cu=row.filter_cu,
+                                                      focus=row.focus,
+                                                      grid=row.grid,
+                                                      diamond_view=row.diamond_view,
+                                                      edge_filter_kernel_size=row.edge_filter_kernel_size,
+                                                      edge_filter_gain=row.edge_filter_gain,
+                                                      harmonization_kernel_size=row.harmonization_kernel_size,
+                                                      harmonization_gain=row.harmonization_gain,
+                                                      noise_reduction=row.noise_reduction,
+                                                      image_auto_amplification=row.image_auto_amplification,
+                                                      image_amplification_gain=row.image_amplification_gain,
+                                                      sensitivity=row.sensitivity,
+                                                      lut=row.lut,
+                                                      machine=machine_entry,
+                                                     )
+            else:
+                protocol_entry = Protocol.objects.create(ris_name=row.ris_name,
+                                      body_part=row.body_part,
+                                      technique=row.technique,
+                                      kv=row.kv,
+                                      mas=row.mas,
+                                      filter_cu=row.filter_cu,
+                                      focus=row.focus,
+                                      grid=row.grid,
+                                      diamond_view=row.diamond_view,
+                                      edge_filter_kernel_size=row.edge_filter_kernel_size,
+                                      edge_filter_gain=row.edge_filter_gain,
+                                      harmonization_kernel_size=row.harmonization_kernel_size,
+                                      harmonization_gain=row.harmonization_gain,
+                                      noise_reduction=row.noise_reduction,
+                                      image_auto_amplification=row.image_auto_amplification,
+                                      image_amplification_gain=row.image_amplification_gain,
+                                      sensitivity=row.sensitivity,
+                                      lut=row.lut,
+                                      datum = tzdate,
+                                      machine=machine_entry,
+                                      )
 
-    for index, row in df.iterrows():
-        # get or create protocol_entry
-        protocol_entry, protocol_created = Protocol.objects.get_or_create(ris_name=row.ris_name,
-                                                        body_part=row.body_part,
-                                                        technique=row.technique,
-                                                        kv=row.kv,
-                                                        mas=row.mas,
-                                                        filter_cu=row.filter_cu,
-                                                        focus=row.focus,
-                                                        grid=row.grid,
-                                                        diamond_view=row.diamond_view,
-                                                        edge_filter_kernel_size=row.edge_filter_kernel_size,
-                                                        edge_filter_gain=row.edge_filter_gain,
-                                                        harmonization_kernel_size=row.harmonization_kernel_size,
-                                                        harmonization_gain=row.harmonization_gain,
-                                                        noise_reduction=row.noise_reduction,
-                                                        image_auto_amplification=row.image_auto_amplification,
-                                                        image_amplification_gain=row.image_amplification_gain,
-                                                        sensitivity=row.sensitivity,
-                                                        lut=row.lut,
-                                                        machine=machine_entry,
-                                                        )
-        # associate backup with protocol
-        backup_entry.protocol.add(protocol_entry)
+            # associate backup with protocol
+            backup_entry.protocol.add(protocol_entry)
 
 
 

@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from datetime import datetime
 from .models import Protocol, Machine, Backup
 from .filter import ProtocolsFilter
 from .tools.pex import parse_db
@@ -33,14 +34,15 @@ def ajax_protocols_results(request):
         db_query = Protocol.objects.all().filter(backup__in=backup_list)
 
     # filter using django_filters
-    f = ProtocolsFilter(request.GET, queryset=db_query.order_by('ris_name'))
+    f = ProtocolsFilter(request.GET, queryset=db_query.order_by('ris_name', 'machine', 'datum'))
 
     # make data format for Json response
     tt = []
     for obj in f.qs:
         tt.append([obj.ris_name,
-                   obj.machine.hospital_name,
-                   obj.technique,
+                   obj.machine.hospital_name,])
+        tt[-1] += [obj.datum.strftime("%Y%m%d"),]
+        tt[-1] += [obj.technique,
                    obj.sensitivity,
                    obj.kv,
                    obj.mas,
@@ -48,7 +50,7 @@ def ajax_protocols_results(request):
                    obj.focus,
                    obj.grid,
                    obj.lut,
-                   obj.diamond_view,])
+                   obj.diamond_view,]
         if obj.image_auto_amplification:
             tt[-1] += ['auto',]
         else:
