@@ -1,3 +1,4 @@
+// Styling dataTable
 $(document).ready(function() {
     $("#idResultTable").DataTable( {
         paging: false,
@@ -6,6 +7,7 @@ $(document).ready(function() {
 
 });
 
+// Filter
 $("#form").change(function () {
     console.log( $(this).val() );
 
@@ -31,3 +33,17 @@ $(document)
   .ajaxStop(function () {
     $loading.hide();
   });
+
+// PEX
+function pexRead(){
+    console.log( 'test' );
+
+    $.ajax({
+        type: "GET",
+        url: $("#idPexRead").html(),
+        dataType: 'json',
+        data : '',
+        success: function(data) {
+        }
+    });
+}

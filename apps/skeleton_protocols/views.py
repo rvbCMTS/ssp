@@ -13,12 +13,14 @@ def skeleton_protocols_results(request):
                   context =  {'filter': f}
                   )
 
-def test_pex_databse(request):
-    parse_db('../RontgenProtokoll/mdb_databases/')
-
+def pex(request):
     return render (request,
-                template_name='skeleton_protocols/Protocols.html',
+                template_name='skeleton_protocols/PexBibliotek.html',
                     )
+
+def pex_read(request):
+    parse_db('../RontgenProtokoll/mdb_databases/')
+    return JsonResponse({'data': ''})
 
 def ajax_protocols_results(request):
     # if history checkbox is on
