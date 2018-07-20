@@ -6,11 +6,11 @@ $(document).ready(function() {
             $('#idLoaderRow').toggleClass('hidden');
             _updateTable(result.tableData);
 
-            pie_w = 0.9 * $('idCurrentYearPie').width();
-            w_median = 0.9 * $('idCurrentYearPie').width();
+            pie_w = 0.9 * $('#idCurrentYearPie').width();
+            w_median = 0.9 * $('#idCurrentYearPie').width();
 
             pie_h = 400;
-            h_median = w_median / 15 * result.layouts.medianHeight;
+            h_median = w_median / 20 * result.layouts.medianHeight;
 
             _plotFluoroPlot([result.pieChart.currentYear], result.layouts.pieCharts.currentYear, 'idCurrentYearPie', pie_w, pie_h);
             _plotFluoroPlot([result.pieChart.previousYear], result.layouts.pieCharts.previousYear, 'idPreviousYearPie', pie_w, pie_h);

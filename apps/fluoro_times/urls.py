@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import index, register_exam_form, api_save_new_exam, yearly_reports, ssm_plots, data_cleaning,\
-    api_save_clean_data, IndexSummaryData, api_update_orbit_data
+    api_save_clean_data, IndexSummaryData, api_update_orbit_data, YearlyReportData
 
 app_name = 'fluoro_times'
 urlpatterns = [
@@ -12,5 +12,6 @@ urlpatterns = [
     path('api/save_new_exam/', api_save_new_exam, name='save_exam'),
     path('api/save_clean_data/', api_save_clean_data, name='save_clean_data'),
     path('api/dashboard_data/', IndexSummaryData.as_view(), name='dashboard_data'),
+    path('api/yearly_report/', YearlyReportData.as_view(), name='yearly_report'),
     path('api/update_orbit/', api_update_orbit_data, name='update_orbit'),
 ]
