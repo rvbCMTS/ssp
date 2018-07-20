@@ -5,9 +5,11 @@
 {% load static %}
 {% block extra-styles %}
   <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+  <link href="{% static 'fluoro_times/fluoro_time.css' %}" rel="stylesheet">
 {% endblock extra-styles %}
 
 {% block extra-scripts %}
+  <script src="{% static 'fluoro_times/fluoro_time_yearly_report.js' %}"></script>
   <script src="{% static 'js/plotly.min.js' %}"></script>
   <script src="{% static 'DataTables/datatables.min.js' %}"></script>
 {% endblock extra-scripts %}
@@ -15,5 +17,77 @@
 <!-- Main Content -->
 {% block main %}
   <h1>Årsrapporter - Genomlysning</h1>
+  <div id="idFilterRow" class="row">
+    <div class="container card-container">
+      <div class="card text-white bg-dark mb-3">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-2 col-md-2 col-sm-12">
+              <div class="form-group">
+                <label for="idYear">År</label>
+                <select id="idYear" name="Year" class="update-filter-choices"></select>
+              </div>
+            </div>
+            <div class="col-lg-10 col-md-10 col-sm-12">
+              <div class="form-group">
+                <label for="idClinic">Klinik</label>
+                <select id="idClinic" name="Clinic" class="update-data"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="idLoaderRow" class="row justify-content-center hidden">
+    <div class="loader"></div>
+  </div>
+  <!-- Report -->
+  <div class="row report-row hidden">
+    <div class="col-lg-12">
+      <h2 id="idReportHeader"></h2>
+    </div>
+
+    <!-- Plot -->
+    <div class="col-12 report-col">
+      <div id="idBubblePlot"></div>
+    </div>
+
+    <!-- Anatomy region stat summary -->
+    <div class="col-12 report-col">
+      <h4>Sammanställning per undersökningsområde</h4>
+      <table id="idAreaStat">
+        <thead>
+          <tr>
+            <th>Område</th>
+            <th>Antal</th>
+            <th>Mediantid (min:s)</th>
+            <th>95:e percentil  (min:s)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Operator stat summary -->
+    <div class="col-12 report-col">
+      <h4>Sammanställning per operatör</h4>
+      <table id="idOperatorStat">
+        <thead>
+          <tr>
+            <th>Operatör</th>
+            <th>Antal</th>
+            <th>Totaltid (h:min:s)</th>
+            <th>Mediantid (h:min:s)</th>
+            <th>95:e percentil  (h:min:s)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="idUpdateUrl" class="hidden">{% url 'gls:yearly_report' %}</div>
+  <div id="idFilterData" class="hidden">{{ filter }}</div>
 
 {% endblock main %}
