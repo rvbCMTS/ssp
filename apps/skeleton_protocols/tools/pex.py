@@ -11,11 +11,13 @@ def parse_db(input_directory: str):
 
     # find databases
     dbs = _find_db(input_directory)
+    print(f'Hittade {len(dbs)} databaser i biblioteket')
 
     # for all databases
     if len(dbs) > 0:
         for db in dbs:
             print(db)
+
             # convert database from mdb to sqlite
             _mdb2sqlite(db)
 
@@ -28,6 +30,7 @@ def parse_db(input_directory: str):
             # place dataframe in new database
             _prot2db(machine, df)
 
+    print('klar')
 
 
 def _find_db(input_directory: str) ->list:

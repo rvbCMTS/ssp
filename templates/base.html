@@ -59,8 +59,12 @@
               </div>
             </li>
 
-            <li class="nav-item {% active 'skelettprotokoll' %}">
-              <a class="nav-link" href="{% url 'sp:sp-results' %}">Skelettprotokoll</a>
+            <li class="nav-item dropdown {% active 'skelettprotokoll' %}">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSp" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Skelettprotokoll</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownSp">
+                 <a class="dropdown-item" href="{% url 'sp:sp-results' %}">Sök protokoll</a>
+                 <a class="dropdown-item" href="{% url 'sp:sp-pex' %}">Bibliotek</a>
+              </div>
             </li>
 
             <li class="nav-item dropdown {% active 'mgqa' %}">

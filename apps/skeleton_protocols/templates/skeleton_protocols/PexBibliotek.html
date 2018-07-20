@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Skelettprotokoll{% endblock title %}
+
+{% load static %}
+
+{% block extra-styles %}
+    <link href="{% static 'skeleton_protocols/sp.css' %}" rel="stylesheet">
+    <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+    <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+    <script src="{% static 'skeleton_protocols/sp.js' %}"></script>
+{% endblock extra-scripts %}
+
+
+{% block main %}
+
+<div class="row">
+    <div class="container card-container">
+        <div class="card text-black bg-light mb-3 form-card">
+            <div class="card-header">PEX bibliotek</div>
+                <div class="card-body">
+                    <button type="button" class="btn btn-outline-success" onClick="pexRead()">Läs in PEX bibliotek</button>
+                </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="hidden">
+    <div id="idPexRead">{% url 'sp:sp-pex-read' %}</div>
+</div>
+
+{% endblock main %}
