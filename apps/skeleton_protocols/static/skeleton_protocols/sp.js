@@ -5,6 +5,11 @@ $(document).ready(function() {
         searching: false,
     } );
 
+    $("#idHistoryTable").DataTable( {
+        paging: false,
+        searching: false,
+    } );
+
 });
 
 // Filter
@@ -36,7 +41,6 @@ $(document)
 
 // PEX
 function pexRead(){
-    console.log( 'test' );
 
     $.ajax({
         type: "GET",
@@ -46,4 +50,25 @@ function pexRead(){
         success: function(data) {
         }
     });
+}
+
+// History
+function viewHistory(pk){
+    $('#idHistoryRow').removeClass('hidden');
+
+    $.ajax({
+        type: "GET",
+        url: $("#idViewHistory").html(),
+        dataType: 'json',
+        data : {'pk': pk},
+        success: function(data) {
+            var table = $("#idHistoryTable").DataTable();
+            table.clear().rows.add(data.data).draw();
+        }
+    });
+
+}
+
+function closeHistory(){
+    $('#idHistoryRow').addClass('hidden');
 }
