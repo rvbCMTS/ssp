@@ -273,10 +273,29 @@ def _prot2db(machine, df):
                                       lut=row.lut,
                                       datum = tzdate,
                                       machine=machine_entry,
+                                      history_flag = False,
                                       )
 
             # associate backup with protocol
             backup_entry.protocol.add(protocol_entry)
+
+
+            # filter previous versions of protocol (same ris_name and machine), excluding itself
+            previous_versions = Protocol.objects.filter(ris_name=row.ris_name, machine=machine_entry).exclude(pk=protocol_entry.pk)
+
+            # if more than one version
+            if len(previous_versions)>0:
+                for entry in previous_versions:
+                    # associate versions
+                    protocol_entry.history.add(entry)
+                    # switch history_flag
+                    protocol_entry.history_flag = True
+                    protocol_entry.save()
+
+
+
+
+
 
 
 

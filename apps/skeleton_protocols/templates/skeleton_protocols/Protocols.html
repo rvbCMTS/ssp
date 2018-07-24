@@ -32,15 +32,11 @@
                 <form action="javascript:void(0);" id="form" method="get">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-12">
+                            <div class="col-lg-8 col-md-8 col-sm-12">
                                 {% render_field filter.form.ris_name class="form-control" placeholder="Sök protokoll..."%}
                             </div>
                             <div class="col-lg-4 col-md-4 col-sm-12">
                                 {% render_field filter.form.machine class="form-control" %}
-                            </div>
-                            <div class="col-lg-2 col-md-2 col-sm-12">
-                                <input type="checkbox" class="form-check-input" id="id_history" name="history">
-                                <label class="form-check-label" for="id_history">Historik</label>
                             </div>
                         </div>
                     </div>
@@ -139,6 +135,44 @@
     <div class="loader"></div>
 </div>
 
+
+<!-- History -->
+<div class="row hidden" id="idHistoryRow">
+    <div class="container card-container">
+        <div class="card text-black bg-light mb-3 form-card">
+            <div class="card-header">
+                Historik <button type="button" class="btn btn-outline-secondary btn-sm" onClick="closeHistory()">X</button>
+            </div>
+                <div class="card-body">
+                    <table id="idHistoryTable" class="stripe hover compact">
+                            <thead>
+                                <tr>
+                                    <th>Protokoll</th>
+                                    <th>Modalitet</th>
+                                    <th>Datum</th>
+                                    <th>T</th>
+                                    <th>S</th>
+                                    <th>kV</th>
+                                    <th>mAs</th>
+                                    <th>Fi</th>
+                                    <th>Fo</th>
+                                    <th>R</th>
+                                    <th>Lut</th>
+                                    <th>Diamond</th>
+                                    <th>Amp</th>
+                                    <th>Edge</th>
+                                    <th>Harmon</th>
+                                </tr>
+                            </thead>
+                        </table>
+                </div>
+        </div>
+    </div>
+</div>
+ <!-- End History-->
+
+
+
 <!-- Results -->
 <table id="idResultTable" class="stripe hover compact">
         <thead>
@@ -150,14 +184,15 @@
                 <th>S</th>
                 <th>kV</th>
                 <th>mAs</th>
-                <th>Filter</th>
-                <th>Focus</th>
-                <th>Raster</th>
+                <th>Fi</th>
+                <th>Fo</th>
+                <th>R</th>
                 <th>Lut</th>
                 <th>Diamond</th>
                 <th>Amp</th>
                 <th>Edge</th>
                 <th>Harmon</th>
+                <th>Hist</th>
             </tr>
         </thead>
         <tfoot>
@@ -169,14 +204,15 @@
                 <th>S</th>
                 <th>kV</th>
                 <th>mAs</th>
-                <th>Filter</th>
-                <th>Focus</th>
-                <th>Raster</th>
+                <th>Fi</th>
+                <th>Fo</th>
+                <th>R</th>
                 <th>Lut</th>
                 <th>Diamond</th>
                 <th>Amp</th>
                 <th>Edge</th>
                 <th>Harmon</th>
+                <th>Hist</th>
             </tr>
         </tfoot>
     </table>
@@ -185,6 +221,7 @@
 
 <div class="hidden">
     <div id="idUpdateResults">{% url 'sp:sp-results-list' %}</div>
+    <div id="idViewHistory">{% url 'sp:sp-history' %}</div>
 </div>
 
 {% endblock main %}
