@@ -143,10 +143,10 @@ def _clean_input_data(report_list: list, log: logging.Logger):
     df.index = range(len(df.ix[:, 0]))  # Resets index on data frame
 
     # Remove other values than nan or floats
-    df.Hp10 = df.Hp10.str.replace(',', '.')
-    df.Hp007 = df.Hp007.str.replace(',', '.')
-    df.Hp10tn = df.Hp10tn.str.replace(',', '.')
-    df.Hp10fn = df.Hp10fn.str.replace(',', '.')
+    df.Hp10 = df.Hp10.astype(str).str.replace(',', '.')
+    df.Hp007 = df.Hp007.astype(str).str.replace(',', '.')
+    df.Hp10tn = df.Hp10tn.astype(str).str.replace(',', '.')
+    df.Hp10fn = df.Hp10fn.astype(str).str.replace(',', '.')
     df['Hp10String'] = [_float_conversion_test(val) for val in df.Hp10]
     df['Hp007String'] = [_float_conversion_test(val) for val in df.Hp007]
     df['Hp10tnString'] = [_float_conversion_test(val) for val in df.Hp10tn]
@@ -155,6 +155,14 @@ def _clean_input_data(report_list: list, log: logging.Logger):
         [False if (row.Hp10String + row.Hp007String + row.Hp10fnString + row.Hp10tnString) > 0 else True for _, row in
          df.iterrows()]]
     df.index = range(len(df.ix[:, 0]))  # Resets index on data frame
+
+    # Trim string to remove possible blank spaces at start or end
+    df.Kundtext1 = df.Kundtext1.str.strip()
+    df.Kundtext2 = df.Kundtext2.str.strip()
+    df.Namn = df.Namn.str.strip()
+    df.Dosimetertyp = df.Dosimetertyp.str.strip()
+    df.Dosimeterplacering = df.Dosimeterplacering.str.strip()
+    df.Servicekod = df.Servicekod.str.strip()
 
     return df, df_nr
 
@@ -253,12 +261,22 @@ def _insert_results_to_db(results: pd.DataFrame, list_type: str, log: logging.Lo
         stop_date = dt.strptime(row.Slutdatum, '%Y-%m-%d')
 
         # Save new measurement to database
-        db_result = Result(dosimetry_vendor='Landauer', personnel=personnel, vendor_dosimetry_placement=vdp,
-                           clinic=clinic, report=f'{row.Rapportnr}:{row.RapportVersion}',
-                           measurement_period_start=row.Startdatum, measurement_period_stop=row.Slutdatum,
-                           measurement_period_center=(start_date + (stop_date - start_date) / 2),
-                           hp10=row.Hp10, hp007=row.Hp007, hp10fn=row.Hp10fn, hp10tn=row.Hp10tn,
-                           dosimeter_type=row.Dosimetertyp)
+        try:
+            db_result = Result.objects.get(
+                dosimetry_vendor='Landauer', personnel=personnel, dosimeter_type=row.Dosimetertyp,
+                report__startswith=f'{row.Rapportnr}:', vendor_dosimetry_placement=vdp
+            )
+            db_result.hp10 = row.Hp10
+            db_result.hp007 = row.Hp007
+            db_result.hp10fn = row.Hp10fn
+            db_result.hp10tn = row.Hp10tn
+        except:
+            db_result = Result(dosimetry_vendor='Landauer', personnel=personnel, vendor_dosimetry_placement=vdp,
+                               clinic=clinic, report=f'{row.Rapportnr}:{row.RapportVersion}',
+                               measurement_period_start=row.Startdatum, measurement_period_stop=row.Slutdatum,
+                               measurement_period_center=(start_date + (stop_date - start_date) / 2),
+                               hp10=row.Hp10, hp007=row.Hp007, hp10fn=row.Hp10fn, hp10tn=row.Hp10tn,
+                               dosimeter_type=row.Dosimetertyp)
         db_result.save()
 
     return True
