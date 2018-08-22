@@ -9,3 +9,4 @@ django-widget-tweaks
 pyodbc
 django-ckeditor
 django-tempus-dominus
+xlrd

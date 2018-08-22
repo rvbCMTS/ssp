@@ -5,16 +5,16 @@ from django.db import models
 
 class Profession(models.Model):
     landauer_profession_id = models.IntegerField(blank=True, null=True)
-    profession = models.TextField(blank=False, null=False)
+    profession = models.CharField(max_length=4000, blank=False, null=False)
 
     def __str__(self):
         return self.profession
 
 
 class Personnel(models.Model):
-    dosimetry_vendor_id = models.TextField(blank=True, null=True)
-    person_id = models.TextField(blank=True, null=True)
-    person_name = models.TextField(blank=False, null=False)
+    dosimetry_vendor_id = models.CharField(max_length=4000, blank=True, null=True)
+    person_id = models.CharField(max_length=400, blank=True, null=True)
+    person_name = models.CharField(max_length=400, blank=False, null=False)
     profession = models.ForeignKey(Profession, on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
@@ -42,7 +42,7 @@ class DosimeterLaterality(models.Model):
 
 
 class VendorDosimeterPlacement(models.Model):
-    vendor_dosimeter_placement = models.TextField(blank=False, null=False)
+    vendor_dosimeter_placement = models.CharField(max_length=4000, blank=False, null=False)
     dosimeter_placement = models.ForeignKey(DosimeterPlacement, on_delete=models.DO_NOTHING, blank=True, null=True)
     dosimeter_laterality = models.ForeignKey(DosimeterLaterality, on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -51,8 +51,8 @@ class VendorDosimeterPlacement(models.Model):
 
 
 class Clinic(models.Model):
-    clinic = models.TextField(blank=False, null=False)
-    display_clinic = models.TextField(blank=False, null=False, default=clinic)
+    clinic = models.CharField(max_length=4000, blank=False, null=False)
+    display_clinic = models.CharField(max_length=400, blank=False, null=False, default=clinic)
 
     def __str__(self):
         return self.display_clinic
@@ -62,12 +62,12 @@ class Clinic(models.Model):
 
 
 class Result(models.Model):
-    dosimetry_vendor = models.TextField(blank=True, null=True)
+    dosimetry_vendor = models.CharField(max_length=4000, blank=True, null=True)
     personnel = models.ForeignKey(Personnel, on_delete=models.CASCADE)
     dosimeter_type = models.CharField(max_length=400, null=True, blank=True)
     vendor_dosimetry_placement = models.ForeignKey(VendorDosimeterPlacement, on_delete=models.DO_NOTHING)
     clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE)
-    report = models.TextField(blank=True, null=True)
+    report = models.CharField(max_length=4000, blank=True, null=True)
     measurement_period_start = models.DateTimeField(blank=False, null=False)
     measurement_period_stop = models.DateTimeField(blank=False, null=False)
     measurement_period_center = models.DateField(blank=False, null=False)
@@ -112,7 +112,7 @@ class PersonnelDosimetryUsers(models.Model):
 
 class NotReturnedDosimeters(models.Model):
     personnel = models.ForeignKey(Personnel, on_delete=models.CASCADE)
-    report = models.TextField(blank=False, null=False)
+    report = models.CharField(max_length=4000, blank=False, null=False)
 
     def __str__(self):
         return f'{self.personnel.person_name} ({self.report})'

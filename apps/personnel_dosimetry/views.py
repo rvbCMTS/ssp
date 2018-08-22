@@ -480,28 +480,61 @@ def _add_time_filter(databaseobject, time_interval: int=None):
 
 
 def _add_clinic_filter(databaseobject, clinic):
-    if clinic is not None and isinstance(clinic, int) and clinic > 0:
-        return databaseobject.filter(clinic_id__exact=clinic)
-    else:
-        return databaseobject
+    if clinic is not None:
+        if isinstance(clinic, int) and clinic > 0:
+            return databaseobject.filter(clinic_id__exact=clinic)
+        else:
+            try:
+                clinic = int(clinic)
+            except:
+                return databaseobject
+            if clinic > 0:
+                return databaseobject.filter(clinic_id__exact=clinic)
+
+    return databaseobject
 
 
 def _add_profession_filter(databaseobject, profession):
-    if profession is not None and isinstance(profession, int) and profession > 0:
-        return databaseobject.filter(personnel__profession_id__exact=profession)
-    else:
-        return databaseobject
+    if profession is not None:
+        if isinstance(profession, int) and profession > 0:
+            return databaseobject.filter(personnel__profession_id__exact=profession)
+        else:
+            try:
+                profession = int(profession)
+            except:
+                return databaseobject
+            if profession > 0:
+                return databaseobject.filter(personnel__profession_id__exact=profession)
+
+    return databaseobject
 
 
 def _add_personnel_filter(databaseobject, personnel):
-    if personnel is not None and isinstance(personnel, int) and personnel > 0:
-        return databaseobject.filter(personnel_id__exact=personnel)
-    else:
-        return databaseobject
+    if personnel is not None:
+        if isinstance(personnel, int) and personnel > 0:
+            return databaseobject.filter(personnel_id__exact=personnel)
+        else:
+            try:
+                personnel = int(personnel)
+            except:
+                return databaseobject
+            if personnel > 0:
+                return databaseobject.filter(personnel_id__exact=personnel)
+
+    return databaseobject
 
 
 def _add_dosimeter_placement_filter(databaseobject, dosimeter_placement):
-    if dosimeter_placement is not None and isinstance(dosimeter_placement, int) and dosimeter_placement > 0:
-        return databaseobject.filter(vendor_dosimetry_placement__dosimeter_placement_id__exact=dosimeter_placement)
-    else:
-        return databaseobject
+    if dosimeter_placement is not None:
+        if isinstance(dosimeter_placement, int) and dosimeter_placement > 0:
+            return databaseobject.filter(vendor_dosimetry_placement__dosimeter_placement_id__exact=dosimeter_placement)
+        else:
+            try:
+                dosimeter_placement = int(dosimeter_placement)
+            except:
+                return databaseobject
+            if dosimeter_placement > 0:
+                return databaseobject.filter(
+                    vendor_dosimetry_placement__dosimeter_placement_id__exact=dosimeter_placement)
+
+    return databaseobject
