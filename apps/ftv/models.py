@@ -29,12 +29,20 @@ class MachineType(models.Model):
 
 
 class Machine(models.Model):
+    machine_name = models.CharField(max_length=400, blank=False, null=False)
+    inventory_system_id = models.CharField(max_length=400, blank=True, null=True)
     model = models.ForeignKey(ManufacturerModel, blank=False, null=False, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, blank=False, null=False, on_delete=models.CASCADE)
     machine_type = models.ForeignKey(MachineType, blank=False, null=False)
     in_use = models.BooleanField(blank=False, null=False, default=True)
     installed_date = models.DateField(blank=False, null=False)
-    taken_out_of_commission_dat = models.DateField(blank=True, null=True)
+    taken_out_of_commission_date = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return self.machine_name
+
+    class Meta:
+        ordering = ['-in_use', 'machine_name']
 
 
 class OP300TestQA(models.Model):
