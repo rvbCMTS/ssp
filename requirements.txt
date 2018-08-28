@@ -1,5 +1,6 @@
 django
 djangorestframework
+djangorestframework-datatables
 django-webpack-loader
 markdown
 django-filter

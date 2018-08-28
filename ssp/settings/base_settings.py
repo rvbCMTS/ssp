@@ -39,11 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'webpack_loader',
     'rest_framework',
+    'rest_framework_datatables',
     'apps.frontpage',
     'apps.personnel_dosimetry',
     'apps.fluoro_times',
     'apps.skeleton_protocols',
     'apps.mammography',
+    'apps.radiation_shielding',
+    'apps.ftv',
     'widget_tweaks',
     'ckeditor',
     'ckeditor_uploader',
@@ -148,7 +151,17 @@ WEBPACK_LOADER = {
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+    ],
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework_datatables.renderers.DatatablesRenderer',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework_datatables.filters.DatatablesFilterBackend',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework_datatables.pagination.DatatablesPageNumberPagination',
+    'PAGE_SIZE': 50,
 }
 
 CKEDITOR_UPLOAD_PATH = 'ckeditor/'
