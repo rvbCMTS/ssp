@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}FTV{% endblock %}
+{% load static %}
+
+{% block extra-styles %}
+  <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+  <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+  <script src="{% static 'ftv/ftvMachineList.js' %}"></script>
+{% endblock extra-scripts %}
+
+<!-- Main content -->
+{% block main %}
+  <h1>FTV - Maskiner</h1>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <table id="idMachineListTable" class="stripe hover compact">
+        <thead>
+          <tr>
+            <th>Maskin</th>
+            <th>Modell</th>
+            <th>Maskintyp</th>
+            <th>Rum</th>
+            <th>Strålskärmning i rum</th>
+            <th>Inst. datum</th>
+            <th>I bruk</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th>Maskin</th>
+            <th>Modell</th>
+            <th>Maskintyp</th>
+            <th>Rum</th>
+            <th>Strålskärmning i rum</th>
+            <th>Inst. datum</th>
+            <th>I bruk</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="hidden" id="idUpdateDataUrl">{% url 'ftv:machine_info_list' %}</div>
+{% endblock main %}
