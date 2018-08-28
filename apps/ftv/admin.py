@@ -33,10 +33,10 @@ class ManufacturerModelAdmin(admin.ModelAdmin):
 
 
 class MachineTypeAdmin(admin.ModelAdmin):
-    list_display = ['machine_Type', 'required_protection_class']
-    list_display_links = ['machine_Type', 'required_protection_class']
+    list_display = ['machine_type', 'required_protection_class']
+    list_display_links = ['machine_type', 'required_protection_class']
     list_filter = ['machine_type']
-    search_fields = ['machine_Type', 'required_protection_class']
+    search_fields = ['machine_type', 'required_protection_class']
     form = ManufacturerModelAdminForm
 
     class Meta:
