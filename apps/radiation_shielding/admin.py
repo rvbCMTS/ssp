@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib import admin
-from .models import Contact, City, Clinic, Room, RadiationProtectionClass, RadiationProtectionClassification
+from .models import Contact, City, Clinic, Room, RadiationProtectionClass
 from ckeditor.widgets import CKEditorWidget
 
 
@@ -61,18 +61,8 @@ class RadiationProtectionClassAdmin(admin.ModelAdmin):
         model = RadiationProtectionClass
 
 
-class RadiationProtectionClassificationAdmin(admin.ModelAdmin):
-    list_display = ['room', 'protection_class']
-    list_display_links = ['room', 'protection_class']
-    search_fields = ['room', 'protection_class']
-
-    class Meta:
-        model = RadiationProtectionClassification
-
-
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(City, CityAdmin)
 admin.site.register(Clinic, ClinicAdmin)
 admin.site.register(Room, RoomAdmin)
 admin.site.register(RadiationProtectionClass, RadiationProtectionClassAdmin)
-admin.site.register(RadiationProtectionClassification, RadiationProtectionClassificationAdmin)
