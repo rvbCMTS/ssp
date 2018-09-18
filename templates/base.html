@@ -67,16 +67,35 @@
               </div>
             </li>
 
-            <li class="nav-item dropdown {% active 'mgqa' %}">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMGQALink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Mammografi QA</a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdownMGQALink">
-                <a class="dropdown-item" href="{% url 'mg:mg-weekly-qa-result' %}">QA Resultat</a>
-                <a class="dropdown-item" href="{% url 'mg:mg-weekly-measurement' %}">Veckokontroll</a>
-              </div>
-            </li>
-
-            <li class="nav-item {% active 'mrqa' %}">
-              <a class="nav-link" href="#">MR QA</a>
+            <li class="nav-item dropdown {% active 'mammo' %}{% active 'ftv' %}">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownQALink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">QA</a>
+              <ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+                <li class="dropdown-submenu">
+                  <a class="dropdown-item" tabindex="-1" href="{% url 'mg:mg-weekly-qa-result' %}">Mammografi</a>
+                  <ul class="dropdown-menu">
+                    <li class="dropdown-item">
+                      <a class="dropdown-item" href="{% url 'mg:mg-weekly-qa-result' %}">QA Resultat</a>
+                    </li>
+                    <li class="dropdown-item">
+                      <a class="dropdown-item" href="{% url 'mg:mg-weekly-measurement' %}">Veckokontroll</a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="dropdown-submenu">
+                  <a class="dropdown-item" tabindex="-1" href="{% url 'ftv:machines' %}">FTV</a>
+                  <ul class="dropdown-menu">
+                    <li class="dropdown-item">
+                      <a class="dropdown-item" href="{% url 'ftv:machines' %}">Resultat</a>
+                    </li>
+                    <li class="dropdown-item">
+                      <a class="dropdown-item" href="{% url 'ftv:op300_form' %}">Kontroll</a>
+                    </li>
+                  </ul>
+                </li>
+                <li class="dropdown-submenu {% active 'mrqa' %}">
+                  <a class="dropdown-item" href="#">MR</a>
+                </li>
+              </ul>
             </li>
 
             {% if user.is_authenticated %}
