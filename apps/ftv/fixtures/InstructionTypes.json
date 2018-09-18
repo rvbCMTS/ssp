@@ -1,0 +1,22 @@
+[
+  {
+    "model": "ftv.instructiontype",
+    "pk": 1,
+    "fields": {"instruction_type": "Kalibrering"}
+  },
+  {
+    "model": "ftv.instructiontype",
+    "pk": 2,
+    "fields": {"instruction_type": "QA test"}
+  },
+  {
+    "model": "ftv.instructiontype",
+    "pk": 3,
+    "fields": {"instruction_type": "Årskontroll"}
+  },
+  {
+    "model": "ftv.instructiontype",
+    "pk": 4,
+    "fields": {"instruction_type": "Stickprov"}
+  }
+]
