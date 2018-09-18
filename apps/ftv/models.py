@@ -28,6 +28,25 @@ class MachineType(models.Model):
         return self.machine_type
 
 
+class InstructionType(models.Model):
+    instruction_type = models.CharField(max_length=400, blank=False, null=False)
+
+    def __str__(self):
+        return self.instruction_type
+
+
+class QaTestInstructions(models.Model):
+    instruction_name = models.CharField(max_length=400, blank=False, null=False)
+    instruction = RichTextField(blank=False, null=False)
+    instruction_type = models.ForeignKey(InstructionType, blank=False, null=False, on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return f'{self.instruction_name} ({self.instruction_type})'
+
+    class Meta:
+        ordering = ['instruction_type', 'instruction_name']
+
+
 class Machine(models.Model):
     machine_name = models.CharField(max_length=400, blank=False, null=False)
     inventory_system_id = models.CharField(max_length=400, blank=True, null=True)
@@ -37,6 +56,7 @@ class Machine(models.Model):
     in_use = models.BooleanField(blank=False, null=False, default=True)
     installed_date = models.DateField(blank=False, null=False)
     taken_out_of_commission_date = models.DateField(blank=True, null=True)
+    qa_test_instruction = models.ManyToManyField(QaTestInstructions)
 
     def __str__(self):
         return self.machine_name
@@ -49,7 +69,7 @@ class OP300TestQA(models.Model):
     machine = models.ForeignKey(Machine, blank=False, null=False, on_delete=models.DO_NOTHING)
     qa_date = models.DateTimeField(blank=False, null=False)
     signature = models.CharField(max_length=400, blank=False, null=False)
-    comment = RichTextField(blank=True, null=True)
+    comment = models.CharField(max_length=4000, blank=True, null=True)
 
     def __str__(self):
         return f'{self.machine} - {self.qa_date}'
