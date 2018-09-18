@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+
+{% block title %}PanoramaQA{% endblock %}
+{% load static %}
+
+{% block extra-styles %}
+
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+  <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+  <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+  <script src="{% static 'ftv/ftvOP300Test.js' %}"></script>
+{% endblock extra-scripts %}
+
+
+{% block main %}
+  <h1>FTV - Panorama QA</h1>
+
+  <form id="ftvform" class="ajax-form" action="{% url 'ftv:op300_form' %}" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
+          {{ form.modality.errors }}
+          {{ form.modality.label_tag }}{{ form.modality }}
+        </div>
+      </div>
+    </div>
+    <div id="defaultFields" class="{% if not show_form %}hidden{% endif %}">
+      <div class="container card-container">
+        <div class="card text-white bg-dark mb-3">
+          <div id="idInstructionHeader" class="card-header" data-toggle="collapse" data-target="idInstruction" aria-expanded="true"><h4>Instruktioner</h4></div>
+          <div id="idInstruction" class="card-body"></div>
+          <ul id="idMeasurementInfo" class="list-group list-group-flush bg-dark">
+              <li id="idMeasurementInfoFirstRow" class="list-group-item bg-dark">När värden med en tolerans fylls i markeras de som <em class="mg-alert-instruction alert-success">inom tolerans</em>, <em class="mg-alert-instruction alert-warning">utanför tolerans</em> eller <em class="mg-alert-instruction alert-danger">inte ett tal</em>.</li>
+              <li class="list-group-item bg-dark">Om ett värde är utanför tolerans kan det fortfarande sparas men man bör kontrollera att det inte är t ex en felplacerad decimalsepartor som ger att det är utanför tolerans.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <div class="form-group">
+            {{ form.qa_date.errors }}
+            {{ form.qa_date.label }}{{ form.qa_date }}
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <div class="form-group">
+            {{ form.tmp.errors }}
+            {{ form.tmp.label }}{{ form.tmp }}
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <div class="form-group">
+            {{ form.tmp.errors }}
+            {{ form.tmp.label }}{{ form.tmp }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Sections that should be filled with fields if the selected modality has that functionality -->
+      <div class="row" id="idPanoramicTestFields">
+        {% if pan %}
+          <div class="col-lg-12"><h4>Panorama</h4></div>
+          <!-- Pan Geom -->
+          <div class="col-lg-12"><h6>Pan Geom</h6></div>
+          <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_geom.errors }}
+              {{ form.pan_geom.label_tag }}{{ form.pan_geom }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_geom_x_offset.errors }}
+              {{ form.pan_geom_x_offset.label_tag }}{{ form.pan_geom_x_offset }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_geom_y_offset.errors }}
+              {{ form.pan_geom_y_offset.label_tag }}{{ form.pan_geom_y_offset }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_geom_n_offset.errors }}
+              {{ form.pan_geom_n_offset.label_tag }}{{ form.pan_geom_n_offset }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_geom_j_offset.errors }}
+              {{ form.pan_geom_j_offset.label_tag }}{{ form.pan_geom_j_offset }}
+            </div>
+          </div>
+          <!-- Pan pix -->
+          <div class="col-lg-12"><h6>Pan Pix</h6></div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_pix.errors }}
+              {{ form.pan_pix.label_tag }}{{ form.pan_pix }}
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_pix_ctq.errors }}
+              {{ form.pan_pix_ctq.label_tag }}{{ form.pan_pix_ctq }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_pix_signal_level.errors }}
+              {{ form.pan_pix_signal_level.label_tag }}{{ form.pan_pix_signal_level }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_pix_dark_level.errors }}
+              {{ form.pan_pix_dark_level.label_tag }}{{ form.pan_pix_dark_level }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12"></div>
+          <!-- Pan QC -->
+          <div class="col-lg-12"><h6>Pan QC</h6></div>
+          <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_qc.errors }}
+              {{ form.pan_qc.label_tag }}{{ form.pan_qc }}
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_qc_homogeneous.errors }}
+              {{ form.pan_qc_homogeneous.label_tag }}{{ form.pan_qc_homogeneous }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_qc_high_contrast.errors }}
+              {{ form.pan_qc_high_contrast.label_tag }}{{ form.pan_qc_high_contrast }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_qc_low_contrast.errors }}
+              {{ form.pan_qc_low_contrast.label_tag }}{{ form.pan_qc_low_contrast }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12"></div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_qc_round_ball.errors }}
+              {{ form.pan_qc_round_ball.label_tag }}{{ form.pan_qc_round_ball }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.pan_qc_distance_white_rods_ball.errors }}
+              {{ form.pan_qc_distance_white_rods_ball.label_tag }}{{ form.pan_qc_distance_white_rods_ball }}
+            </div>
+          </div>
+
+        {% endif %}
+      </div>
+
+      <div class="row" id="idCbctTestFields">
+        {% if cbct %}
+          <div class="col-lg-12"><h4>CBCT</h4></div>
+          <!-- CBCT Geom -->
+          <div class="col-lg-12"><h6>CBCT Geom</h6></div>
+          <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_geom.errors }}
+              {{ form.cbct_geom.label_tag }}{{ form.cbct_geom }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_geom_ctq.errors }}
+              {{ form.cbct_geom_ctq.label_tag }}{{ form.cbct_geom_ctq }}
+            </div>
+          </div>
+          <div class="col-lg-9 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_geom_scan_diff.errors }}
+              {{ form.cbct_geom_scan_diff.label_tag }}{{ form.cbct_geom_scan_diff }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_geom_n_offset.errors }}
+              {{ form.cbct_geom_n_offset.label_tag }}{{ form.cbct_geom_n_offset }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_geom_x_offset.errors }}
+              {{ form.cbct_geom_x_offset.label_tag }}{{ form.cbct_geom_x_offset }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_geom_y_offset.errors }}
+              {{ form.cbct_geom_y_offset.label_tag }}{{ form.cbct_geom_y_offset }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_geom_j_offset.errors }}
+              {{ form.cbct_geom_j_offset.label_tag }}{{ form.cbct_geom_j_offset }}
+            </div>
+          </div>
+          <!-- CBCT pix -->
+          <div class="col-lg-12"><h6>CBCT Pix</h6></div>
+          <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_pix.errors }}
+              {{ form.cbct_pix.label_tag }}{{ form.cbct_pix }}
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_pix_ctq.errors }}
+              {{ form.cbct_pix_ctq.label_tag }}{{ form.cbct_pix_ctq }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_pix_signal_level.errors }}
+              {{ form.cbct_pix_signal_level.label_tag }}{{ form.cbct_pix_signal_level }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_pix_dark_level.errors }}
+              {{ form.cbct_pix_dark_level.label_tag }}{{ form.cbct_pix_dark_level }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12"></div>
+
+          <!-- CBCT QC -->
+          <div class="col-lg-12"><h6>CBCT QC</h6></div>
+          <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_qc.errors }}
+              {{ form.cbct_qc.label_tag }}{{ form.cbct_qc }}
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_qc_pmma_min_value.errors }}
+              {{ form.cbct_qc_pmma_min_value.label_tag }}{{ form.cbct_qc_pmma_min_value }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_qc_pmma_max_value.errors }}
+              {{ form.cbct_qc_pmma_max_value.label_tag }}{{ form.cbct_qc_pmma_max_value }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_qc_pmma_std_dev.errors }}
+              {{ form.cbct_qc_pmma_std_dev.label_tag }}{{ form.cbct_qc_pmma_std_dev }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12"></div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_qc_ptfe.errors }}
+              {{ form.cbct_qc_ptfe.label_tag }}{{ form.cbct_qc_ptfe }}
+            </div>
+          </div>
+          <div class="col-lg-9 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_qc_ptfe_std_dev.errors }}
+              {{ form.cbct_qc_ptfe_std_dev.label_tag }}{{ form.cbct_qc_ptfe_std_dev }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_qc_air.errors }}
+              {{ form.cbct_qc_air.label_tag }}{{ form.cbct_qc_air }}
+            </div>
+          </div>
+          <div class="col-lg-9 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cbct_qc_air_std_dev.errors }}
+              {{ form.cbct_qc_air_std_dev.label_tag }}{{ form.cbct_qc_air_std_dev }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="row" id="idCefTestFields">
+        {% if cbct %}
+          <div class="col-lg-12"><h4>Kefalostat</h4></div>
+          <!-- Cef pix -->
+          <div class="col-lg-12"><h6>Kef Pix</h6></div>
+          <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="form-group">
+              {{ form.cef_pix.errors }}
+              {{ form.cef_pix.label_tag }}{{ form.cef_pix }}
+            </div>
+          </div>
+          <!-- Cef QC -->
+          <div class="col-lg-12"><h6>Kef QC</h6></div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cef_qc.errors }}
+              {{ form.cef_qc.label_tag }}{{ form.cef_qc }}
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cef_qc_homogeneous.errors }}
+              {{ form.cef_qc_homogeneous.label_tag }}{{ form.cef_qc_homogeneous }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cef_qc_low_contrast.errors }}
+              {{ form.cef_qc_low_contrast.label_tag }}{{ form.cef_qc_low_contrast }}
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="form-group">
+              {{ form.cef_qc_round_ball.errors }}
+              {{ form.cef_qc_round_ball.label_tag }}{{ form.cef_qc_round_ball }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div id="idSubmitContainer"></div>
+
+      <!-- Comments and signature section -->
+      <div class="row">
+        <div class="col-lg-12"><h4>Kommentar & Signatur</h4></div>
+        <div class="col-lg-12">
+          <div class="form-group">
+            {{ form.comment.errors }}
+            {{ form.comment.label_tag }}{{ form.comment }}
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <div class="form-group">
+            {{ form.signature.errors }}
+            {{ form.signature.label_tag }}{{ form.signature }}
+          </div>
+        </div>
+      </div>
+    </div>
+  <div class="hidden">
+    <input id="id_modality_change" name="modality_change" onchange="ftvform.submit()" value="0">
+  </div>
+  </form>
+
+  <div id="idFormUpdateUrl" class="hidden">{% url 'ftv:op300_form' %}</div>
+  <div id="idReferences" class="hidden"></div>
+{% endblock main %}
