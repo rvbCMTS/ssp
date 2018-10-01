@@ -3,6 +3,20 @@ $(document).ready(function() {
     $("#idResultTable").DataTable( {
         paging: false,
         searching: false,
+        fixedHeader: true,
+        responsive: true,
+
+        // column 0 equal exam_name. Sorted by, group name and hidden.
+        orderFixed: [0, 'asc'],
+        rowGroup: {
+            dataSrc: 0
+        },
+        "columnDefs": [
+            {
+                "targets": [ 0 ],
+                "visible": false,
+            }
+        ]
     } );
 
     $("#idHistoryTable").DataTable( {

@@ -1,5 +1,7 @@
 SELECT 	OGP.Name AS ris_name,
+		Exam.Name AS exam_name,
 		BodyPart.Name AS body_part,
+		AcquisitionSystem.Name AS acquisition_system,
 		Technique.Value AS technique,
 		OGP_kV.Value AS kv,
 		RADOGP_mAs.Value AS mas,
@@ -18,7 +20,10 @@ SELECT 	OGP.Name AS ris_name,
 		GradationParameter.Name AS lut
 FROM OGP
 
+INNER JOIN Exam_OGP ON OGP.Id = Exam_OGP.Id_ogp
+INNER JOIN Exam ON Exam.Id = Exam_OGP.Id_exam
 INNER JOIN BodyPart ON BodyPart.Id = OGP.Id_bodypart
+INNER JOIN AcquisitionSystem ON AcquisitionSystem.Id = OGP.Id_acqsystem
 INNER JOIN OGP_kV  ON OGP_kV.ID = OGP.ID_kV
 INNER JOIN RAD_OGP ON RAD_OGP.ID = OGP.ID
 LEFT OUTER JOIN RADOGP_mAs ON RAD_OGP.Id_mas = RADOGP_mAs.Id

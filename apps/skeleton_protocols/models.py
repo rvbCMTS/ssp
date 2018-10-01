@@ -10,7 +10,9 @@ class Machine(models.Model):
 
 class Protocol(models.Model):
     ris_name = models.TextField(blank=False, null=False)
+    exam_name = models.TextField(blank=False, null=False)
     body_part = models.TextField(blank=False, null=False)
+    acquisition_system = models.TextField(blank=False, null=False)
     technique = models.TextField(blank=False, null=False)
     kv = models.DecimalField(null=False, decimal_places=1, max_digits=4)
     mas = models.DecimalField(null=True, decimal_places=2, max_digits=5)

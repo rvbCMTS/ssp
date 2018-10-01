@@ -1,31 +1,41 @@
 import os
 import pyodbc
 import sqlite3
-from collections import namedtuple
+from collections import namedtuple, UserDict
 import re
 import pandas
+import datetime
 from ..models import Machine, Protocol, Backup
 
 
 def parse_db(input_directory: str):
 
-    # find databases
-    dbs = _find_db(input_directory)
-    print(f'Hittade {len(dbs)} databaser i biblioteket')
+    # find mdb databases
+    mdbs = _find(input_directory, '.mdb')
+    print(f'Hittade {len(mdbs)} Microsoft Access databaser i biblioteket')
 
-    # for all databases
+    # Convert mdb to sqlite
+    if len(mdbs) > 0:
+        for mdb in mdbs:
+            print(mdb)
+            if not os.path.isfile(mdb.replace('.mdb','.sqlite')):
+                _mdb2sqlite(mdb, mdb.replace('.mdb','.sqlite'))
+    print('klar')
+
+
+    # for all sqlite databases
+    dbs = _find(input_directory, '.sqlite')
+    print(f'Hittade {len(dbs)} sqlite databaser i biblioteket')
+
     if len(dbs) > 0:
         for db in dbs:
             print(db)
 
-            # convert database from mdb to sqlite
-            _mdb2sqlite(db)
-
             # parse temporary sqlite database
-            [machine, df] = _parse_pex_db()
+            [machine, df] = _parse_pex_db(db)
 
             # clean data before insert to new database
-            df = _clean_df(df)
+            [machine, df] = _clean_up(machine, df)
 
             # place dataframe in new database
             _prot2db(machine, df)
@@ -33,15 +43,15 @@ def parse_db(input_directory: str):
     print('klar')
 
 
-def _find_db(input_directory: str) ->list:
+def _find(input_directory: str, file_type: str) ->list:
     dbs = []
     for root, dirnames, filenames in os.walk(input_directory):
         for filename in filenames:
-            if filename.lower().endswith('.mdb'):
+            if filename.lower().endswith(file_type):
                 dbs.append(os.path.join(root, filename))
     return dbs
 
-def _mdb2sqlite(mdb_database_path):
+def _mdb2sqlite(mdb_database_path, sqlite_database_path):
 
     # Open Access Database
     # Need to install driver for Access - Access Database Engine
@@ -55,7 +65,7 @@ def _mdb2sqlite(mdb_database_path):
     cnxn.setdecoding(pyodbc.SQL_WCHAR, encoding='latin1')
     cursor = cnxn.cursor()
 
-    conn = sqlite3.connect('apps\\skeleton_protocols\\tools\\temp.sqlite3')
+    conn = sqlite3.connect(sqlite_database_path)
     c = conn.cursor()
 
     Table = namedtuple('Table', ['cat', 'schem', 'name', 'type'])
@@ -121,29 +131,29 @@ def _mdb2sqlite(mdb_database_path):
     conn.commit()
     conn.close()
 
-def _parse_pex_db():
+def _parse_pex_db(sqlite_database_path):
     # Open temporary database
-    conn = sqlite3.connect('apps\\skeleton_protocols\\tools\\temp.sqlite3')
+    #conn = sqlite3.connect('apps\\skeleton_protocols\\tools\\temp.sqlite3')
+    conn = sqlite3.connect(sqlite_database_path)
+
+    # Find database version (grid parameter not in all database versions)
+    sql_db_version = """SELECT * FROM GlobalVars
+                        WHERE GlobalVars.Name = 'DBVersion'"""
+    global_vars = pandas.read_sql_query(sql_db_version, conn)
+    db_version = global_vars.iloc[:, 1][0]
 
     # Find which machine - query to db and conversion to dataframe
     fd = open('apps\\skeleton_protocols\\tools\\machine.sql', 'r')
     sql_machine = fd.read()
     fd.close()
     machine = pandas.read_sql_query(sql_machine, conn)
+    if db_version == '72.01':
+        # Convert timestamp to readable date
+        machine['last_modification'] = datetime.datetime.utcfromtimestamp(machine['last_modification'][0]/1000).strftime('%Y-%m-%d %H:%M:%S')
 
-    # Find database version (grid parameter not in all database versions)
-    sql_db_version = """SELECT * FROM GlobalVars """
-    global_vars = pandas.read_sql_query(sql_db_version, conn)
-    db_version = global_vars.loc[1, ['Varvalue']][0]
 
     # call correct sql-query
-    if db_version == '60':
-        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv60.sql', 'r')
-        sql_organ_programs = fd.read()
-        fd.close()
-        # Read from db to dataframe
-        df = pandas.read_sql_query(sql_organ_programs, conn)
-    elif db_version == '45':
+    if db_version == '45':
         fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv45.sql', 'r')
         sql_organ_programs = fd.read()
         fd.close()
@@ -151,6 +161,18 @@ def _parse_pex_db():
         df = pandas.read_sql_query(sql_organ_programs, conn)
         # Add None for grid
         df['grid'] = [float('nan')]*len(df)
+    elif db_version == '60':
+        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv60.sql', 'r')
+        sql_organ_programs = fd.read()
+        fd.close()
+        # Read from db to dataframe
+        df = pandas.read_sql_query(sql_organ_programs, conn)
+    elif db_version == '72.01':
+        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv7201.sql', 'r')
+        sql_organ_programs = fd.read()
+        fd.close()
+        # Read from db to dataframe
+        df = pandas.read_sql_query(sql_organ_programs, conn)
 
 
     # Correcting kV och mAs
@@ -165,34 +187,62 @@ def _parse_pex_db():
 
     return machine, df
 
-def _clean_df(df):
+def _clean_up(machine, df):
     # Distinct Lut names
-
     lut_names = {
         '1':'01 Service Bone Black',
         '2':'02 Service Bone White',
         '3':'03 Low Contrast',
-        '4':'04 Extremity/Skull',
-        '4 Extremity/Skull': '04 Extremity/Skull',
+        '4':'04 Skull/Hip',
+        '4 Extremity/Skull':'04 Skull/Hip',
+        '04 skull hip':'04 Skull/Hip',
         '5':'05 Chest',
+        '5 Chest':'05 Chest',
         '6':'06 Extremity/Skull',
         '6 Extremity/Skull': '06 Extremity/Skull',
         '7':'07',
+        '07 cs':'07',
         '8':'08 Chest',
+        '8 Chest':'08 Chest',
         '9':'09 Low Contrast',
         '10':'10 Abdomen/Ribs',
         '11':'11 Abdomen/Ribs',
+        '11 rips':'11 Abdomen/Ribs',
         '12':'12 Extremity',
         '13':'13 Spine/Abdomen',
+        '13 c-spine':'13 Spine/Abdomen',
         '14':'14 Chest Mediastinum',
         '15':'15 Spine/Abdomen',
     }
 
-    # Replace lut number with lut string
     for ind in lut_names:
         df.lut.replace(ind,lut_names[ind], inplace=True)
 
-    return df
+
+    # Distinct Modality names
+    modality_names = {
+        'Skellefteå, S12':'S12',
+        'Skellefteå S02':'S02',
+        'NUS, U208':'U208',
+    }
+
+    for ind in modality_names:
+        machine.hospital_name.replace(ind,modality_names[ind], inplace=True)
+
+
+    # Short notation for acquisition_system
+    acq_names = {
+        'Wall':'W',
+        'Table':'T',
+        'Free Exposure': 'X',
+    }
+    for ind in acq_names:
+        df.acquisition_system.replace(ind,acq_names[ind], inplace=True)
+
+    # Upper case letters for exam_name
+    df.exam_name = df.exam_name.str.upper()
+
+    return machine, df
 
 def _prot2db(machine, df):
     # date time for backup in UTC time
@@ -215,6 +265,7 @@ def _prot2db(machine, df):
             if Protocol.objects.filter(ris_name=row.ris_name,
                                       body_part=row.body_part,
                                       technique=row.technique,
+                                      acquisition_system = row.acquisition_system,
                                       kv=row.kv,
                                       mas=row.mas,
                                       filter_cu=row.filter_cu,
@@ -235,6 +286,7 @@ def _prot2db(machine, df):
                 protocol_entry = Protocol.objects.get(ris_name=row.ris_name,
                                                       body_part=row.body_part,
                                                       technique=row.technique,
+                                                      acquisition_system=row.acquisition_system,
                                                       kv=row.kv,
                                                       mas=row.mas,
                                                       filter_cu=row.filter_cu,
@@ -254,8 +306,10 @@ def _prot2db(machine, df):
                                                      )
             else:
                 protocol_entry = Protocol.objects.create(ris_name=row.ris_name,
+                                      exam_name = row.exam_name,
                                       body_part=row.body_part,
                                       technique=row.technique,
+                                      acquisition_system=row.acquisition_system,
                                       kv=row.kv,
                                       mas=row.mas,
                                       filter_cu=row.filter_cu,

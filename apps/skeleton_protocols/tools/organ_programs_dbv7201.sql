@@ -7,6 +7,7 @@ SELECT 	OGP.Name AS ris_name,
 		RADOGP_mAs.Value AS mas,
 		FilterType.Name AS filter_cu,
 		Focus.Name AS focus,
+		OGP.Grid AS grid,
 		DiamondViewID.Name AS diamond_view,
 		EdgeFilterKernel.Value AS edge_filter_kernel_size,
 		SpatialFrequencyParameter.Edgefiltergain AS edge_filter_gain,
@@ -14,7 +15,7 @@ SELECT 	OGP.Name AS ris_name,
 		SpatialFrequencyParameter.Harmonisgain AS harmonization_gain,
 		SpatialFrequencyParameter.Noisereduction AS noise_reduction,
 		RAD_OGP.Imageautoamplification AS image_auto_amplification,
-		ImageAmplification.Value AS image_amplification_gain,
+		RAD_OGP.ImageAmplification AS image_amplification_gain,
 		Dose_RAD.Sensitivity AS sensitivity,
 		GradationParameter.Name AS lut
 FROM OGP
@@ -33,9 +34,8 @@ INNER JOIN SpatialFrequencyParameter ON OGP.Id_imaspatialfreqparam = SpatialFreq
 INNER JOIN DiamondViewID ON SpatialFrequencyParameter.Id_diamondviewid = DiamondViewID.Id
 INNER JOIN EdgeFilterKernel ON SpatialFrequencyParameter.Id_edgefilterkernel = EdgeFilterKernel.Id
 INNER JOIN HarmonisKernel ON SpatialFrequencyParameter.Id_harmoniskernel = HarmonisKernel.Id
-LEFT OUTER JOIN ImageAmplification ON RAD_OGP.Id_imageamplification = ImageAmplification.Id
 INNER JOIN Dose_RAD ON RAD_OGP.Id_dose = Dose_RAD.Id
 INNER JOIN GradationParameter ON RAD_OGP.Id_imagegradation = GradationParameter.Ids
 
 
-WHERE OGP.status=2 AND OGP.Type='SIEMENSDEFAULT' AND NOT OGP.Id_bodypart=57;
+WHERE OGP.status=2 AND OGP.Type='SIEMENSDEFAULT';
