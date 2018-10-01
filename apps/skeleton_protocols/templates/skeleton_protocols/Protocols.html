@@ -32,10 +32,13 @@
                 <form action="javascript:void(0);" id="form" method="get">
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-lg-8 col-md-8 col-sm-12">
+                            <div class="col-lg-6 col-md-6 col-sm-12">
                                 {% render_field filter.form.ris_name class="form-control" placeholder="Sök protokoll..."%}
                             </div>
-                            <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-3 col-md-3 col-sm-12">
+                                {% render_field filter.form.exam_name class="form-control" %}
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-12">
                                 {% render_field filter.form.machine class="form-control" %}
                             </div>
                         </div>
@@ -174,12 +177,13 @@
 
 
 <!-- Results -->
-<table id="idResultTable" class="stripe hover compact">
+    <table id="idResultTable" class="stripe hover compact">
         <thead>
             <tr>
+                <th>Exam</th>
+                <th>Acq</th>
                 <th>Protokoll</th>
                 <th>Modalitet</th>
-                <th>Datum</th>
                 <th>T</th>
                 <th>S</th>
                 <th>kV</th>
@@ -192,14 +196,15 @@
                 <th>Amp</th>
                 <th>Edge</th>
                 <th>Harmon</th>
-                <th>Hist</th>
+                <th></th>
             </tr>
         </thead>
         <tfoot>
             <tr>
+                <th>Exam</th>
+                <th>Acq</th>
                 <th>Protokoll</th>
                 <th>Modalitet</th>
-                <th>Datum</th>
                 <th>T</th>
                 <th>S</th>
                 <th>kV</th>
@@ -212,7 +217,7 @@
                 <th>Amp</th>
                 <th>Edge</th>
                 <th>Harmon</th>
-                <th>Hist</th>
+                <th></th>
             </tr>
         </tfoot>
     </table>

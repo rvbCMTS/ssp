@@ -2,7 +2,7 @@ django
 djangorestframework
 django-webpack-loader
 markdown
-django-filter
+django-filter >=2.0.0
 numpy
 pandas
 django-widget-tweaks
