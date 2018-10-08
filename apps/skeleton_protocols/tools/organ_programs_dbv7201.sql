@@ -17,7 +17,8 @@ SELECT 	OGP.Name AS ris_name,
 		RAD_OGP.Imageautoamplification AS image_auto_amplification,
 		RAD_OGP.ImageAmplification AS image_amplification_gain,
 		Dose_RAD.Sensitivity AS sensitivity,
-		GradationParameter.Name AS lut
+		GradationParameter.Name AS lut,
+		FPSet.Name AS fp_set
 FROM OGP
 
 INNER JOIN Exam_OGP ON OGP.Id = Exam_OGP.Id_ogp
@@ -36,6 +37,7 @@ INNER JOIN EdgeFilterKernel ON SpatialFrequencyParameter.Id_edgefilterkernel = E
 INNER JOIN HarmonisKernel ON SpatialFrequencyParameter.Id_harmoniskernel = HarmonisKernel.Id
 INNER JOIN Dose_RAD ON RAD_OGP.Id_dose = Dose_RAD.Id
 INNER JOIN GradationParameter ON RAD_OGP.Id_imagegradation = GradationParameter.Ids
+LEFT OUTER JOIN FPSet ON FPset.ID = OGP.ID_FPSet
 
 
 WHERE OGP.status=2 AND OGP.Type='SIEMENSDEFAULT';

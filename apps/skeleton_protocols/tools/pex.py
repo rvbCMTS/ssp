@@ -224,6 +224,7 @@ def _clean_up(machine, df):
         'Skellefteå, S12':'S12',
         'Skellefteå S02':'S02',
         'NUS, U208':'U208',
+        'Lycksele L10':'L10',
     }
 
     for ind in modality_names:
@@ -281,6 +282,7 @@ def _prot2db(machine, df):
                                       image_amplification_gain=row.image_amplification_gain,
                                       sensitivity=row.sensitivity,
                                       lut=row.lut,
+                                      fp_set=row.fp_set,
                                       machine=machine_entry,
                                      ).exists():
                 protocol_entry = Protocol.objects.get(ris_name=row.ris_name,
@@ -302,6 +304,7 @@ def _prot2db(machine, df):
                                                       image_amplification_gain=row.image_amplification_gain,
                                                       sensitivity=row.sensitivity,
                                                       lut=row.lut,
+                                                      fp_set=row.fp_set,
                                                       machine=machine_entry,
                                                      )
             else:
@@ -325,6 +328,7 @@ def _prot2db(machine, df):
                                       image_amplification_gain=row.image_amplification_gain,
                                       sensitivity=row.sensitivity,
                                       lut=row.lut,
+                                      fp_set=row.fp_set,
                                       datum = tzdate,
                                       machine=machine_entry,
                                       history_flag = False,

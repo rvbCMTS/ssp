@@ -5,6 +5,7 @@ from .models import Protocol, Machine
 class ProtocolsFilter(django_filters.FilterSet):
     ris_name = django_filters.CharFilter(lookup_expr='icontains', label='Protocol')
     exam_name = django_filters.AllValuesFilter(field_name='exam_name', label='Exam', empty_label="Exam")
+    fp_set = django_filters.AllValuesFilter(field_name='fp_set', empty_label='Gml')
     machine = django_filters.ModelChoiceFilter(queryset=Machine.objects.all(), empty_label="Alla modaliteter")
     technique = django_filters.AllValuesFilter(empty_label="Teknik")
     kv_max = django_filters.AllValuesFilter(field_name='kv', label='kV Max', lookup_expr='lte', empty_label='Kv max')
