@@ -54,6 +54,7 @@ def ajax_protocols_results(request):
 
         tt[-1] += [f'{obj.edge_filter_kernel_size} | {obj.edge_filter_gain}',
                    f'{obj.harmonization_kernel_size} | {obj.harmonization_gain}',]
+        tt[-1] += [obj.fp_set,]
         if obj.history_flag:
             tt[-1] += [f'<button type="button" class="btn btn-outline-warning btn-sm" onClick="viewHistory({obj.pk})">H</button>',]
         else:

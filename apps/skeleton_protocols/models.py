@@ -29,6 +29,7 @@ class Protocol(models.Model):
     image_amplification_gain = models.DecimalField(null=True, decimal_places=1, max_digits=3)
     sensitivity = models.IntegerField(null=False)
     lut = models.TextField(blank=False, null=False)
+    fp_set = models.TextField(blank=False, null=True)
     datum = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     history = models.ManyToManyField('self', symmetrical=False)
