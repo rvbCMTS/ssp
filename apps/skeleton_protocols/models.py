@@ -10,7 +10,7 @@ class Machine(models.Model):
 
 class Protocol(models.Model):
     ris_name = models.TextField(blank=False, null=False)
-    exam_name = models.TextField(blank=False, null=False)
+    exam_name = models.TextField(blank=False, null=True)
     body_part = models.TextField(blank=False, null=False)
     acquisition_system = models.TextField(blank=False, null=False)
     technique = models.TextField(blank=False, null=False)
