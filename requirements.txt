@@ -10,3 +10,4 @@ pyodbc
 django-ckeditor
 django-tempus-dominus
 xlrd
+django-python3-ldap

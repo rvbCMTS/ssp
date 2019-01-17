@@ -1,3 +1,28 @@
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #0050A0; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+}
+
+#idLoaderRow {
+    z-index: 1000;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    top: 24em;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
 .mg-alert-instruction {
     padding: .175rem .375rem;
     border-radius: .25rem;
@@ -5,4 +30,16 @@
 
 #idMeasurementInfoFirstRow {
     border-top-color: #979797;
+}
+
+#id_time_span {
+    list-style: none;
+}
+
+#id_time_span ul li label {
+    display: inline;
+}
+
+#radio ul li label{
+    display:inline;
 }

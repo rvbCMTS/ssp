@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}QA Mammo{% endblock title %}
+
+{% load static %}
+
+{% block extra-styles %}
+  <link href="{% static 'css/fullWidthMain.css' %}" rel="stylesheet">
+  <link href="{% static 'mammography/mg.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+  <script src="{% static 'js/plotly.min.js' %}"></script>
+  <script src="{% static 'mammography/mg_result.js' %}"></script>
+{% endblock extra-scripts %}
+
+<!-- Main Content -->
+{% block main %}
+    <div class="row">
+    <div class="container card-container">
+        <div id="accordion">
+            <div class="card text-white bg-dark mb-3 form-card">
+                <div class="card-header">
+                    Filter
+                </div>
+
+                <div id="idCollapseFilter" class="collapse show" aria-labelledby="hedingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <div class="row form-row">
+                            <div class="col-lg-6">
+                                <div class="form-check-inline">
+                                  {{ form.time_span.errors }}
+
+                                  {{ form.time_span.label_tag }}{{ form.time_span }}
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                  {{ form.modality.errors }}
+                                  {{ form.modality.label_tag }}{{ form.modality }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div id="idLoaderRow" class="row justify-content-center hidden">
+    <div class="loader"></div>
+  </div>
+  <div id="resultPlots" class="hidden">
+      <div class="row">
+          <div class="col-lg-12">
+              <h3></h3>
+          </div>
+          <!-- mAs plot -->
+          <div class="col-lg-6 col-md-6 col-sm-12">
+              <div class="col-lg-12"><h4>mAs</h4></div>
+              <div id="mas-plot" class="col-lg-12"></div>
+          </div>
+          <!-- Entrance dose plot -->
+          <div class="col-lg-6 col-md-6 col-sm-12">
+              <div class="col-lg-12"><h4>Ingångsdos</h4></div>
+              <div id="ed-plot" class="col-lg-6 col-md-6 col-sm-12"></div>
+          </div>
+      </div>
+
+      <div class="row">
+          <div class="col-lg-12">
+              <h3>Medel över alla ROI:ar</h3>
+          </div>
+          <!-- SNR plot -->
+          <!--
+          <div id="snr-all-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          -->
+          <!-- Mean plot -->
+          <div id="mean-all-plot" class="col-lg-12 col-md-12 col-sm-12"></div>
+          <!-- Stdev plot -->
+          <!--
+          <div id="stdev-all-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          -->
+      </div>
+
+      <div class="row">
+          <div class="col-lg-12">
+              <h3>ROI 1</h3>
+          </div>
+          <!-- SNR plot -->
+          <div id="snr1-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          <!-- Mean plot -->
+          <div id="mean1-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          <!-- Stdev plot -->
+          <div id="stdev1-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+      </div>
+
+      <div class="row">
+          <div class="col-lg-12">
+              <h3>ROI 2</h3>
+          </div>
+          <!-- SNR plot -->
+          <div id="snr2-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          <!-- Mean plot -->
+          <div id="mean2-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          <!-- Stdev plot -->
+          <div id="stdev2-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+      </div>
+
+      <div class="row">
+          <div class="col-lg-12">
+              <h3>ROI 3</h3>
+          </div>
+          <!-- SNR plot -->
+          <div id="snr3-plot" class="col-lg-4 col-md-4 col-sm-12"> </div>
+          <!-- Mean plot -->
+          <div id="mean3-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          <!-- Stdev plot -->
+          <div id="stdev3-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+      </div>
+
+      <div class="row">
+          <div class="col-lg-12">
+              <h3>ROI 4</h3>
+          </div>
+          <!-- SNR plot -->
+          <div id="snr4-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          <!-- Mean plot -->
+          <div id="mean4-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          <!-- Stdev plot -->
+          <div id="stdev4-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+      </div>
+
+      <div class="row">
+          <div class="col-lg-12">
+              <h3>ROI 5</h3>
+          </div>
+          <!-- SNR plot -->
+          <div id="snr5-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          <!-- Mean plot -->
+          <div id="mean5-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+          <!-- Stdev plot -->
+          <div id="stdev5-plot" class="col-lg-4 col-md-4 col-sm-12"></div>
+      </div>
+  </div>
+
+    <div class="hidden">
+    <div id="idFilterChoicesUrl">{% url 'mg:mg-weekly-qa-result-form-api' %}</div>
+    <div id="idUpdatePlotsUrl">{% url 'mg:mg-weekly-qa-result-api' %}</div>
+  </div>
+{% endblock main %}
