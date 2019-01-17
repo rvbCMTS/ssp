@@ -55,7 +55,7 @@ $('#id_modality').change(function(event) {
                endFields.removeClass('hidden')
             }
 
-            $("#idSubmitContainer").append(
+            $("#idSubmitContainer").empty().append(
                 "<input type='submit' class='btn btn-primary btn-lg' value='Spara'>"
             );
 

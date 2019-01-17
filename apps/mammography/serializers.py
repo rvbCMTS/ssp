@@ -3,15 +3,15 @@ from rest_framework import serializers
 from .models import Modality, Reference, MeasurementParameter, Measurement, RoiValue
 
 
-
-class ReferenceSerializer(serializers.Serializer):
+class ReferenceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reference
-        fields = ('roi', 'mean', 'stdev', 'signal_noise_ratio')
+        depth = 1
+        fields = '__all__'
 
 
-class MeasurementParameterSerializer(serializers.Serializer):
+class MeasurementParameterSerializer(serializers.ModelSerializer):
     reference = ReferenceSerializer(many=True, read_only=True)
 
     class Meta:
@@ -19,18 +19,20 @@ class MeasurementParameterSerializer(serializers.Serializer):
         fields = ('parameter')
 
 
-class RoiValueSerializer(serializers.Serializer):
+class RoiValueSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RoiValue
+        depth = 1
+        fields = '__all__'
 
 
-class MeasurementSerializer(serializers.Serializer):
-    roi_values = RoiValueSerializer(many=True, read_only=True)
+class MeasurementSerializer(serializers.ModelSerializer):
+    measurement_date = serializers.DateTimeField("%Y-%m-%d %H:%M:%S")
 
     class Meta:
         model = Measurement
-        fields = ('modality', 'measurement_date', 'mas', 'entrance_dose', 'comment', 'signature')
+        fields = '__all__'
 
 
 class ModalityReferenceSerializer(serializers.Serializer):
@@ -47,3 +49,13 @@ class ModalityMeasurementSerializer(serializers.Serializer):
     class Meta:
         model = Modality
         fields = '__all__'
+
+
+class MeanAllRoiSerializer(serializers.Serializer):
+    measurement_date = serializers.DateTimeField(read_only=True)
+    mean_all = serializers.FloatField(read_only=True)
+
+
+class ModalityResultSerializer(serializers.Serializer):
+    roi_result = RoiValueSerializer(many=True)
+    reference = ReferenceSerializer(many=True)

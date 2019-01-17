@@ -218,7 +218,7 @@ def _insert_results_to_db(results: pd.DataFrame, list_type: str, log: logging.Lo
             else:
                 profession = None
 
-            personnel = Personnel(dosimetry_vendor_id=row.DeltagarId, person_id=row.Personnummer,
+            personnel = Personnel(dosimetry_vendor_id=row.DeltagarId, person_id=str(int(row.Personnummer)),
                                   person_name=row.Namn.title(), profession=profession)
             personnel.save()
             personnel_in_db = pd.DataFrame(list(Personnel.objects.all().values()))
@@ -227,8 +227,8 @@ def _insert_results_to_db(results: pd.DataFrame, list_type: str, log: logging.Lo
             #                      for _, row2 in results.iterrows()]
         else:
             personnel = Personnel.objects.get(dosimetry_vendor_id=row.DeltagarId)
-            if len(str(row.Personnummer).strip()) > 0 and str(row.Personnummer).strip() not in personnel_in_db.person_id.values:
-                personnel.person_id = row.Personnummer
+            if len(str(int(row.Personnummer)).strip()) > 0 and str(int(row.Personnummer)).strip() not in personnel_in_db.person_id.values:
+                personnel.person_id = str(int(row.Personnummer))
                 personnel.save()
             if personnel.profession is None and not np.isnan(row.Yrkeskod):
                 profession = Profession.objects.get(landauer_profession_id=int(row.Yrkeskod))

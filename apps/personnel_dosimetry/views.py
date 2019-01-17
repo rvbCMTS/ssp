@@ -20,9 +20,14 @@ def personnel_dosimatery_results(request):
         'year').distinct()
     years = [obj['year'].year for obj in years]
 
-    # Get a list of the clinics
+    # Get a list of the clinics active during the last 12 months
+    clinics = Result.objects.filter(measurement_period_center__gte=(dt.now() - relativedelta(years=1))).values(
+        'clinic__id'
+    )
+    clinic_ids = [obj['clinic__id'] for obj in clinics]
+
     clinics = Clinic.objects.order_by('display_clinic', 'clinic').all()
-    clinics = [{'id': obj.pk, 'name': obj.display_clinic} for obj in clinics]
+    clinics = [{'id': obj.pk, 'name': obj.display_clinic} for obj in clinics if obj.pk in clinic_ids]
 
     # Get a list of professions for users present in the database
     profession = Result.objects.all().filter(measurement_period_center__gte=(dt.now() - relativedelta(years=1))).values(

@@ -1,9 +1,11 @@
-import datetime
+from datetime import datetime as dt
+from datetime import date
 from dateutil.relativedelta import relativedelta
 from django import forms
+from django.forms import widgets
 from tempus_dominus.widgets import DateTimePicker
 
-from .models import Modality
+from .models import Modality, Measurement
 
 
 class MammographyWeeklyQAForm(forms.Form):
@@ -13,7 +15,7 @@ class MammographyWeeklyQAForm(forms.Form):
         label='Mätdatum', input_formats=('%Y-%m-%d %H:%M:%S',),
         widget=DateTimePicker(
             options={
-                'minDate': (datetime.date.today() - relativedelta(years=1)).strftime('%Y-%m-%d'),
+                'minDate': (date.today() - relativedelta(years=1)).strftime('%Y-%m-%d'),
                 'useCurrent': True,
                 'collapse': False,
             }
@@ -41,3 +43,27 @@ class ROIForm(forms.Form):
     def roi_values(self):
         for name, value in self.cleaned_data:
             yield (name, value)
+
+
+RESULT_TIMESPAN_CHOICES = (
+    (3, '3 mån'),
+    (6, '6 mån'),
+    (12, '12 mån'),
+    (0, 'Alla mätningar')
+)
+
+
+class MammographyQAResultForm(forms.Form):
+    time_span = forms.ChoiceField(choices=RESULT_TIMESPAN_CHOICES, widget=forms.RadioSelect(attrs={'class': 'inline'}))
+    modality = forms.ModelChoiceField(queryset=Modality.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        relative_timespan = kwargs.pop('time_span', 12)
+        super(MammographyQAResultForm, self).__init__(*args, **kwargs)
+
+        if relative_timespan is not None and relative_timespan > 0:
+            # Query for machines with measurements in the current timespan
+            machines = Measurement.objects.filter(measurement_date__gte=(dt.now() - relativedelta(months=12))).values(
+                'modality__display_name').distinct()
+        else:
+            machines = Measurement.objects.values('modality__display_name').distinct()

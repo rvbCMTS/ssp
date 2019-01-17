@@ -1,13 +1,19 @@
+from collections import namedtuple
+from datetime import datetime as dt
+from dateutil.relativedelta import relativedelta
+from django.db.models import Avg
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, Http404
+from django.urls import reverse
+from django.utils.timezone import now
 from rest_framework import permissions
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .forms import MammographyWeeklyQAForm, ROIForm
+from .forms import MammographyWeeklyQAForm, ROIForm, MammographyQAResultForm
 from .models import Modality, Reference, Measurement, RoiValue
-from .serializers import ModalityMeasurementSerializer, ModalityReferenceSerializer
+from .serializers import ModalityMeasurementSerializer, ModalityReferenceSerializer, ModalityResultSerializer
 
 
 def mgqa_measurement_form(request):
@@ -38,7 +44,7 @@ def mgqa_measurement_form(request):
                     roi_value.save()
 
                 # Redirect to the result view
-                return HttpResponseRedirect('mg:mg-weekly-qa-result')
+                return HttpResponseRedirect(reverse('mg:mg-weekly-qa-result'))
         raise Http404
 
     modality = request.GET.get('modality', None)
@@ -81,8 +87,13 @@ def mgqa_measurement_form(request):
 
 
 def mgqa_measurement_result(request):
+    context = {
+        'form': MammographyQAResultForm(initial={'time_span': '12'})
+    }
+    modalities = Measurement.objects.filter(measurement_date__gte=(dt.now() - relativedelta(months=12))).values(
+        'modality__display_name').order_by('modality__display_name').distinct()
 
-    return render
+    return render(request=request, template_name='mammography/mg_result.html', context=context)
 
 
 class MGQAMeasurementForm(APIView):
@@ -116,11 +127,59 @@ class MGQAResultView(APIView):
 
     def get(self, request, format=None):
         modality = self.request.query_params.get('modality', None)
+        time_span = self.request.query_params.get('timeSpan', None)
 
-        reference = Reference.objects.all().filter(parameter__modality_id=modality, active=True, parameter__active=True)
-        roi_value = RoiValue.objects.all().filter(measurement__modality_id=modality)
+        if modality is not None:
+            modality = int(modality)
+            reference = Reference.objects.all().filter(parameter__modality_id=modality)
+            roi_value = RoiValue.objects.all().filter(measurement__modality_id=modality)
+            mean_all = RoiValue.objects.filter(measurement__modality_id=modality).values(
+                'measurement__measurement_date', 'measurement__signature'
+            ).order_by(
+                'measurement__measurement_date', 'measurement__signature'
+            ).annotate(medel=Avg('mean'), snr=Avg('signal_noise_ratio'), stdev=Avg('stdev'))
 
-        reference = ModalityReferenceSerializer(data=reference)
-        roi_value = ModalityMeasurementSerializer(data=roi_value)
+            if time_span is not None and int(time_span) > 0:
+                roi_value = roi_value.filter(
+                    measurement__measurement_date__gte=now() - relativedelta(months=int(time_span))
+                )
+                mean_all = mean_all.filter(
+                    measurement__measurement_date__gte=now() - relativedelta(months=int(time_span))
+                )
 
-        Response({'measurement': roi_value, 'reference': reference})
+            ModalityResult = namedtuple('ModalityResult', ('roi_result', 'reference'))
+            temp = ModalityResult(roi_result=roi_value, reference=reference)
+            modality_result = ModalityResultSerializer(temp)
+            mean_all = [{'measurement_date': obj.get('measurement__measurement_date'),
+                         'mean_all': obj.get('medel'), 'snr_all': obj.get('snr'), 'stdev_all': obj.get('stdev'),
+                         'signature': obj.get('measurement__measurement_signature')} for obj in mean_all]
+
+            output = modality_result.data.copy()
+            output['mean_all'] = mean_all
+
+            return Response(output)
+
+        return Response({'measurement': None, 'reference': None})
+
+
+class MGQAResultFormView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, format=None):
+        time_span = self.request.query_params.get('timeSpan', None)
+
+        if time_span is not None:
+            modalities = Measurement.objects.values('modality__display_name', 'modality_id').order_by(
+                'modality__display_name').distinct()
+
+            if int(time_span) > 0:
+                modalities = modalities.filter(
+                    measurement_date__gte=(dt.now() - relativedelta(months=int(time_span)))
+                )
+
+            output = {'modalities': [
+                {'id': obj['modality_id'], 'name': obj['modality__display_name']} for obj in modalities]
+            }
+            return Response(output)
+
+        return Response({'modalities': []})
