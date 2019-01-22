@@ -7,9 +7,10 @@ function validateField(event) {
 
     var param = event.target.id.split(/_(.+)/)[1];
 
-    if (param.includes('mean') || param.includes('stdev') || param.includes('snr')) {
-        param = 'roi' + param
-    }
+    if (event.target.id.includes('entrance')){ param = 'entrance-dose' }
+    if (event.target.id.includes('mean')){ param = 'mean-roi' + param.split(/_(.+)/)[0] }
+    if (event.target.id.includes('stdev')){ param = 'std-roi' + param.split(/_(.+)/)[0] }
+    if (event.target.id.includes('snr')){ param = 'snr-roi' + param.split(/_(.+)/)[0] }
 
     if (refs.hasOwnProperty(param)) {
         var param_val = event.target.valueAsNumber;
