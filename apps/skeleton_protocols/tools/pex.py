@@ -240,6 +240,10 @@ def _clean_up(machine, df):
     for ind in acq_names:
         df.acquisition_system.replace(ind,acq_names[ind], inplace=True)
 
+    # Remove full stop from exam_name and ris_name
+    df.exam_name.replace('[.]', '', regex=True, inplace=True)
+    df.ris_name.replace('[.]', '', regex=True, inplace=True)
+
     # Upper case letters for exam_name
     df.exam_name = df.exam_name.str.upper()
 
