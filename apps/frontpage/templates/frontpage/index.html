@@ -6,9 +6,8 @@
 
   <!-- Jumbotron Header -->
   <header class="jumbotron my-4">
-    <h1 class="display-3">A Warm Welcome!</h1>
-    <p class="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsa, ipsam, eligendi, in quo sunt possimus non incidunt odit vero aliquid similique quaerat nam nobis illo aspernatur vitae fugiat numquam repellat.</p>
-    <a href="#" class="btn btn-primary btn-lg">Call to action!</a>
+    <h1 class="display-3">Välkommen till Strålskyddsportalen</h1>
+    <p class="lead">Här finns samlad information som rör strålskydd inom {{ OrganisationName }}.</p>
   </header>
 
   <!-- Page Features -->
@@ -16,52 +15,58 @@
 
     <div class="col-lg-3 col-md-6 mb-4">
       <div class="card">
-        <img class="card-img-top" src="http://placehold.it/500x325" alt="">
         <div class="card-body">
-          <h4 class="card-title">Card title</h4>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente esse necessitatibus neque.</p>
+          <h4 class="card-title">Persondosimetri</h4>
+          <p class="card-text">Se statistik över din persondos.</p>
         </div>
         <div class="card-footer">
-          <a href="#" class="btn btn-primary">Find Out More!</a>
+          <a href="{% url 'pd:pd-result' %}" class="btn btn-primary">Gå vidare</a>
         </div>
       </div>
     </div>
 
     <div class="col-lg-3 col-md-6 mb-4">
       <div class="card">
-        <img class="card-img-top" src="http://placehold.it/500x325" alt="">
         <div class="card-body">
-          <h4 class="card-title">Card title</h4>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo magni sapiente, tempore debitis beatae culpa natus architecto.</p>
+          <h4 class="card-title">Genomlysningstider</h4>
+          <p class="card-text">Registrera dina genomlysningstider.</p>
         </div>
         <div class="card-footer">
-          <a href="#" class="btn btn-primary">Find Out More!</a>
+          <a href="{% url 'fluoro_times:register' %}" class="btn btn-primary">Gå vidare</a>
         </div>
       </div>
     </div>
 
     <div class="col-lg-3 col-md-6 mb-4">
       <div class="card">
-        <img class="card-img-top" src="http://placehold.it/500x325" alt="">
         <div class="card-body">
-          <h4 class="card-title">Card title</h4>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sapiente esse necessitatibus neque.</p>
+          <h4 class="card-title">Skelettprotokoll</h4>
+          <p class="card-text">Sök och jämför protokoll på skelettlab.</p>
         </div>
         <div class="card-footer">
-          <a href="#" class="btn btn-primary">Find Out More!</a>
+          <a href="{% url 'sp:sp-results' %}" class="btn btn-primary">Gå vidare</a>
         </div>
       </div>
     </div>
 
     <div class="col-lg-3 col-md-6 mb-4">
       <div class="card">
-        <img class="card-img-top" src="http://placehold.it/500x325" alt="">
         <div class="card-body">
-          <h4 class="card-title">Card title</h4>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Explicabo magni sapiente, tempore debitis beatae culpa natus architecto.</p>
+          <h4 class="card-title">Mammografi QA</h4>
+          <p class="card-text">Registrera eller se sammanställningar över mammografi QA.</p>
         </div>
         <div class="card-footer">
-          <a href="#" class="btn btn-primary">Find Out More!</a>
+          <a href="{% url 'mg:mg-weekly-qa-result' %}" class="btn btn-primary">Gå vidare</a>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="col-lg-3 col-md-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">MR QA</h4>
+          <p class="card-text">Registrera eller se sammanställningar över MR QA.</p>
         </div>
       </div>
     </div>

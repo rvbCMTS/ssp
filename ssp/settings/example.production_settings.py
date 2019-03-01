@@ -15,6 +15,16 @@ DATABASES = {
     }
 }
 
+FRONT_PAGE_PARAMETERS = {
+    'OrganisationName': '<custom-organisation-name>',
+    'ContactInformation': [
+        {
+            'Name': '<Contact-Name-1>',
+            'Email': '<Contact-Email-1>'
+        },
+    ]
+}
+
 
 PERSONNEL_DOSIMETRY_DIRS = {
     'Landauer': {

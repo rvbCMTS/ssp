@@ -226,17 +226,31 @@
     </div>
 
     <!-- Footer -->
-    <footer class="py-5 bg-dark">
+    <footer class="py-5 bg-vll">
       <div class="container">
-        <p class="m-0 text-center text-white">Copyright &copy; VLL 2018</p>
-      </div>
-      <!-- /.container -->
+        <div class="row">
+          <h5><a class="text-white" href="{% url 'home:home' %}"><img class="navbar-logo" src="{% static 'media/CMTS_cog.svg'%}">Strålskyddsportalen</a></h5>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col col-md-6 col-s-12">
+            <h6 class="text-white">OM STRÅLSKYDDSPORTALEN</h6>
+            <p class="text-white">Strålskyddsportalen är ett verkyg som tagits fram vid avdelningen Strålningsfysik för att enklare hantera information kring strålskydd.</p>
+          </div>
+          <div class="col col-md-4 col-s-12 col-md-offset-2">
+            <h6 class="text-white">KONTAKTVÄGAR</h6>
+            <dl id="idContacts" class="text-white"></dl>
+            <div id="idContactsUrl" class="hidden">{% url 'home:front-page-contacts' %}</div>
+          </div>
+        </div>
+      </div><!-- /.container -->
     </footer>
 
     <!-- Bootstrap core JavaScript -->
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'bootstrap4/js/bootstrap.js' %}"></script>
     <script src="{% static 'fontawesome5/js/all.js' %}"></script>
+    <script src="{% static 'js/ssp_contacts.js' %}"></script>
     {% block extra-scripts %}{% endblock extra-scripts %}
 
   </body>
