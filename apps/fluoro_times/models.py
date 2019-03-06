@@ -56,9 +56,9 @@ class Operator(models.Model):
 
     def __str__(self):
         if self.clinic is not None:
-            msg = f'{self.last_name}, {self.last_name} ({self.clinic.name})'
+            msg = f'{self.last_name}, {self.first_name} ({self.clinic.name})'
         else:
-            msg = f'{self.last_name}, {self.last_name} ()'
+            msg = f'{self.last_name}, {self.first_name} ()'
         return msg
 
     class Meta:

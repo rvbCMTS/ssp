@@ -1,8 +1,11 @@
 from datetime import datetime as dt
+from django.contrib import messages
+from django.forms import ValidationError
 from django.db.models import Count, Avg, Sum, F
 from django.db.models.functions import TruncYear
 from django.http import JsonResponse, HttpResponseServerError
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse, Http404
+from django.utils.translation import gettext as _
 from datetime import date, time, datetime as dt, timedelta
 import json
 from math import floor, isnan
@@ -12,8 +15,11 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from statistics import median
+from typing import Optional
 
-from .models import Exam, Operator, Clinic, Hospital, AnatomyRegion
+from .forms import FluoroTimeForm
+from .helpers import fluoro_dose_convert
+from .models import Exam, Operator, Clinic, Hospital, AnatomyRegion, Modality, ModalityClinicMap, OperatorClinicMap, DirtyClinic, DirtyModality, DirtyOperator, ExamDescription
 from .tools.update_fluoro_times import OrbitGML
 
 
@@ -127,17 +133,107 @@ def data_cleaning(request):
     return render(request=request, template_name='fluoro_times/clean_data.html')
 
 
-def register_exam_form(request):
+def register_exam_form(request, clinic: Optional[int] = None):
+    if request.method == 'POST':
+        form = FluoroTimeForm(request.POST)
+        if form.is_valid():
+            if Exam.objects.filter(exam_no=form.cleaned_data.get('exam_id')).all() is not None:
+                raise ValidationError(_('Undersökningmed id %(value)'), code='invalid',
+                                      params={'value': form.cleaned_data.get('exam_id')})
+
+            dirty_clinic = DirtyClinic.objects.filter(clinic=form.cleaned_data.get('clinic')).first()
+            if dirty_clinic is None:
+                dirty_clinic = DirtyClinic(
+                    dirty_name=f"{form.cleaned_data.get('clinic').name} - {form.cleaned_data.get('clinic').hospital}",
+                    clinic=form.cleaned_data.get('clinic'))
+                dirty_clinic.save()
+
+            dirty_operator = DirtyOperator.objects.filter(operator=form.cleaned_data.get('operator')).first()
+            if dirty_operator is None:
+                dirty_operator = DirtyOperator(
+                    dirty_name=f"{form.cleaned_data.get('operator').last_name}, {form.cleaned_data.get('operator').first_name}",
+                    operator=form.cleaned_data.get('operator')
+                )
+                dirty_operator.save()
+
+            dirty_modality = DirtyModality.objects.filter(modality=form.cleaned_data.get('modality')).first()
+            if dirty_modality is None:
+                dirty_modality = DirtyModality(
+                    dirty_name=form.cleaned_data.get('modality').name,
+                    operator=form.cleaned_data.get('modality')
+                )
+                dirty_modality.save()
+
+            exam_description = ExamDescription.objects.filter(
+                description=form.cleaned_data.get('anatomical_region').region,
+                pediatric=int(form.cleaned_data.get('pediatric')) == 2).first()
+            if exam_description is None:
+                exam_description = ExamDescription(
+                    description=form.cleaned_data.get('anatomical_region').region,
+                    anatomy_region=form.cleaned_data.get('anatomical_region'),
+                    pediatric=int(form.cleaned_data.get('pediatric')) == 2
+                )
+                exam_description.save()
+
+            fluoro_time = 0
+            if form.cleaned_data.get('fluoro_time_minutes') is not None:
+                fluoro_time += form.cleaned_data.get('fluoro_time_minutes') * 60
+            if form.cleaned_data.get('fluoro_time_seconds') is not None:
+                fluoro_time += form.cleaned_data.get('fluoro_time_seconds')
+
+            fluoro_dose = 0
+            if form.cleaned_data.get('fluoro_dose') is not None:
+                fluoro_dose = fluoro_dose_convert(
+                    form.cleaned_data.get('fluoro_dose'),
+                    form.cleaned_data.get('fluoro_dose_unit')
+                )
+
+            fluoro_exam = Exam(
+                exam_no=form.cleaned_data.get('exam_id'),
+                exam_description=exam_description,
+                exam_date=form.cleaned_data.get('exam_date'),
+                dirty_clinic=dirty_clinic,
+                dirty_operator=dirty_operator,
+                dirty_modality=dirty_modality,
+                fluoro_time=fluoro_time,
+                dose=fluoro_dose
+            )
+
+            fluoro_exam.save()
+            messages.success(request=request,
+                             message=f'Genomlysningsundersökningen {form.cleaned_data.get("exam_id")} har sparats')
+
+    cmm = ModalityClinicMap.objects.all().prefetch_related()
+    modality_map = {}
+    if len(cmm) > 0:
+        for obj in cmm:
+            if str(obj.clinic.id) not in modality_map.keys():
+                modality_map[str(obj.clinic.id)] = []
+            modality_map[str(obj.clinic.id)].append(obj.modality.id)
+
+    com = OperatorClinicMap.objects.all().prefetch_related()
+    operator_map = {}
+    if len(com) > 0:
+        for obj in com:
+            if str(obj.clinic.id) not in operator_map.keys():
+                operator_map[str(obj.clinic.id)] = []
+            operator_map[str(obj.clinic.id)].append(obj.operator.id)
+
+    mdu = Modality.objects.all()
+    modality_dose_unit = {}
+    if len(mdu) > 0:
+        modality_dose_unit = {obj.id: obj.dose_unit for obj in mdu}
+
+    form = FluoroTimeForm(initial={'clinic': clinic})
 
     context = {
-        'clinics': [{'id': 1, 'name': 'Test Klinik'}, ],
-        'modalities': [{'id': 1, 'name': 'Testmodalitet'}, ],
-        'operators': [{'id': 1, 'name': 'Efternamn, Förnamn'}, ],
-
-        'preset_clinic': None,
-        'clinic_operator_map': [{"1": [1, 2, 3, 4]}],
-        'clinic_modality_map': [{"1": [1]}]
+        'preset_clinic': clinic,
+        'clinic_operator_map': json.dumps(operator_map),
+        'clinic_modality_map': json.dumps(modality_map),
+        'modality_dose_unit': json.dumps(modality_dose_unit),
+        'form': form
     }
+
     return render(request=request, template_name='fluoro_times/manual_report_form.html', context=context)
 
 
@@ -168,16 +264,19 @@ class IndexSummaryData(APIView):
         anatomy_regions = AnatomyRegion.objects.all()
         anatomy_regions = list(set([obj.region for obj in anatomy_regions]))
         anatomy_regions.append('Okänd')
-        anatomy_regions = list(reversed(sorted(anatomy_regions)))
+        # anatomy_regions = list(reversed(sorted(anatomy_regions)))
+        anatomy_regions = list(sorted(anatomy_regions))
 
         # Get pie chart data
-        pie_chart_query = Exam.objects.all().filter(
+        pie_chart_query = Exam.objects.select_related(
+            'exam_description__anatomy_region'
+        ).filter(
             exam_date__gte=dt(year=dt.now().year - 1, month=1, day=1)
         ).annotate(
             year=TruncYear('exam_date')
         ).values('year', 'exam_description__anatomy_region__region').annotate(exams=Count('exam_no')).order_by(
             'year', 'exam_description__anatomy_region__region',
-        )
+        ).all()
 
         if not pie_chart_query:
             return Response()
@@ -194,7 +293,7 @@ class IndexSummaryData(APIView):
                 pie_previous_year[anatomy_regions.index(ar)] = obj['exams']
 
         # Get median fluoro time data per anatomy region and year
-        query = Exam.objects.all().filter(
+        query = Exam.objects.select_related('exam_description__anatomy_region').filter(
             exam_date__gte=dt(year=dt.now().year - 1, month=1, day=1)
         ).annotate(
             year=TruncYear('exam_date')
@@ -221,23 +320,25 @@ class IndexSummaryData(APIView):
             else:
                 ar = row.exam_description__anatomy_region__region
             if row.year == current_year:
-                median_plot_current[anatomy_regions.index(ar)] = time(
+                median_plot_current[anatomy_regions.index(ar)] = dt.combine(dt.date(dt.now()), time(
                     minute=int(floor(row.total_fluoro_time)),
-                    second=int((row.total_fluoro_time - floor(row.total_fluoro_time)) * 60)
+                    second=int((row.total_fluoro_time - floor(row.total_fluoro_time)) * 60))
                 )
             else:
-                median_plot_previous[anatomy_regions.index(ar)] = time(
+                median_plot_previous[anatomy_regions.index(ar)] = dt.combine(dt.date(dt.now()), time(
                     minute=int(floor(row.total_fluoro_time)),
-                    second=int((row.total_fluoro_time - floor(row.total_fluoro_time))*60)
+                    second=int((row.total_fluoro_time - floor(row.total_fluoro_time))*60))
                 )
 
         # Format response data
         context = {
             'pieChart': {
                 'previousYear': {'labels': anatomy_regions, 'values': pie_previous_year, 'type': 'pie', 'hole': 0.4,
-                                 'hoverinfo': 'label+percent+name', 'textinfo': 'none', 'name': str(current_year - 1)},
+                                 'hoverinfo': 'label+percent+name', 'textinfo': 'none', 'name': str(current_year - 1),
+                                 'sort': False},
                 'currentYear': {'labels': anatomy_regions, 'values': pie_current_year, 'type': 'pie', 'hole': 0.4,
-                                 'hoverinfo': 'label+percent+name', 'textinfo': 'none', 'name': str(current_year)}
+                                 'hoverinfo': 'label+percent+name', 'textinfo': 'none', 'name': str(current_year),
+                                 'sort': False}
             },
             'medianPlot': [
                 {'y': anatomy_regions, 'x': median_plot_previous, 'name': f'{current_year - 1}', 'type': 'bar',
@@ -295,7 +396,9 @@ class IndexSummaryData(APIView):
                     'pad': 4
                 },
                 'xaxis': dict(
-                    title='Mediantid (hh:mm:ss)'
+                    title='Mediantid (hh:mm:ss)',
+                    type='time',
+                    tickformat='%H:%M:%S'
                 )
             },
             'pieCharts': {
@@ -408,10 +511,10 @@ class YearlyReportData(APIView):
                                     'sizemode': 'area',
                                     'opacity': 0.6
                                 }})
-            plot[row.AnatomyRegion]['y'][x.index(row.ExamDate)] = time(
+            plot[row.AnatomyRegion]['y'][x.index(row.ExamDate)] = dt.combine(dt.date(dt.now()), time(
                 hour=int(floor(row['FluoroTime'] / 60)),
                 minute=int(floor(row['FluoroTime'] - floor(row['FluoroTime'] / 60))),
-                second=int((row['FluoroTime'] - floor(row['FluoroTime'])) * 60))
+                second=int((row['FluoroTime'] - floor(row['FluoroTime'])) * 60)))
 
         # Set the marker size
         for _, row in df_count.iterrows():
@@ -435,7 +538,8 @@ class YearlyReportData(APIView):
             'yaxis': {
                 'title': 'Mediantid (h:min:s)',
                 'rangemode': 'tozero',
-                'autorange': 'reversed'
+                'type': 'time',
+                'tickformat': '%H:%M:%S'
             }
         }
         layout2 = {}

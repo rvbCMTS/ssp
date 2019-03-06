@@ -4,74 +4,137 @@
 
 {% load static %}
 {% block extra-styles %}
+    <link href="{% static 'fluoro_times/fluoro_time.css' %}" rel="stylesheet">
 {% endblock extra-styles %}
 
 {% block extra-scripts %}
+    {{ form.media }}
+    <script src="{% static 'fluoro_times/fluoro_time_form.js' %}"></script>
 {% endblock extra-scripts %}
 
 <!-- Main Content -->
 {% block main %}
   <h1>Registrera genomlysningstid</h1>
-  <div class="row">
-    <div class="container card-container">
-      <div class="card text-white bg-dark mb-3 form-card">
-
-        <div class="card-body">
-          <!-- Clinic and Modality and Operator -->
-          <div class="row form-row">
-
-            <div class="col col-lg-4 col-md-6 col-sm-12">
-              <div class="form-stacked filter-select">
-                <label for="idClinic">Klinik</label>
-                <select id="idClinic" name="Clinic">
-                  <option value="None">Välj klinik</option>
-                  {% for clinic in clinics %}
-                  <option value="{{ clinic.id }}">{{ clinic.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-
-            <div class="col col-lg-4 col-md-6 col-sm-12">
-              <div class="form-stacked filter-select">
-                <label for="idModality">Modalitet</label>
-                <select id="idModality" name="Modality">
-                  <option value="None">Välj modalitet</option>
-                  {% for modality in modalities %}
-                  <option value="{{ modality.id }}">{{ modality.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-
-            <div class="col col-lg-4 col-md-6 col-sm-12">
-              <div class="form-stacked filter-select">
-                <label for="idOperator">Operatör</label>
-                <select id="idOperator" name="Operator">
-                  <option value="None">Välj operatör</option>
-                  {% for operator in opeartors %}
-                  <option value="{{ operator.id }}">{{ operator.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="form-space-top">
-                <input type="checkbox" class="custom-control-input" id="idShowAllOperatorsCheck">
-                <label class="custom-control-label" for="idShowAllOperatorsCheck">Visa alla operatörer</label>
-              </div>
-            </div>
-
-          </div>
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
         </div>
+    {% endfor %}
+    {% endif %}
+  <div class="row">
+      <div class="container card-container">
+          <div class="card text-white bg-dark mb-3 form-card">
+
+              <div class="card-body">
+                  <form action="{% url 'gls:register' %}" method="post">
+                      {% csrf_token %}
+                      <div class="row">
+                          <div class="col col-lg-6 col-md-12 col-sm-12">
+                              <div class="form-group">
+                                  {{ form.clinic.errors }}
+                                  {{ form.clinic.label_tag }}{{ form.clinic }}
+                              </div>
+                          </div>
+                          <div class="col col-lg-6 col-md-12 col-sm-12">
+                              <div class="form-group">
+                                  {{ form.anatomical_region.errors }}
+                                  {{ form.anatomical_region.label_tag }}{{ form.anatomical_region }}
+                              </div>
+                          </div>
+                      </div>
+                      <div class="row" style="padding-bottom: 1em;">
+                          <div class="col col-lg-6 col-md-12 col-sm-12">
+                              <div class="form-group">
+                                  {{ form.modality.errors }}
+                                  {{ form.modality.label_tag }}{{ form.modality }}
+                              </div>
+                              <div class="form-space-top" style="padding-left: 2em;">
+                                  <input type="checkbox" class="custom-control-input" id="idShowAllModalitiesCheck">
+                                  <label class="custom-control-label" for="idShowAllModalitiesCheck">Visa alla modaliteter</label>
+                              </div>
+                          </div>
+                          <div class="col col-lg-6 col-md-12 col-sm-12">
+                              <div class="form-group">
+                                  {{ form.operator.errors }}
+                                  {{ form.operator.label_tag }}{{ form.operator }}
+                              </div>
+                              <div class="form-space-top" style="padding-left: 2em;">
+                                  <input type="checkbox" class="custom-control-input" id="idShowAllOperatorsCheck">
+                                  <label class="custom-control-label" for="idShowAllOperatorsCheck">Visa alla operatörer</label>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="row">
+                          <div class="col col-lg-6">
+                              <div class="form-group">
+                                  {{ form.exam_date.errors }}
+                                  {{ form.exam_date.label_tag }}{{ form.exam_date }}
+                              </div>
+                              <div class="form-group">
+                                  {{ form.exam_id.errors }}
+                                  {{ form.exam_id.label_tag }}{{ form.exam_id }}
+                              </div>
+                          </div>
+                          <div class="col col-lg-6">
+                              <div class="form-group">
+                                  {{ form.pediatric.errors }}
+                                  {{ form.pediatric.label_tag }}{{ form.pediatric }}
+                              </div>
+                          </div>
+                      </div>
+                      <div class="row">
+                          <div class="col col-lg-6 col-sm-12">
+                              <div class="row">
+                                  <div class="col col-lg-12"><h4>Genomlysningstid</h4></div>
+                                  <div class="col col-lg-6 col-md-6 col-sm-6">
+                                      <div class="form-group">
+                                          {{ form.fluoro_time_minutes.errors }}
+                                          {{ form.fluoro_time_minutes.label_tag }}{{ form.fluoro_time_minutes }}
+                                      </div>
+                                  </div>
+                                  <div class="col col-lg-6 col-md-6 col-sm-6">
+                                      <div class="form-group">
+                                          {{ form.fluoro_time_seconds.errors }}
+                                          {{ form.fluoro_time_seconds.label_tag }}{{ form.fluoro_time_seconds}}
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="col col-lg-6 col-sm-12">
+                              <div class="row">
+                                  <div class="col col-lg-12"><h4>Genomlysningsdos (DAP)</h4></div>
+                                  <div class="col col-lg-6 col-md-6 col-sm-6" style="justify-content: right;">
+                                      <div class="form-group">
+                                          {{ form.fluoro_dose.errors }}
+                                          {{ form.fluoro_dose.label_tag }}{{ form.fluoro_dose }}
+                                      </div>
+                                  </div>
+                                  <div class="col col-lg-6 col-md-6 col-sm-6" style="justify-content: left;">
+                                      <div class="form-group">
+                                          {{ form.fluoro_dose_unit.errors }}
+                                          {{ form.fluoro_dose_unit.label_tag }}{{ form.fluoro_dose_unit}}
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div id="idSubmitContainer">
+                        <input type='submit' class='btn btn-primary btn-lg' value='Spara'>
+                      </div>
+                  </form>
+              </div>
+          </div>
       </div>
-    </div>
   </div>
 
   <div class="hidden">
-    <div id="idPresetClinic">{{ preset_clinic }}</div>
-    <div id="idOperators">{{ operators }}</div>
-    <div id="idClinicOperatorMap">{{ clinic_operator_map }}</div>
-    <div id="idModalityOperatorMap">{{ clinic_modality_map }}</div>
-    <div id="idSaveUrl">{% url 'fluoro_times:save_exam' %}</div>
+      <div id="idSelectedClinic">{{ preset_clinic }}</div>
+      <div id="idClinicOperatorMap">{{ clinic_operator_map }}</div>
+      <div id="idClinicModalityMap">{{ clinic_modality_map }}</div>
+      <div id="idModalityDoseUnit">{{ modality_dose_unit }}</div>
   </div>
 
 {% endblock main %}
