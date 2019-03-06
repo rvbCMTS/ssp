@@ -25,3 +25,9 @@
 .report-col {
     margin-bottom: 2em;
 }
+
+#id_pediatric {
+    list-style-type: none;
+}
+
+#id_exam_id { width: 100%; }

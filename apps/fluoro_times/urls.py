@@ -6,6 +6,7 @@ app_name = 'fluoro_times'
 urlpatterns = [
     path('', index, name='index'),
     path('registrera_us/', register_exam_form, name='register'),
+    path('registrera_us/<int:clinic>', register_exam_form, name='register_preselected'),
     path('ssm_plottar/', ssm_plots, name='ssm-plots'),
     path('arsrapporter/', yearly_reports, name='yearly-reports'),
     path('datastad/', data_cleaning, name='data-clean'),
