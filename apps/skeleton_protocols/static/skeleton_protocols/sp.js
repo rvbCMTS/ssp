@@ -22,6 +22,7 @@ $(document).ready(function() {
     $("#idHistoryTable").DataTable( {
         paging: false,
         searching: false,
+        responsive: true,
     } );
 
 });

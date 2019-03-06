@@ -30,9 +30,9 @@ def ajax_protocols_results(request):
     # make data format for Json response
     tt = []
     for obj in f.qs:
-        tt.append([obj.exam_name,
-                   obj.ris_name,
-                   obj.machine.hospital_name,])
+        tt.append([obj.exam_name,])
+        tt[-1] += [obj.ris_name,]
+        tt[-1] += [obj.machine.hospital_name,]
         tt[-1] += [obj.technique,]
         if obj.technique == '2 pt':
             tt[-1] += ['',]
