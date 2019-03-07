@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Persondosimetri{% endblock title %}
+
+{% load static %}
+{% block extra-styles %}
+    <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+    <link href="{% static 'personnel_dosimetry/pdfbd.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+    {{ form.media }}
+    <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+    <script src="{% static 'personnel_dosimetry/pdfbd.js' %}"></script>
+{% endblock extra-scripts %}
+
+
+{% block main %}
+<h1>Helkroppsmätning</h1>
+<h2>Definition av resultat</h2>
+<p>För att ett resultat ska klassa som <em>Ok</em> nedan skall uppmätt aktivitet ligga under åtgärdsnivå för samtliga isotoper. Specifika åtgärdsnivåer för olika isotoper definieras i ledningssystemet.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+<div class="row">
+    <div id="idMeasurementForm" class="col col-lg-12">
+        <div class="container card-container" id="measurementFormCard">
+            <div class="card text-white bg-dark mb-3 form-card">
+                <div class="card-header" id="newMeasurementHeader">
+                    <a class="btn btn-link" data-toggle="collapse" href="#newMeasurementForm" role="button" aria-expanded="false" aria-controls="newMeasurementForm" style="color: white; font-size: 1.2rem;">
+                        Ny mätning
+                    </a>
+                </div>
+                <div id="newMeasurementForm" class="collapse" aria-labelledby="newMeasurementForm" data-parent="#measurementFormCard">
+                    <div class="card-body">
+                        <form action="{% url 'pd:pd-fbd' %}" method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col col-lg-12 col-md-12 col-sm-12">
+                                    <div class="form-group">
+                                        {{ form.personnel.errors }}
+                                        {{ form.personnel.label_tag }}{{ form.personnel }}
+                                    </div>
+                                </div>
+                                <div class="col col-lg-12 col-md-12 col-sm-12 align-content-center align-items-center" style="margin-bottom: 1em;">
+                                    <div id="newPersonnelBtn" style="margin-top: auto; margin-bottom: auto;">
+                                        <a class="btn btn-secondary btn-sm" href="{% url 'pd:pd-np' %}" role="button">Ny personal</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        {{ form.measurement_date.errors }}
+                                        {{ form.measurement_date.label_tag }}{{ form.measurement_date }}
+                                    </div>
+                                </div>
+                                <div class="col col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        {{ form.result.errors }}
+                                        {{ form.result.label_tag }}{{ form.result }}
+                                    </div>
+                                </div>
+                            </div><div class="row">
+                                <div class="col col-lg-12 col-md-12 col-sm-12">
+                                    <div class="form-group">
+                                        {{ form.comment.errors }}
+                                        {{ form.comment.label_tag }}{{ form.comment }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="idSubmitContainer">
+                                    <input type='submit' class='btn btn-primary' value='Spara' style="margin-left: 1em;">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col col-lg-12">
+        <h2>Mätresultat</h2>
+    </div>
+    <div class="col col-lg-12">
+        <table id="measurementTableContainer" class="stripe hover compact">
+            <thead>
+                <tr><th></th><th></th><th></th><th></th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div class="hidden">
+    <div id="tableData">{{ table_data }}</div>
+</div>
+
+{% endblock main %}

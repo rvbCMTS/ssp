@@ -44,8 +44,12 @@
               </a>
             </li>
 
-            <li class="nav-item {% active 'persondosimetri' %}">
-              <a class="nav-link" href="{% url 'pd:pd-result' %}">Persondosimetri</a>
+            <li class="nav-item dropdown {% active 'persondosimetri' %}">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPdLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Persondosimetri</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownPdLink">
+                <a class="dropdown-item" href="{% url 'pd:pd-result' %}">Persondosimetri</a>
+                <a class="dropdown-item" href="{% url 'pd:pd-fbd' %}">Helkroppsmätning</a>
+              </div>
             </li>
 
             <li class="nav-item dropdown {% active 'genomlysning' %}">

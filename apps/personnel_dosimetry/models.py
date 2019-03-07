@@ -4,11 +4,14 @@ from django.db import models
 
 
 class Profession(models.Model):
-    landauer_profession_id = models.IntegerField(blank=True, null=True)
+    landauer_profession_id = models.IntegerField(blank=True, null=True, unique=True)
     profession = models.CharField(max_length=4000, blank=False, null=False)
 
     def __str__(self):
         return self.profession
+
+    class Meta:
+        ordering = ['profession']
 
 
 class Personnel(models.Model):
@@ -18,31 +21,33 @@ class Personnel(models.Model):
     profession = models.ForeignKey(Profession, on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
-        return '{} ({})'.format(self.person_name, self.profession)
+        return f'{self.person_name} ({self.profession})'
 
     class Meta:
         permissions = (
             ("view_personnel_names", "Can see name of personnel"),
             ("view_personnel_pid", "Can see pid of the personnel"),
         )
+        unique_together = (('person_id', 'dosimetry_vendor_id'),)
+        ordering = ['person_name']
 
 
 class DosimeterPlacement(models.Model):
-    dosimeter_placement = models.TextField(blank=False, null=False)
+    dosimeter_placement = models.TextField(blank=False, null=False, unique=True)
 
     def __str__(self):
         return self.dosimeter_placement
 
 
 class DosimeterLaterality(models.Model):
-    dosimeter_laterality = models.CharField(max_length=100)
+    dosimeter_laterality = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.dosimeter_laterality
 
 
 class VendorDosimeterPlacement(models.Model):
-    vendor_dosimeter_placement = models.CharField(max_length=4000, blank=False, null=False)
+    vendor_dosimeter_placement = models.CharField(max_length=4000, blank=False, null=False, unique=True)
     dosimeter_placement = models.ForeignKey(DosimeterPlacement, on_delete=models.DO_NOTHING, blank=True, null=True)
     dosimeter_laterality = models.ForeignKey(DosimeterLaterality, on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -51,7 +56,7 @@ class VendorDosimeterPlacement(models.Model):
 
 
 class Clinic(models.Model):
-    clinic = models.CharField(max_length=4000, blank=False, null=False)
+    clinic = models.CharField(max_length=4000, blank=False, null=False, unique=True)
     display_clinic = models.CharField(max_length=400, blank=False, null=False, default=clinic)
 
     def __str__(self):
@@ -119,3 +124,27 @@ class NotReturnedDosimeters(models.Model):
 
     class Meta:
         ordering = ['personnel', 'report']
+
+
+FULL_BODY_ASSESSMENT = (
+    ('ok', 'Ok'),
+    ('an', 'Ok med anmärkning'),
+    ('no', 'Inte Ok'),
+)
+
+
+class FullBodyDosimetry(models.Model):
+    personnel = models.ForeignKey(Personnel, on_delete=models.CASCADE, blank=False, null=False)
+    measurement_date = models.DateTimeField(blank=False, null=False)
+    result = models.CharField(max_length=2, choices=FULL_BODY_ASSESSMENT, null=False)
+    comment = models.CharField(max_length=4000, null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.measurement_date.strftime("%Y-%m-%d")} - {self.personnel.person_name}'
+
+    class Meta:
+        ordering = ['measurement_date', 'personnel']
+        permissions = (
+            ("manage_full_body_results", "Can see and perform full body measurements"),
+        )
+        unique_together = (('personnel', 'measurement_date'),)
