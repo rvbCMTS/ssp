@@ -1,16 +1,19 @@
 from datetime import datetime as dt
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib import messages
 from django.db.models.functions import TruncYear
 from django.shortcuts import render, redirect
 from django.http import Http404
+import json
 from math import ceil
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from .forms import FullBodyMeasurementForm, PersonnelForm
 from .functions import import_personnel_dosimetry_report
-from .models import Clinic, Result
+from .models import Clinic, Result, FullBodyDosimetry, FULL_BODY_ASSESSMENT, Personnel
 from .serializers import PersonnelDosimetryResultSerializer
 
 
@@ -64,6 +67,58 @@ def personnel_dosimatery_results(request):
                   })
 
 
+def full_body_dosimetry_view(request):
+    if request.method == 'POST':
+        form = FullBodyMeasurementForm(request.POST)
+        if form.is_valid():
+            try:
+                fbm = FullBodyDosimetry(
+                    personnel=form.cleaned_data.get('personnel'),
+                    measurement_date=form.cleaned_data.get('measurement_date'),
+                    result=form.cleaned_data.get('result'),
+                    comment=form.cleaned_data.get('comment'),
+                )
+                fbm.save()
+                messages.success(request=request,
+                                 message=f'Mätning sparad för {form.cleaned_data.get("personnel").person_name}')
+            except Exception as e:
+                messages.error(request=request,
+                               message='Kunde inte spara mätningen')
+
+    form = FullBodyMeasurementForm()
+    measurment_result = FullBodyDosimetry.objects.all().prefetch_related('personnel')
+    if measurment_result is not None:
+        result_types = dict(FULL_BODY_ASSESSMENT)
+        table_data = [
+            [obj.measurement_date.strftime('%Y-%m-%d %H:%M:%S'), obj.personnel.person_name, result_types.get(obj.result), obj.comment]
+            for obj in measurment_result]
+    else:
+        table_data = []
+
+    return render(request=request, template_name='personnel_dosimetry/FullBodyDosimetry.html',
+                  context={'table_data': json.dumps(table_data), 'form': form})
+
+
+def new_personnel_form(request):
+    if request.method == 'POST':
+        form = PersonnelForm(request.POST)
+        if form.is_valid():
+            try:
+                personnel = Personnel(
+                    person_id=form.cleaned_data.get('person_id'),
+                    person_name=form.cleaned_data.get('person_name'),
+                    profession=form.cleaned_data.get('profession')
+                )
+                personnel.save()
+                messages.success(request=request,
+                                 message='Ny personal sparad i databasen')
+            except Exception as e:
+                messages.error(request=request, message='Kunde inte spara personalen')
+
+    form = PersonnelForm()
+    return render(request=request, template_name='personnel_dosimetry/NewPersonnel.html', context={'form': form})
+
+
 def api_parse_new_landauer_reports(request):
     test = import_personnel_dosimetry_report(
         vendor='Landauer',
@@ -96,7 +151,7 @@ class PersonnelDosimetryResultList(APIView):
             'displaylogo': False
         }
 
-        results = Result.objects.all()
+        results = Result.objects
         # Add time interval filtering (time_interval == 0: last 12 months, time_interval == 1: no time filtering)
         if time_interval is not None and int(time_interval) > 1:
             results = results.filter(measurement_period_center__year=int(time_interval))
@@ -198,6 +253,17 @@ class PersonnelDosimetryResultList(APIView):
 
         if area_measurement is None or int(area_measurement) == 0:
             results = results.filter(area_measurement=False)
+
+        results = results.select_related(
+            'vendor_dosimetry_placement__dosimeter_placement'
+        ).select_related(
+            'personnel'
+        ).select_related(
+            'clinic'
+        ).select_related(
+            'personnel__profession'
+        )
+        results = results.all()
 
         plot_data = {}
         table_data = {}
