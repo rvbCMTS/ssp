@@ -461,10 +461,10 @@ class YearlyReportData(APIView):
         anatomy_region_table = [[
             ar, row['FluoroTime']['count'],
             time(hour=int(floor(row['FluoroTime']['median'] / 60)),
-                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60))),
+                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60) * 60)),
                  second=int((row['FluoroTime']['median'] - floor(row['FluoroTime']['median'])) * 60)),
             time(hour=int(floor(row['FluoroTime']['<lambda>'] / 60)),
-                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60))),
+                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60) * 60)),
                  second=int((row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'])) * 60))
         ] for ar, row in anatomy_region_data.iterrows()]
 
@@ -475,16 +475,17 @@ class YearlyReportData(APIView):
             {'FluoroTime': sum})
         operator_statistic_data = operator_statistic_data.groupby('Operator').agg(
             {'FluoroTime': ['count', 'sum', 'median', lambda x: np.percentile(x, q=95)]})
+
         operator_table = [[
             op, row['FluoroTime']['count'],
             time(hour=int(floor(row['FluoroTime']['sum'] / 60)),
-                 minute=int(floor(row['FluoroTime']['sum'] - floor(row['FluoroTime']['sum'] / 60))),
+                 minute=int(floor(row['FluoroTime']['sum'] - floor(row['FluoroTime']['sum'] / 60) * 60)),
                  second=int((row['FluoroTime']['sum'] - floor(row['FluoroTime']['sum'])) * 60)),
             time(hour=int(floor(row['FluoroTime']['median'] / 60)),
-                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60))),
+                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60) * 60)),
                  second=int((row['FluoroTime']['median'] - floor(row['FluoroTime']['median'])) * 60)),
             time(hour=int(floor(row['FluoroTime']['<lambda>'] / 60)),
-                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60))),
+                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60) * 60)),
                  second=int((row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'])) * 60))
         ] for op, row in operator_statistic_data.iterrows()]
 
@@ -513,7 +514,7 @@ class YearlyReportData(APIView):
                                 }})
             plot[row.AnatomyRegion]['y'][x.index(row.ExamDate)] = dt.combine(dt.date(dt.now()), time(
                 hour=int(floor(row['FluoroTime'] / 60)),
-                minute=int(floor(row['FluoroTime'] - floor(row['FluoroTime'] / 60))),
+                minute=int(floor(row['FluoroTime'] - floor(row['FluoroTime'] / 60) * 60)),
                 second=int((row['FluoroTime'] - floor(row['FluoroTime'])) * 60)))
 
         # Set the marker size
