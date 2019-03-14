@@ -25,6 +25,62 @@ $(document).ready(function() {
         responsive: true,
     } );
 
+    var table = $("#idExamsTable").DataTable( {
+
+        paging: false,
+        searching: false,
+        responsive: true,
+
+        ajax: ({
+            type: "GET",
+            url: $("#idPopulateExams").html(),
+            dataType: 'json',
+            success: function(data) {
+                table.clear().rows.add(data.data).draw();
+            }
+        }),
+
+        columns: [
+                {
+                className: "details-control",
+                orderable: false,
+                data: null,
+                defaultContent: ''
+                },
+                { data: 0 },
+                { data: 1 },
+                { data: 2 }
+              ],
+
+        order: ([1, 'asc']),
+
+    });
+
+    // Add event listener for opening and closing details
+    $('#idExamsTable tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = table.row( tr );
+
+        if ( row.child.isShown() ) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
+        }
+        else {
+            // Open this row
+            row.child(
+            $(
+                '<tr>'+
+                    '<td></td>'+
+                    '<td>'+row.data()[1]+'</td>'+
+                    '<td>'+row.data()[2]+'</td>'+
+                '</tr>'
+            )
+            ).show();
+            tr.addClass('shown');
+        }
+    } );
+
 });
 
 // Filter
@@ -87,3 +143,4 @@ function viewHistory(pk){
 function closeHistory(){
     $('#idHistoryRow').addClass('hidden');
 }
+

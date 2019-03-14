@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Skelletprotokoll{% endblock title %}
+
+{% load static %}
+
+{% block extra-styles %}
+    <link href="{% static 'skeleton_protocols/sp.css' %}" rel="stylesheet">
+    <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+    <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+    <script src="{% static 'skeleton_protocols/sp.js' %}"></script>
+{% endblock extra-scripts %}
+
+<!-- Widget-tweaks for form layout -->
+{% load widget_tweaks %}
+
+{% block main %}
+
+<!-- Results -->
+<div class="row">
+    <div class="container">
+    <table id="idExamsTable" class="display compact stripe hover compact" style="width:100%">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Exam</th>
+                <th>Protokoll</th>
+                <th>Modalitet</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th></th>
+                <th>Exam</th>
+                <th>Protokoll</th>
+                <th>Modalitet</th>
+            </tr>
+        </tfoot>
+    </table>
+    </div>
+ </div>
+<!-- End Results -->
+
+
+<div class="hidden">
+    <div id="idPopulateExams">{% url 'sp:sp-list-exams' %}</div>
+</div>
+
+{% endblock main %}

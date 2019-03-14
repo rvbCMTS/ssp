@@ -5,16 +5,25 @@ from .filter import ProtocolsFilter
 from .tools.pex import parse_db
 
 
+def list_exams(request):
+    # query to get the latest backup for each machine
+    all_machines = Machine.objects.all()
+    backup_list = []
+    for m in all_machines:
+        # for each machine find the latest backup
+        backup_list += ([ Backup.objects.all().filter(machine=m).latest() ])
+    f = Protocol.objects.all().filter(backup__in=backup_list)[1000:1100]
+
+    # make data format for Json response
+    tt = []
+    for obj in f:
+        tt.append([obj.exam_name, ])
+        tt[-1] += [obj.ris_name, ]
+        tt[-1] += [obj.machine.hospital_name, ]
+
+    return JsonResponse({'data': tt})
+
 def skeleton_protocols_results(request):
-    f = ProtocolsFilter(request.GET)
-
-    return render(request,
-                  template_name='skeleton_protocols/Protocols.html',
-                  context =  {'filter': f}
-                  )
-
-
-def ajax_protocols_results(request):
 
     # query to get the latest backup for each machine
     all_machines = Machine.objects.all()
@@ -61,18 +70,6 @@ def ajax_protocols_results(request):
 
     return JsonResponse({'data': tt})
 
-
-def pex(request):
-    return render (request,
-                template_name='skeleton_protocols/PexBibliotek.html',
-                    )
-
-
-def pex_read(request):
-    parse_db('apps/skeleton_protocols/tools/pex_library')
-    return JsonResponse({'data': ''})
-
-
 def history(request):
     # get primary key
     pk = request.GET.get('pk', None)
@@ -111,3 +108,31 @@ def history(request):
                    f'{obj.harmonization_kernel_size} | {obj.harmonization_gain}',]
 
     return JsonResponse({'data': tt})
+
+
+def pex(request):
+    return render (request,
+                template_name='skeleton_protocols/PexBibliotek.html',
+                    )
+
+def skeleton_protocols(request):
+    f = ProtocolsFilter(request.GET)
+
+    return render(request,
+                  template_name='skeleton_protocols/Protocols.html',
+                  context={'filter': f}
+                  )
+
+def exams(request):
+
+    return render(request,
+                  template_name='skeleton_protocols/Exams.html',
+                  )
+
+
+def pex_read(request):
+    parse_db('apps/skeleton_protocols/tools/pex_library')
+    return JsonResponse({'data': ''})
+
+
+
