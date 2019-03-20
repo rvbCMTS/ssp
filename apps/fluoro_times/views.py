@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+from copy import deepcopy
 from django.contrib import messages
 from django.forms import ValidationError
 from django.db.models import Count, Avg, Sum, F
@@ -54,78 +55,7 @@ def ssm_plots(request):
     """
     View that plots the number of exams and mean exam time per year for the last 5 years
     """
-    # Get data from db
-    q1 = Exam.objects.filter(
-        exam_date__gte=date(int(dt.strftime(dt.now(), '%Y'))-6, 1, 1),
-        exam_date__lt=date(int(dt.strftime(dt.now(), '%Y'))-1, 1, 1)
-    ).annotate(year=TruncYear('exam_date'), anatomy_region='exam_description__anatomy_region__region').values(
-        'year', 'anatomy_region').order_by('year', 'anatomy_region').values('year', 'anatomy_region', 'fluoro_time')
-
-    db_data = pd.DataFrame.from_records(q1)
-
-    # Get the number of exams per year grouped by anatomy region for the last 5 whole years
-    exam_counts = Exam.objects.filter(
-        exam_date__gte=date(int(dt.strftime(dt.now(), '%Y'))-6, 1, 1),
-        exam_date__lt=date(int(dt.strftime(dt.now(), '%Y'))-1, 1, 1)
-    ).annotate(
-        year=TruncYear('exam_date'),
-        anatomy_region='exam_description__anatomy_region__region').values(
-        'year', 'anatomy_region').aggregate(num_exams=Count('anatomy_region')).order_by(
-        'year', 'anatomy_region').values('year', 'anatomy_region', 'fluoro_time')
-
-    anatomy_regions = list(set([obj.anatomy_region for obj in exam_counts]))
-    years = list(set([obj.year.year for obj in exam_counts]))
-
-    plot_data = {}
-    for year in years:
-        plot_data[str(year)] = {
-            'x': anatomy_regions,
-            'y': [None]*len(anatomy_regions),
-            'name': str(year),
-            'type': 'bar',
-            'orientation': 'h'
-        }
-
-    for obj in exam_counts:
-        plot_data[str(obj.year.year)]['y'][anatomy_regions.index(obj.anatomy_region)] = obj.num_exams
-
-    context = {'examsPerYear': {
-        'data': [obj for obj in plot_data],
-        'layout': {'barmode': 'group'}
-    }}
-
-    # Get the median fluoroscopy time per year grouped by anatomy region for the last 5 whole years
-    exam_counts = Exam.objects.filter(
-        exam_date__gte=date(int(dt.strftime(dt.now(), '%Y')) - 6, 1, 1),
-        exam_date__lt=date(int(dt.strftime(dt.now(), '%Y')) - 1, 1, 1)
-    ).annotate(
-        year=TruncYear('exam_date'),
-        anatomy_region='exam_description__anatomy_region__region').values(
-        'year', 'anatomy_region').aggregate(num_exams=Count('anatomy_region')).order_by(
-        'year', 'anatomy_region').values('year', )
-
-    anatomy_regions = list(set([obj.anatomy_region for obj in exam_counts]))
-    years = list(set([obj.year for obj in exam_counts]))
-
-    plot_data = {}
-    for year in years:
-        plot_data[str(year)] = {
-            'x': anatomy_regions,
-            'y': [None] * len(anatomy_regions),
-            'name': str(year),
-            'type': 'bar',
-            'orientation': 'h'
-        }
-
-    for obj in exam_counts:
-        plot_data[str(obj.year)]['y'][anatomy_regions.index(obj.anatomy_region)] = obj.num_exams
-
-    context['medianTimePerYear'] = {
-        'data': [obj for obj in plot_data],
-        'layout': {'barmode': 'group'}
-    }
-
-    return render(request=request, template_name='fluoro_times/ssm_report.html', context=context)
+    return render(request=request, template_name='fluoro_times/ssm_report.html', context={})
 
 
 def data_cleaning(request):
@@ -341,10 +271,10 @@ class IndexSummaryData(APIView):
                                  'sort': False}
             },
             'medianPlot': [
-                {'y': anatomy_regions, 'x': median_plot_previous, 'name': f'{current_year - 1}', 'type': 'bar',
-                 'orientation': 'h'},
-                {'y': anatomy_regions, 'x': median_plot_current, 'name': f'{current_year}', 'type': 'bar',
-                 'orientation': 'h'}
+                {'x': anatomy_regions, 'y': median_plot_previous, 'name': f'{current_year - 1}', 'type': 'bar',
+                 'orientation': 'v'},
+                {'x': anatomy_regions, 'y': median_plot_current, 'name': f'{current_year}', 'type': 'bar',
+                 'orientation': 'v'}
             ]
         }
 
@@ -395,7 +325,7 @@ class IndexSummaryData(APIView):
                     't': 80,
                     'pad': 4
                 },
-                'xaxis': dict(
+                'yaxis': dict(
                     title='Mediantid (hh:mm:ss)',
                     type='time',
                     tickformat='%H:%M:%S'
@@ -461,10 +391,10 @@ class YearlyReportData(APIView):
         anatomy_region_table = [[
             ar, row['FluoroTime']['count'],
             time(hour=int(floor(row['FluoroTime']['median'] / 60)),
-                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60))),
+                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60) * 60)),
                  second=int((row['FluoroTime']['median'] - floor(row['FluoroTime']['median'])) * 60)),
             time(hour=int(floor(row['FluoroTime']['<lambda>'] / 60)),
-                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60))),
+                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60) * 60)),
                  second=int((row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'])) * 60))
         ] for ar, row in anatomy_region_data.iterrows()]
 
@@ -475,16 +405,17 @@ class YearlyReportData(APIView):
             {'FluoroTime': sum})
         operator_statistic_data = operator_statistic_data.groupby('Operator').agg(
             {'FluoroTime': ['count', 'sum', 'median', lambda x: np.percentile(x, q=95)]})
+
         operator_table = [[
             op, row['FluoroTime']['count'],
             time(hour=int(floor(row['FluoroTime']['sum'] / 60)),
-                 minute=int(floor(row['FluoroTime']['sum'] - floor(row['FluoroTime']['sum'] / 60))),
+                 minute=int(floor(row['FluoroTime']['sum'] - floor(row['FluoroTime']['sum'] / 60) * 60)),
                  second=int((row['FluoroTime']['sum'] - floor(row['FluoroTime']['sum'])) * 60)),
             time(hour=int(floor(row['FluoroTime']['median'] / 60)),
-                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60))),
+                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60) * 60)),
                  second=int((row['FluoroTime']['median'] - floor(row['FluoroTime']['median'])) * 60)),
             time(hour=int(floor(row['FluoroTime']['<lambda>'] / 60)),
-                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60))),
+                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60) * 60)),
                  second=int((row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'])) * 60))
         ] for op, row in operator_statistic_data.iterrows()]
 
@@ -513,7 +444,7 @@ class YearlyReportData(APIView):
                                 }})
             plot[row.AnatomyRegion]['y'][x.index(row.ExamDate)] = dt.combine(dt.date(dt.now()), time(
                 hour=int(floor(row['FluoroTime'] / 60)),
-                minute=int(floor(row['FluoroTime'] - floor(row['FluoroTime'] / 60))),
+                minute=int(floor(row['FluoroTime'] - floor(row['FluoroTime'] / 60) * 60)),
                 second=int((row['FluoroTime'] - floor(row['FluoroTime'])) * 60)))
 
         # Set the marker size
@@ -527,7 +458,7 @@ class YearlyReportData(APIView):
             'title': 'Mediangenomlysningstid per år och område',
             'showlegend': True,
             'legend': {
-                'orientation': 'h'
+                'orientation': 'v'
             },
             'xaxis': {
                 'tickmode': 'linear',
@@ -550,6 +481,143 @@ class YearlyReportData(APIView):
             'anatomyRegionTable': {'tableId': 'idAreaStat', 'data': anatomy_region_table},
             'bubblePlot': {'id': 'idBubblePlot', 'data': [obj for _, obj in plot.items()],
                            'layout': layout, 'layout2': layout2, 'cols': len(x), 'maxCount': max(df_count.FluoroTime)}
+        })
+
+
+class SsmPlotData(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, format=None):
+        # Get data from db
+        q1 = Exam.objects.filter(
+            exam_date__gte=date(int(dt.strftime(dt.now(), '%Y')) - 6, 1, 1),
+            exam_date__lt=date(int(dt.strftime(dt.now(), '%Y')) - 1, 1, 1)
+        ).annotate(
+            year=TruncYear('exam_date'),
+            anatomy_region=F('exam_description__anatomy_region__region'),
+            clinic_category=F('dirty_clinic__clinic__clinic_category__name')
+        ).values(
+            'year', 'anatomy_region', 'clinic_category', 'fluoro_time'
+        ).order_by('year', 'anatomy_region')
+
+        db_data = pd.DataFrame.from_records(q1)
+
+        median_all = db_data.groupby('year', as_index=False).median()
+        median_clinic_category = db_data.groupby(['clinic_category', 'year'], as_index=False).median()
+        median_anatomy_region = db_data.groupby(['anatomy_region', 'year'], as_index=False).median()
+        count_anatomy_region = db_data.groupby(['anatomy_region', 'year'], as_index=False).count()
+
+        years = list([obj.year for obj in db_data.year.unique()])
+        db_data = db_data.sort_values('anatomy_region', ascending=False)
+        anatomy_regions = list(db_data.anatomy_region.unique())
+        db_data = db_data.sort_values('clinic_category', ascending=True)
+        clinic_categories = list(db_data.clinic_category.unique())
+
+        plot_data_median_year = {
+            'x': [str(year) for year in years],
+            'y': [None] * len(years),
+            'name': 'Median',
+            'type': 'bar'
+        }
+        for _, row in median_all.iterrows():
+            plot_data_median_year['y'][years.index(row.year.year)] = dt.combine(
+                dt.date(dt.now()), time(
+                    hour=int(floor(row.fluoro_time) / 60),
+                    minute=int(floor(row.fluoro_time) - (floor(row.fluoro_time) / 60) * 60),
+                    second=int((row.fluoro_time - floor(row.fluoro_time)) * 60))
+                )
+
+        plot_data_median_clinic_category = {}
+        for year in years:
+            plot_data_median_clinic_category[str(year)] = {
+                'x': clinic_categories,
+                'y': [None] * len(clinic_categories),
+                'name': str(year),
+                'type': 'bar'
+            }
+
+        for _, row in median_clinic_category.iterrows():
+            plot_data_median_clinic_category[str(row.year.year)]['y'][
+                clinic_categories.index(row.clinic_category)] = dt.combine(
+                dt.date(dt.now()), time(
+                    hour=int(floor(row.fluoro_time) / 60),
+                    minute=int(floor(row.fluoro_time) - (floor(row.fluoro_time) / 60) * 60),
+                    second=int((row.fluoro_time - floor(row.fluoro_time)) * 60))
+                )
+
+        plot_data = {}
+        for year in years:
+            plot_data[str(year)] = {
+                'x': anatomy_regions,
+                'y': [None] * len(anatomy_regions),
+                'name': str(year),
+                'type': 'bar',
+                'orientation': 'v'
+            }
+
+        plot_data_median_anatomy_region = deepcopy(plot_data)
+        for _, row in median_anatomy_region.iterrows():
+            plot_data_median_anatomy_region[str(row.year.year)]['y'][
+                anatomy_regions.index(row.anatomy_region)] = dt.combine(
+                dt.date(dt.now()), time(
+                    hour=int(floor(row.fluoro_time) / 60),
+                    minute=int(floor(row.fluoro_time) - (floor(row.fluoro_time) / 60) * 60),
+                    second=int((row.fluoro_time - floor(row.fluoro_time)) * 60))
+                )
+
+        plot_data_count_anatomy_region = deepcopy(plot_data)
+        for _, row in count_anatomy_region.iterrows():
+            plot_data_count_anatomy_region[str(row.year.year)]['y'][
+                anatomy_regions.index(row.anatomy_region)] = row.fluoro_time
+
+        return Response({
+            'medianTimePerYear': {
+                'data': [plot_data_median_year],
+                'layout': {
+                    'barmode': 'group',
+                    'xaxis': {
+                        'autotick': False,
+                        'tick0': min(years),
+                        'dtick': 1
+                    },
+                    'yaxis': {
+                        'type': 'time',
+                        'tickformat': '%H:%M:%S',
+                        'range': [
+                            dt.combine(dt.date(dt.now()), time(hour=0, minute=0, second=0)),
+                            max([obj for obj in plot_data_median_year['y']])]
+                    }
+                }
+            }, 'medianTimePerClinicCategory': {
+                'data': [obj for _, obj in plot_data_median_clinic_category.items()],
+                'layout': {
+                    'barmode': 'group',
+                    'yaxis': {
+                        'type': 'time',
+                        'tickformat': '%H:%M:%S',
+                        'range': [
+                            dt.combine(dt.date(dt.now()), time(hour=0, minute=0, second=0)),
+                            max([i for _, obj in plot_data_median_clinic_category.items() for i in obj['y'] if i is not None])]
+                    }
+                }
+            }, 'examsPerAnatomyRegion': {
+                'data': [obj for _, obj in plot_data_count_anatomy_region.items()],
+                'layout': {
+                    'barmode': 'group',
+                    'yaxis': {
+                        'tick0': 0
+                    }
+                }
+            }, 'medianTimePerAnatomyRegion': {
+                'data': [obj for _, obj in plot_data_median_anatomy_region.items()],
+                'layout': {
+                    'barmode': 'group',
+                    'yaxis': {
+                        'type': 'time',
+                        'tickformat': '%H:%M:%S'
+                    }
+                }
+            }
         })
 
 
