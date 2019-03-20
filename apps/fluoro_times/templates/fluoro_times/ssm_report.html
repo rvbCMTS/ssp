@@ -9,10 +9,34 @@
 
 {% block extra-scripts %}
   <script src="{% static 'js/plotly.min.js' %}"></script>
+  <!--<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>-->
   <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+  <script src="{% static 'fluoro_times/ssmplot.js' %}"></script>
 {% endblock extra-scripts %}
 
 <!-- Main Content -->
 {% block main %}
   <h1>SSM-plottar</h1>
+  <div class="row">
+    <div class="col col-lg-12">
+      <div id="medianYearPlot"></div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col col-lg-12">
+      <div id="medianClinicCategoryPlot">
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col col-lg-12">
+      <div id="medianAnatomyYearPlot"></div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col col-lg-12">
+      <div id="countAnatomyYearPlot"></div>
+    </div>
+  </div>
+  <div class="hidden" id="idUpdateUrl">{% url 'gls:ssm_plot_api' %}</div>
 {% endblock main %}
