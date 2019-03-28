@@ -5,7 +5,7 @@ from collections import namedtuple, UserDict
 import re
 import pandas
 import datetime
-from ..models import Machine, Protocol, Backup
+from ..models import Machine, Protocol, Backup, Exam
 
 
 def parse_db(input_directory: str):
@@ -305,6 +305,9 @@ def _clean_up(machine, df):
     df.exam_name.replace('[.]', '', regex=True, inplace=True)
     df.ris_name.replace('[.]', '', regex=True, inplace=True)
 
+    # None exam_name are given the name Annat
+    df.exam_name.fillna(value='ANNAT', inplace=True)
+
     # Upper case letters for exam_name
     df.exam_name = df.exam_name.str.upper()
 
@@ -415,6 +418,24 @@ def _prot2db(machine, df):
                     protocol_entry.history_flag = True
                     protocol_entry.save()
 
+            # check if Exam exists, get it and associate, otherwise create it and associate.
+            if Exam.objects.filter(exam_name=row.exam_name,
+                                   protocol_name=row.ris_name,
+                                     ).exists():
+                exam_entry = Exam.objects.get(exam_name=row.exam_name,
+                                            protocol_name=row.ris_name,
+                                              )
+                # associate Exam with Protocol and Machine
+                exam_entry.protocol.add(protocol_entry)
+                exam_entry.machine.add(machine_entry)
+            else:
+                exam_entry = Exam.objects.create(exam_name=row.exam_name,
+                                                 protocol_name=row.ris_name,
+                                                 datum = tzdate,
+                                                 )
+                # associate Exam with Protocol and Machine
+                exam_entry.protocol.add(protocol_entry)
+                exam_entry.machine.add(machine_entry)
 
 
 

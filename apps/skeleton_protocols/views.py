@@ -1,25 +1,45 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Protocol, Machine, Backup
+from .models import Protocol, Machine, Backup, Exam
 from .filter import ProtocolsFilter
 from .tools.pex import parse_db
 
 
 def list_exams(request):
     # query to get the latest backup for each machine
-    all_machines = Machine.objects.all()
     backup_list = []
-    for m in all_machines:
+    for m in Machine.objects.all():
         # for each machine find the latest backup
         backup_list += ([ Backup.objects.all().filter(machine=m).latest() ])
-    f = Protocol.objects.all().filter(backup__in=backup_list)[1000:1100]
 
-    # make data format for Json response
-    tt = []
-    for obj in f:
-        tt.append([obj.exam_name, ])
-        tt[-1] += [obj.ris_name, ]
-        tt[-1] += [obj.machine.hospital_name, ]
+    # all distinct exams
+    tt = [];
+    for e in Protocol.objects.values('exam_name').distinct().filter(backup__in=backup_list):
+        gg = {}
+        gg.update({'exam_name': e['exam_name']})
+
+        # all machines for each exam
+        machines = ''
+        for m in Exam.objects.values('machine__hospital_name').distinct().filter(exam_name=e['exam_name']):
+            machines += f'{m["machine__hospital_name"]} '
+        gg.update({'machine': machines})
+
+        # all protocols for each exam
+        protocols = []
+        for p in Exam.objects.values('protocol_name').distinct().filter(exam_name=e['exam_name']):
+
+            # all machines for each protocol
+            machines = ''
+            for m in Exam.objects.values('machine__hospital_name').distinct().filter(protocol_name=p['protocol_name']):
+                machines += f'{m["machine__hospital_name"]} '
+
+            protocols.append({'protocol_name': p['protocol_name'], 'machine': machines})
+
+        gg.update({'children': protocols})
+
+        # make Json data format for TreeGrid
+        tt.append(gg)
+
 
     return JsonResponse({'data': tt})
 
