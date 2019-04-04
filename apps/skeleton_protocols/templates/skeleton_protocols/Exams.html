@@ -10,7 +10,9 @@
 {% endblock extra-styles %}
 
 {% block extra-scripts %}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+    <script src="{% static 'skeleton_protocols/dataTables.treeGrid.js' %}"></script>
     <script src="{% static 'skeleton_protocols/sp.js' %}"></script>
 {% endblock extra-scripts %}
 
@@ -26,16 +28,14 @@
         <thead>
             <tr>
                 <th></th>
-                <th>Exam</th>
-                <th>Protokoll</th>
+                <th>Exam / Protokoll</th>
                 <th>Modalitet</th>
             </tr>
         </thead>
         <tfoot>
             <tr>
                 <th></th>
-                <th>Exam</th>
-                <th>Protokoll</th>
+                <th>Exam / Protokoll</th>
                 <th>Modalitet</th>
             </tr>
         </tfoot>

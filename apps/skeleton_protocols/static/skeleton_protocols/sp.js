@@ -1,3 +1,4 @@
+
 // Styling dataTable
 $(document).ready(function() {
     $("#idResultTable").DataTable( {
@@ -25,63 +26,48 @@ $(document).ready(function() {
         responsive: true,
     } );
 
-    var table = $("#idExamsTable").DataTable( {
-
-        paging: false,
-        searching: false,
-        responsive: true,
-
-        ajax: ({
+    // ajax call for ExamsTable
+    $.ajax({
             type: "GET",
             url: $("#idPopulateExams").html(),
             dataType: 'json',
             success: function(data) {
-                table.clear().rows.add(data.data).draw();
-            }
-        }),
+                var table = $("#idExamsTable").DataTable();
+                table.clear().rows.add(data.data).draw();;
+            },
+    })
 
-        columns: [
-                {
-                className: "details-control",
-                orderable: false,
-                data: null,
-                defaultContent: ''
-                },
-                { data: 0 },
-                { data: 1 },
-                { data: 2 }
-              ],
+    var table = $("#idExamsTable").DataTable( {
 
-        order: ([1, 'asc']),
+        'select': {
+            style: 'multi',
+            selector: 'td:not(:first-child)'
+        },
+
+        'columns': [
+            {title: '', target: 0, className: 'treegrid-control', width: '1em', data: function (item) { if (item.children) { return '<i class="fas fa-caret-right"></i>'; } return ''; }},
+            {title: 'Exam / Protokoll', target: 1,  width: '5em', data: function (item) { return item.exam_name }},
+            {title: 'Modalitet', target: 2, width: '18em', data: function (item) { return item.machine }},
+        ],
+
+        'treeGrid': {
+            left : 10,
+            expandIcon: '<i class="fas fa-caret-right"></i>',
+            collapseIcon: '<i class="fas fa-caret-down"></i>'
+        },
+
+        'order': ([1, 'asc']),
+
+        'paging': false,
+        'searching': true,
+        'responsive': false,
+        'fixedHeader': true,
+        'destroy': false,
 
     });
 
-    // Add event listener for opening and closing details
-    $('#idExamsTable tbody').on('click', 'td.details-control', function () {
-        var tr = $(this).closest('tr');
-        var row = table.row( tr );
+ });
 
-        if ( row.child.isShown() ) {
-            // This row is already open - close it
-            row.child.hide();
-            tr.removeClass('shown');
-        }
-        else {
-            // Open this row
-            row.child(
-            $(
-                '<tr>'+
-                    '<td></td>'+
-                    '<td>'+row.data()[1]+'</td>'+
-                    '<td>'+row.data()[2]+'</td>'+
-                '</tr>'
-            )
-            ).show();
-            tr.addClass('shown');
-        }
-    } );
-
-});
 
 // Filter
 $("#form").change(function () {

@@ -177,3 +177,4 @@ REST_FRAMEWORK = {
 }
 
 CKEDITOR_UPLOAD_PATH = 'ckeditor/'
+

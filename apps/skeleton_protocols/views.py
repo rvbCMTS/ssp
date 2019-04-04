@@ -19,21 +19,21 @@ def list_exams(request):
         gg.update({'exam_name': e['exam_name']})
 
         # all machines for each exam
-        machines = ''
+        machines_for_exam = ''
         for m in Exam.objects.values('machine__hospital_name').distinct().filter(exam_name=e['exam_name']):
-            machines += f'{m["machine__hospital_name"]} '
-        gg.update({'machine': machines})
+            machines_for_exam += f'{m["machine__hospital_name"]} '
+        gg.update({'machine': machines_for_exam})
 
         # all protocols for each exam
         protocols = []
         for p in Exam.objects.values('protocol_name').distinct().filter(exam_name=e['exam_name']):
 
             # all machines for each protocol
-            machines = ''
-            for m in Exam.objects.values('machine__hospital_name').distinct().filter(protocol_name=p['protocol_name']):
-                machines += f'{m["machine__hospital_name"]} '
+            machines_for_protocols = ''
+            for m in Exam.objects.values('machine__hospital_name').distinct().filter(protocol_name=p['protocol_name'], exam_name=e['exam_name']):
+                machines_for_protocols += f'{m["machine__hospital_name"]} '
 
-            protocols.append({'protocol_name': p['protocol_name'], 'machine': machines})
+            protocols.append({'exam_name': p['protocol_name'], 'machine': machines_for_protocols})
 
         gg.update({'children': protocols})
 
@@ -147,6 +147,12 @@ def exams(request):
 
     return render(request,
                   template_name='skeleton_protocols/Exams.html',
+                  )
+
+def tree_grid(request):
+
+    return render(request,
+                  template_name='skeleton_protocols/TreeGrid.html',
                   )
 
 

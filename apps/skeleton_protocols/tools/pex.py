@@ -249,6 +249,7 @@ def _clean_up(machine, df):
         '00 Off':'00',
         '01 Thorax pa - high contrast':'01',
         '02 Thorax pa':'02',
+        '03 Thorax lateral - high contrast': '03',
         '04 Thorax lateral':'04',
         '05 Pelvis - high contrast':'05',
         '06 Pelvis':'06',
