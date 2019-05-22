@@ -33,7 +33,7 @@ class Personnel(models.Model):
 
 
 class DosimeterPlacement(models.Model):
-    dosimeter_placement = models.TextField(blank=False, null=False, unique=True)
+    dosimeter_placement = models.CharField(max_length=400, blank=False, null=False, unique=True)
 
     def __str__(self):
         return self.dosimeter_placement

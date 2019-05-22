@@ -265,22 +265,28 @@ def _insert_results_to_db(results: pd.DataFrame, list_type: str, log: logging.Lo
         start_date = dt.strptime(row.Startdatum, '%Y-%m-%d')
         stop_date = dt.strptime(row.Slutdatum, '%Y-%m-%d')
 
+        hp10 = float(row.Hp10) if not np.isnan(float(row.Hp10)) else None
+        hp007 = float(row.Hp007) if not np.isnan(float(row.Hp007)) else None
+        hp10fn = float(row.Hp10fn) if not np.isnan(float(row.Hp10fn)) else None
+        hp10tn = float(row.Hp10tn) if not np.isnan(float(row.Hp10tn)) else None
+
         # Save new measurement to database
         try:
             db_result = Result.objects.get(
                 dosimetry_vendor='Landauer', personnel=personnel, dosimeter_type=row.Dosimetertyp,
                 report__startswith=f'{row.Rapportnr}:', vendor_dosimetry_placement=vdp
             )
-            db_result.hp10 = row.Hp10
-            db_result.hp007 = row.Hp007
-            db_result.hp10fn = row.Hp10fn
-            db_result.hp10tn = row.Hp10tn
+            db_result.report = f'{row.Rapportnr}:{row.RapportVersion}'
+            db_result.hp10 = hp10
+            db_result.hp007 = hp007
+            db_result.hp10fn = hp10fn
+            db_result.hp10tn = hp10tn
         except:
             db_result = Result(dosimetry_vendor='Landauer', personnel=personnel, vendor_dosimetry_placement=vdp,
                                clinic=clinic, report=f'{row.Rapportnr}:{row.RapportVersion}',
                                measurement_period_start=row.Startdatum, measurement_period_stop=row.Slutdatum,
                                measurement_period_center=(start_date + (stop_date - start_date) / 2),
-                               hp10=row.Hp10, hp007=row.Hp007, hp10fn=row.Hp10fn, hp10tn=row.Hp10tn,
+                               hp10=hp10, hp007=hp007, hp10fn=hp10fn, hp10tn=hp10tn,
                                dosimeter_type=row.Dosimetertyp)
         db_result.save()
 
