@@ -43,3 +43,5 @@ FLUORO_TIME_DB_ENGINE = {
 }
 
 FLUORO_TIME_ORBIT_TABLE = '<table/view-name-in-orbit>'
+
+RADIOPHARMACEUTICAL_BASE_DIR = '<path-to-radiopharmaceutical-base-dir>'

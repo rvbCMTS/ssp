@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Personnel, VendorDosimeterPlacement, DosimeterPlacement, DosimeterLaterality, Clinic,\
-    Profession, Result
+    Profession, Result, Deviation
 
 
 class PersonnelModelAdmin(admin.ModelAdmin):
@@ -73,6 +73,16 @@ class ResultModelAdmin(admin.ModelAdmin):
         model = Result
 
 
+class DeviationModelAdmin(admin.ModelAdmin):
+    list_display = ['result', 'reported_to_authority', 'comment']
+    list_display_links = ['result', 'reported_to_authority', 'comment']
+    list_filter = ['reported_to_authority']
+    search_fields = ['comment']
+
+    class Meta:
+        model = Deviation
+
+
 admin.site.register(Personnel, PersonnelModelAdmin)
 admin.site.register(Clinic, ClinicModelAdmin)
 admin.site.register(VendorDosimeterPlacement, VendorDosimeterPlacementModelAdmin)
@@ -80,3 +90,4 @@ admin.site.register(DosimeterPlacement, DosimeterPlacementModelAdmin)
 admin.site.register(DosimeterLaterality, DosimeterLateralityModelAdmin)
 admin.site.register(Profession, ProfessionModelAdmin)
 admin.site.register(Result, ResultModelAdmin)
+admin.site.register(Deviation, DeviationModelAdmin)

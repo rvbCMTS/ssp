@@ -52,34 +52,47 @@
               </div>
             </li>
 
-            <li class="nav-item dropdown {% active 'genomlysning' %}">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFluoroLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Genomlysningstider</a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdownFluoroLink">
-                <a class="dropdown-item" href="{% url 'fluoro_times:index' %}">Sammanställning</a>
-                <a class="dropdown-item" href="{% url 'fluoro_times:register' %}">Registrera US</a>
-                <a class="dropdown-item" href="{% url 'fluoro_times:yearly-reports' %}">Årsrapporter</a>
-                <a class="dropdown-item" href="{% url 'fluoro_times:ssm-plots' %}">SSM-plottar</a>
+            <li class="nav-item dropdown {% active 'genomlysning' %} {% active 'skelettprotokoll' %}">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownRtgLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Röntgen</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownRtgLink">
+                <div class="btn-group dropleft dropdown">
+                  <a class="dropdown-item dropdown-toggle" id="navbarDropdownFluoroLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Genomlysningstider</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownFluoroLink">
+                      <a class="dropdown-item" href="{% url 'fluoro_times:index' %}">Sammanställning</a>
+                      <a class="dropdown-item" href="{% url 'fluoro_times:register' %}">Registrera US</a>
+                      <a class="dropdown-item" href="{% url 'fluoro_times:yearly-reports' %}">Årsrapporter</a>
+                      <a class="dropdown-item" href="{% url 'fluoro_times:ssm-plots' %}">SSM-plottar</a>
+                    </div>
+                </div>
+                <div class="btn-group dropleft dropdown">
+                  <a class="dropdown-item dropdown-toggle" id="navbarDropdownSp" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Skelettprotokoll</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownSp">
+                       <a class="dropdown-item" href="{% url 'sp:sp-results' %}">Sök protokoll</a>
+                       <a class="dropdown-item" href="{% url 'sp:sp-pex' %}">Bibliotek</a>
+                    </div>
+                </div>
               </div>
             </li>
 
-            <li class="nav-item dropdown {% active 'skelettprotokoll' %}">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSp" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Skelettprotokoll</a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdownSp">
-                 <a class="dropdown-item" href="{% url 'sp:sp-results' %}">Sök protokoll</a>
-                 <a class="dropdown-item" href="{% url 'sp:sp-pex' %}">Bibliotek</a>
+            <li class="nav-item dropdown {% active 'mammo' %} {% active 'mrqa' %}">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownQALink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">QA</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownQALink">
+                <div class="btn-group dropleft dropdown">
+                  <a class="dropdown-item dropdown-toggle" id="navbarDropdownMGQALink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Mammo QA</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMGQALink">
+                      <a class="dropdown-item" href="{% url 'mg:mg-weekly-qa-result' %}">QA Resultat</a>
+                      <a class="dropdown-item" href="{% url 'mg:mg-weekly-measurement' %}">Veckokontroll</a>
+                    </div>
+                </div>
+                <a class="dropdown-item" href="#">MR QA</a>
               </div>
             </li>
 
-            <li class="nav-item dropdown {% active 'mgqa' %}">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMGQALink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Mammografi QA</a>
-              <div class="dropdown-menu" aria-labelledby="navbarDropdownMGQALink">
-                <a class="dropdown-item" href="{% url 'mg:mg-weekly-qa-result' %}">QA Resultat</a>
-                <a class="dropdown-item" href="{% url 'mg:mg-weekly-measurement' %}">Veckokontroll</a>
+            <li class="nav-item dropdown {% active 'radpharm' %}">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownReportsLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Rapporter</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownReportsLink">
+                <a class="dropdown-item" href="{% url 'radpharmprod:radpharmpro-stat' %}">Radiofarmakaproduktion</a>
               </div>
-            </li>
-
-            <li class="nav-item {% active 'mrqa' %}">
-              <a class="nav-link" href="#">MR QA</a>
             </li>
 
             {% if user.is_authenticated %}

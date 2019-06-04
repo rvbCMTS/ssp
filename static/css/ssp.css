@@ -56,3 +56,23 @@
 .card {
   height: 100%;
 }
+
+.dropdown-submenu {
+  background: #cce5ff;
+  border-radius: 4px;
+  position: relative;
+  color: #000!important;
+}
+
+.dropdown:hover>.dropdown-menu {
+  display:block;
+}
+.dropdown > .dropdown-toggle:active {
+  pointer-evente: none;
+}
+
+.dropdown-submenu>.dropdown-menu {
+    top:0;
+    right:100%;
+    margin-top:-6px;
+}
