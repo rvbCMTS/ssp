@@ -131,7 +131,7 @@ function _updatePlot(data) {
         radiopharmaceutical = data[i].radiopharmaceutical.name;
         x.push(data[i].datum);
         y.push(data[i].activity_mbq / 1000);
-        annotation.push('Radiofarmaka: ' + radiopharmaceutical + '<br>' + 'Signature: ' + data[i].signature);
+        annotation.push('Radiofarmaka: ' + radiopharmaceutical + '<br>' + 'Signatur: ' + data[i].signature);
     }
 
     layout = {
