@@ -67,7 +67,7 @@ def register_exam_form(request, clinic: Optional[int] = None):
     if request.method == 'POST':
         form = FluoroTimeForm(request.POST)
         if form.is_valid():
-            if Exam.objects.filter(exam_no=form.cleaned_data.get('exam_id')).all() is not None:
+            if Exam.objects.filter(exam_no=form.cleaned_data.get('exam_id')).all() is not None and len(Exam.objects.filter(exam_no=form.cleaned_data.get('exam_id')).all()) > 0:
                 raise ValidationError(_('Undersökningmed id %(value)'), code='invalid',
                                       params={'value': form.cleaned_data.get('exam_id')})
 
@@ -90,7 +90,7 @@ def register_exam_form(request, clinic: Optional[int] = None):
             if dirty_modality is None:
                 dirty_modality = DirtyModality(
                     dirty_name=form.cleaned_data.get('modality').name,
-                    operator=form.cleaned_data.get('modality')
+                    modality=form.cleaned_data.get('modality')
                 )
                 dirty_modality.save()
 
@@ -156,8 +156,13 @@ def register_exam_form(request, clinic: Optional[int] = None):
 
     form = FluoroTimeForm(initial={'clinic': clinic})
 
+    all_operators = [{'operatorId': obj.id, 'operatorName': f'{obj.last_name}, {obj.first_name}'} for obj in Operator.objects.all()]
+    all_modalities = [{'modalityId': obj.id, 'modalityName': obj.name} for obj in Modality.objects.all().filter(active=True)]
+
     context = {
         'preset_clinic': clinic,
+        'all_operators': json.dumps(all_operators),
+        'all_modalities': json.dumps(all_modalities),
         'clinic_operator_map': json.dumps(operator_map),
         'clinic_modality_map': json.dumps(modality_map),
         'modality_dose_unit': json.dumps(modality_dose_unit),

@@ -1,4 +1,8 @@
-$(document).ready(function() {$('#id_clinic').change();});
+$(document).ready(function() {
+    $('#id_clinic').change();
+    let timeObj = new Date();
+    $('#id_exam_id').val("SSP_" + timeObj.getTime() );
+});
 
 $('#id_clinic').change(function(event){$('#idSelectedClinic').html($('#id_clinic').val()); filter_modality();filter_operator();});
 
@@ -10,61 +14,63 @@ function filter_modality(){
     let clinic = parseInt($('#idSelectedClinic').html());
     let showAll = $('#idShowAllModalitiesCheck')[0].checked;
     let modalityMap = JSON.parse($('#idClinicModalityMap').html());
+    let allModalityList = JSON.parse($('#idAllModalities').html());
+    let modalityList = $('#id_modality');
+    modalityList.empty();
 
-    var specificModalities = 0;
-    if ( showAll || !modalityMap.hasOwnProperty(clinic.toString()) ){
-        for (option of $('#id_modality')[0].children){
-            option.hidden = false; specificModalities = specificModalities + 1;
+    if ( showAll || !modalityMap.hasOwnProperty(clinic.toString())) {
+        modalityList.append('<option value="" selected>---------</option>');
+        for ( let ind = 0; ind < allModalityList.length; ind++ ) {
+            modalityList.append('<option value="' + allModalityList[ind].modalityId + '">' +
+                allModalityList[ind].modalityName + '</option>');
         }
-    } else {
+    }
+    else {
+        modalityList.append('<option value="">---------</option>');
         let modalities = modalityMap[clinic.toString()];
-        for (option of $('#id_modality')[0].children){
-            if ( option.value.toString() == "" || modalities.includes(parseInt(option.value)) ){
-                if ( option.value.toString() != "" ){ specificModalities = specificModalities + 1 }
-                option.hidden = false
-            } else {
-                option.hidden = true;
-            }
-            option.selected = false;
-            if ( modalities.length == 1 && specificModalities == 1 ){
-                for ( option of $('#id_modality')[0].children ){
-                    option.selected = modalities.includes(parseInt(option.value))
+        let specificModalities = 0;
+
+        for ( let ind = 0; ind < allModalityList.length; ind++ ) {
+            if ( modalities.indexOf(allModalityList[ind].modalityId) !== -1 ) {
+                specificModalities = specificModalities + 1;
+                if (specificModalities == 1 ) {
+                    modalityList.append('<option value="' + allModalityList[ind].modalityId + '" selected>' +
+                        allModalityList[ind].modalityName + '</option>');
+                } else {
+                    modalityList.append('<option value="' + allModalityList[ind].modalityId + '">' +
+                        allModalityList[ind].modalityName + '</option>');
                 }
             }
         }
     }
-
-    if ( specificModalities > 1 ){ $('#id_modality option:first').prop('selected', true); }
-    $('#id_modality').change();
 }
 
 function filter_operator(){
     let clinic = parseInt($('#idSelectedClinic').html());
     let showAll = $('#idShowAllOperatorsCheck')[0].checked;
+    let allOperatorList = JSON.parse($('#idAllOperators').html());
     let operatorMap = JSON.parse($('#idClinicOperatorMap').html());
+    let operatorList = $('#id_operator');
+    operatorList.empty();
 
-    var specificOperator = 0;
-    if ( showAll || !operatorMap.hasOwnProperty(clinic.toString()) ){
-        for ( option of $('#id_operator')[0].children ){ option.hidden = false; specificOperator += 1; }
-    } else {
+    if ( showAll || !operatorMap.hasOwnProperty(clinic.toString())) {
+        operatorList.append('<option value="" selected>---------</option>');
+        for ( let ind = 0; ind < allOperatorList.length; ind++ ) {
+            operatorList.append('<option value="' + allOperatorList[ind].operatorId + '">' +
+                allOperatorList[ind].operatorName + '</option>');
+        }
+    }
+    else {
+        operatorList.append('<option value="" selected>---------</option>');
         let operators = operatorMap[clinic.toString()];
-        for (option of $('#id_operator')[0].children){
-            if ( option.value.toString() == "" || operators.includes(parseInt(option.value)) ){
-                if ( option.value.toString() == "" ){specificOperator = specificOperator + 1}
-                option.hidden = false
-            } else {
-                option.hidden = true;
-            }
-            option.selected = false;
-            if ( operators.length == 1 && specificOperator == 1 ){
-                for ( option of $('#id_operator')[0].children ){
-                    option.selected = operators.includes(parseInt(option.value))
-                }
+
+        for ( let ind = 0; ind < allOperatorList.length; ind++ ) {
+            if ( operators.indexOf(allOperatorList[ind].operatorId) !== -1 ) {
+                operatorList.append('<option value="' + allOperatorList[ind].operatorId + '">' +
+                    allOperatorList[ind].operatorName + '</option>');
             }
         }
     }
-
-    if ( specificOperator > 1 ){ $('#id_operator option:first').prop('selected', true); }
 }
 
 $('#id_modality').change(function(event){

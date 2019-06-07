@@ -16,8 +16,7 @@ class FluoroTimeForm(forms.Form):
                                 ), initial=timezone.now(), required=True)
     pediatric = forms.ChoiceField(choices=((1, 'Vuxen'), (2, 'Barn')),
                                   widget=forms.RadioSelect, label='Vuxen/Barn', initial=1, required=True)
-    exam_id = forms.CharField(max_length=400, label='Undersökningsnummer',
-                              initial=f'VLLMI_{timezone.now().strftime("%Y%m%d%H%M%S%f")}', required=True)
+    exam_id = forms.CharField(max_length=400, label='Undersökningsnummer', required=True)
     fluoro_time_minutes = forms.IntegerField(min_value=0, label='Minuter', required=True)
     fluoro_time_seconds = forms.IntegerField(min_value=0, max_value=59, label='Sekunder', required=True)
     fluoro_dose = forms.FloatField(min_value=0, label='Dos (DAP)', required=True)
