@@ -49,12 +49,3 @@ class Backup(models.Model):
     def __str__(self):
         return f'{self.machine} {self.datum}'
 
-class Exam(models.Model):
-    exam_name = models.TextField(blank=False, null=False)
-    protocol_name = models.TextField(blank=False, null=False)
-    datum = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
-    protocol = models.ManyToManyField(Protocol)
-    machine = models.ManyToManyField(Machine)
-
-    def __str__(self):
-        return self.exam_name

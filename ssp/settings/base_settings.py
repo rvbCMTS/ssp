@@ -178,3 +178,13 @@ REST_FRAMEWORK = {
 
 CKEDITOR_UPLOAD_PATH = 'ckeditor/'
 
+
+FRONT_PAGE_PARAMETERS = {
+    'OrganisationName': '<custom-organisation-name>',
+    'ContactInformation': [
+        {
+            'Name': '<Contact-Name-1>',
+            'Email': '<Contact-Email-1>'
+        },
+    ]
+}

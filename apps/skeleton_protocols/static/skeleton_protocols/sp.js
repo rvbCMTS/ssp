@@ -17,7 +17,8 @@ $(document).ready(function() {
                 "targets": [ 0 ],
                 "visible": false,
             }
-        ]
+        ],
+
     } );
 
     $("#idHistoryTable").DataTable( {
@@ -37,34 +38,66 @@ $(document).ready(function() {
             },
     })
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const pks = urlParams.getAll('pk[]');
+
+    if (pks.length !==0){
+        // ajax call for Results table
+        $.ajax({
+                type: "GET",
+                url: $("#idUpdateResults").html(),
+                dataType: 'json',
+                data: {'pk': pks},
+                success: function(data) {
+                    var table = $("#idResultTable").DataTable();
+                    table.clear().rows.add(data.data).draw();
+                },
+        })
+    }
+
+
     var table = $("#idExamsTable").DataTable( {
 
-        'select': {
+        select: {
             style: 'multi',
             selector: 'td:not(:first-child)'
         },
 
-        'columns': [
+        columns: [
             {title: '', target: 0, className: 'treegrid-control', width: '1em', data: function (item) { if (item.children) { return '<i class="fas fa-caret-right"></i>'; } return ''; }},
-            {title: 'Exam / Protokoll', target: 1,  width: '5em', data: function (item) { return item.exam_name }},
-            {title: 'Modalitet', target: 2, width: '18em', data: function (item) { return item.machine }},
+            {title: 'Exam / Protokoll',  width: '5em', data: function (item) { return item.exam_name }},
+            {title: 'Modalitet',  width: '18em', data: function (item) { return item.machine }},
+            {title: 'Pk', width: '18em', visible: false, data: function (item) { return item.pk }},
         ],
 
-        'treeGrid': {
-            left : 10,
+        treeGrid: {
+            left : 0,
             expandIcon: '<i class="fas fa-caret-right"></i>',
             collapseIcon: '<i class="fas fa-caret-down"></i>'
         },
 
-        'order': ([1, 'asc']),
+        order: ([1, 'asc']),
 
-        'paging': false,
-        'searching': true,
-        'responsive': false,
-        'fixedHeader': true,
-        'destroy': false,
+        paging: false,
+        searching: true,
+        responsive: false,
+        fixedHeader: true,
+        destroy: false,
 
     });
+
+
+ });
+
+// Compare button in Exam view
+$('#idCompareButton').click( function () {
+    var table = $("#idExamsTable").DataTable()
+    var data = table.rows('.selected').data()
+    var pkArray = data.map(a => a.pk);
+    var pk = [].concat.apply([], pkArray)
+    var queryString = Object.keys(pk).map(key => 'pk%5B%5D' + '=' + pk[key]).join('&');
+
+    window.open($("#idCompareProtocols").html() + '?' + queryString,"_self")
 
  });
 

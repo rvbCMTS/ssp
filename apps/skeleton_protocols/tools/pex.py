@@ -5,7 +5,7 @@ from collections import namedtuple, UserDict
 import re
 import pandas
 import datetime
-from ..models import Machine, Protocol, Backup, Exam
+from ..models import Machine, Protocol, Backup
 
 
 def parse_db(input_directory: str):
@@ -419,24 +419,7 @@ def _prot2db(machine, df):
                     protocol_entry.history_flag = True
                     protocol_entry.save()
 
-            # check if Exam exists, get it and associate, otherwise create it and associate.
-            if Exam.objects.filter(exam_name=row.exam_name,
-                                   protocol_name=row.ris_name,
-                                     ).exists():
-                exam_entry = Exam.objects.get(exam_name=row.exam_name,
-                                            protocol_name=row.ris_name,
-                                              )
-                # associate Exam with Protocol and Machine
-                exam_entry.protocol.add(protocol_entry)
-                exam_entry.machine.add(machine_entry)
-            else:
-                exam_entry = Exam.objects.create(exam_name=row.exam_name,
-                                                 protocol_name=row.ris_name,
-                                                 datum = tzdate,
-                                                 )
-                # associate Exam with Protocol and Machine
-                exam_entry.protocol.add(protocol_entry)
-                exam_entry.machine.add(machine_entry)
+
 
 
 

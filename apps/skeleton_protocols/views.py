@@ -1,6 +1,9 @@
+import json
+
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Protocol, Machine, Backup, Exam
+from typing import List, Optional
+from .models import Protocol, Machine, Backup
 from .filter import ProtocolsFilter
 from .tools.pex import parse_db
 
@@ -18,22 +21,47 @@ def list_exams(request):
         gg = {}
         gg.update({'exam_name': e['exam_name']})
 
-        # all machines for each exam
-        machines_for_exam = ''
-        for m in Exam.objects.values('machine__hospital_name').distinct().filter(exam_name=e['exam_name']):
-            machines_for_exam += f'{m["machine__hospital_name"]} '
-        gg.update({'machine': machines_for_exam})
+        # all protocols and machines for each exam
+        p_and_m = list(Protocol.objects.values('ris_name', 'machine__hospital_name').filter(backup__in=backup_list, exam_name=e['exam_name']))
 
-        # all protocols for each exam
+        # unique dicts in list - machines
+        h_names = list({v['machine__hospital_name']: v for v in p_and_m}.values())
+
+        # sort h_names
+        h_names = sorted(h_names, key=lambda k: k['machine__hospital_name'])
+
+        # build string of h_names
+        machines_for_exam = ''
+        for m in h_names:
+            machines_for_exam += f'{m["machine__hospital_name"]} '
+
+        gg.update({'machine': machines_for_exam, 'pk':[]})
+
+        # unique list and sorting of ris_names
+        ris_names = list({v['ris_name']: v for v in p_and_m}.values())
+        ris_names = sorted(ris_names, key=lambda k: k['ris_name'])
+
         protocols = []
-        for p in Exam.objects.values('protocol_name').distinct().filter(exam_name=e['exam_name']):
+        for p in ris_names:
+
+            # all primary keys for each protocol
+            pks = list(Protocol.objects.values('pk').filter(backup__in=backup_list,
+                                                            exam_name=e['exam_name'],
+                                                            ris_name=p['ris_name']))
+            pks = list({v['pk'] for v in pks})
 
             # all machines for each protocol
+            h_names = list(Protocol.objects.values('machine__hospital_name').filter(backup__in=backup_list,
+                                                                                    exam_name=e['exam_name'],
+                                                                                    ris_name=p['ris_name']))
+
+            # sort and build string  for h_names
+            h_names = sorted(h_names, key=lambda k: k['machine__hospital_name'])
             machines_for_protocols = ''
-            for m in Exam.objects.values('machine__hospital_name').distinct().filter(protocol_name=p['protocol_name'], exam_name=e['exam_name']):
+            for m in h_names:
                 machines_for_protocols += f'{m["machine__hospital_name"]} '
 
-            protocols.append({'exam_name': p['protocol_name'], 'machine': machines_for_protocols})
+            protocols.append({'pk': pks, 'exam_name': p['ris_name'], 'machine': machines_for_protocols})
 
         gg.update({'children': protocols})
 
@@ -43,15 +71,29 @@ def list_exams(request):
 
     return JsonResponse({'data': tt})
 
-def skeleton_protocols_results(request):
+def compare_protocols(request):
+    pks = request.GET.getlist('pk[]')
 
-    # query to get the latest backup for each machine
-    all_machines = Machine.objects.all()
-    backup_list = []
-    for m in all_machines:
-        # for each machine find the latest backup
-        backup_list += ([ Backup.objects.all().filter(machine=m).latest() ])
-    db_query = Protocol.objects.all().filter(backup__in=backup_list)
+    tt=[]
+
+    return JsonResponse({'data': tt})
+
+
+
+def skeleton_protocols_results(request):
+    # primary keys for protocol comparsion
+    pks = request.GET.getlist('pk[]')
+
+    if not pks:
+        # query to get the latest backup for each machine
+        all_machines = Machine.objects.all()
+        backup_list = []
+        for m in all_machines:
+            # for each machine find the latest backup
+            backup_list += ([ Backup.objects.all().filter(machine=m).latest() ])
+        db_query = Protocol.objects.all().filter(backup__in=backup_list)
+    else:
+        db_query = Protocol.objects.all().filter(pk__in=pks)
 
     # filter using django_filters
     f = ProtocolsFilter(request.GET, queryset=db_query.order_by('ris_name', 'machine'))
@@ -87,6 +129,7 @@ def skeleton_protocols_results(request):
             tt[-1] += [f'<button type="button" class="btn btn-outline-warning btn-sm" onClick="viewHistory({obj.pk})">H</button>',]
         else:
             tt[-1] += ['',]
+
 
     return JsonResponse({'data': tt})
 
@@ -136,6 +179,7 @@ def pex(request):
                     )
 
 def skeleton_protocols(request):
+
     f = ProtocolsFilter(request.GET)
 
     return render(request,
@@ -147,12 +191,6 @@ def exams(request):
 
     return render(request,
                   template_name='skeleton_protocols/Exams.html',
-                  )
-
-def tree_grid(request):
-
-    return render(request,
-                  template_name='skeleton_protocols/TreeGrid.html',
                   )
 
 
