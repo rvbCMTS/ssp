@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}MRI ACR{% endblock title%}
+
+{% load static %}
+{% block extra-styles %}
+
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+  <script src="{% static 'mri/acrresults.js' %}"></script>
+  <script src="{% static 'js/plotly.min.js' %}"></script>
+{% endblock extra-scripts %}
+
+{% block main %}
+  <h1>Persondosimetri</h1>
+  <p>Nedan presenteras uppmätta persondosimetrivärden.</p>
+  <p>Uppmätta värden med dosimeter från Landauer presenteras som 0 mSv om de understiger det lägsta detekterbara värdet. För båldosimetrar betyder det  värden under 0,05 mSv.</p>
+  <p>Vid frågor, kontakta lokal persondosimetriansvarig eller persondosimetriansvarig fysiker (<a href="mailto:josef.lundman@vll.se">Josef Lundman</a>).</p>
+
+  <!-- Filter -->
+  <div class="row">
+    <div class="container card-container">
+      <div class="card text-white bg-dark mb-3 form-card">
+        <div class="card-header">Filter</div>
+
+        <div class="card-body">
+          <div class="row form-row">
+            <div class="col-lg-4 col-md-6 col-sm-12">
+              <div class="form-stacked filter-select">
+                <label for="idTime">Tidsintervall</label>
+                <select id="idTime" name="TimeInterval" class="update-filter-choices">
+                    <option value="30">Senaste månaden</option>
+                    <option value="91">Senaste 3 månaderna</option>
+                    <option value="183">Senaste 6 månaderna</option>
+                    <option value="365">Senaste 12 månaderna</option>
+                    <option value="0">Ingen begränsning</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 col-sm-12">
+              <div class="form-stacked filter-select">
+                <label for="idModality">Modalitet</label>
+                <select id="idModality" name="Modality" class="update-data update-filter-choices">
+                  <option value="null">Välj modalitet</option>
+                  {% for obj in modality %}
+                  <option value="{{ obj.id }}">{{ obj.name }}</option>
+                  {% endfor %}
+                  <option value="all">Alla</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row align-items-end">
+            <div class="col-lg-4 col-md-6 col-sm-12">
+              <div class="filter-select">
+                <label for="idRfCoil">RF spole</label>
+                <select id="idRfCoil" name="RfCoil" class="update-data update-filter-choices">
+                  <option value="all">Alla</option>
+                  {% for obj in rfcoil %}
+                  <option value="{{ obj.id }}">{{ obj.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 col-sm-12">
+              <div class="filter-select">
+                <label for="idSequence">Sekvens</label>
+                <select id="idSequence" name="Sequence" class="update-data update-filter-choices">
+                  <option value="0">Alla</option>
+                  {% for obj in sekvens %}
+                  <option value="{{ obj.id }}">{{ obj.name }}</option>
+                  {% endfor %}}
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="idLoaderRow" class="row justify-content-center hidden">
+    <div class="loader"></div>
+  </div>
+
+    <!-- Plots -->
+    <div class="row" id="idPlotRow">
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="snrPlot"></div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="frequencyPlot"></div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="pds1Plot"></div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="pds5Plot"></div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="hcodPlot"></div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="stPlot"></div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="spaPlot"></div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="puiPlot"></div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="grPlot"></div>
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="grs5Plot"></div>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-12">
+            <div id="imageNoisePlot"></div>
+        </div>
+    </div>
+
+    <div class="hidden">
+        <div id="idFilterChoicesUrl">{% url 'mri:mri-update-filter-list' %}</div>
+        <div id="idUpdatePlotsUrl">{% url 'mri:acr_result_api' %}</div>
+    </div>
+{% endblock main %}
