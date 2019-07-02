@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'tempus_dominus',
+    'apps.mri',
 ]
 
 MIDDLEWARE = [
