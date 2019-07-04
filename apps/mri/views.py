@@ -1,10 +1,102 @@
 from django.shortcuts import render
 from django.utils import timezone
+import json
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from typing import Optional
+
 from .models import (AcrResult, ManufacturerModelName, ReportedMachine)
 from .serializers import AcrResultSerializer, AcrResultInsertSerializer, ManufacturerModelNameSerializer
+
+
+DEFAULT_TIME_LIMIT = 10000  # days
+
+
+def acr_results(request):
+    filter_data = _get_acr_filters(time_limit=DEFAULT_TIME_LIMIT)
+    return render(request=request, template_name='mri/AcrResult.html',
+                  context={'filterData': json.dumps(filter_data)})
+
+
+def _get_acr_filters(time_limit: Optional[int] = None, modality: Optional[int] = None):
+    if not time_limit:
+        time_limit = DEFAULT_TIME_LIMIT
+    first_date = timezone.now() - timezone.timedelta(days=time_limit)
+
+    query = AcrResult.objects.filter(acquisition_time__gte=first_date)
+
+    if modality:
+        query = query.filter(reported_machine__machine_id__exact=modality)
+
+    query = query.values(
+        'reported_machine__machine_id', 'reported_machine__machine__display_name',
+        'receive_coil_name',
+        'series_description'
+    ).distinct()
+
+    output = {}
+    if len(query) < 1:
+        return output
+
+    for row in query:
+        machine_id = str(row['reported_machine__machine_id'])
+        if machine_id not in output.keys():
+            output[machine_id] = {
+                'displayName': row['reported_machine__machine__display_name'],
+                'coilsAndSequences': [],
+            }
+
+        output[machine_id]['coilsAndSequences'].append(
+            {
+                'coil': row['receive_coil_name'],
+                'sequence': row['series_description']
+            }
+        )
+
+    return output
+
+
+def _get_acr_result(time_limit: Optional[int] = None, modality: Optional[int] = None,
+                    coil: Optional[str] = None, sequence: Optional[str] = None):
+    if not time_limit or time_limit < 0:
+        time_limit = DEFAULT_TIME_LIMIT
+
+    first_date = timezone.now() - timezone.timedelta(days=time_limit)
+    query = AcrResult.objects.filter(acquisition_time__gte=first_date)
+
+    if modality and isinstance(modality, int):
+        query = query.filter(reported_machine__machine_id__exact=int)
+
+    if coil:
+        query = query.filter(receive_coil_name__exact=coil)
+
+    if sequence:
+        query = query.filter(series_description__exact=sequence)
+
+    query = query.prefetch_related(
+        'reported_machine', 'reported_machine__machine_model', 'reported_machine__machine'
+    ).all()
+    ser = AcrResultSerializer(query, many=True)
+    if ser.data:
+        return True, ser.data
+
+    return False, None
+
+
+class AcrUpdateFilterView(APIView):
+
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, format=None):
+        time_limit = request.query_params.get('timeLimit');
+        try:
+            time_limit = int(time_limit)
+        except:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(_get_acr_filters(time_limit=time_limit), status=status.HTTP_200_OK)
+
 
 
 class AcrResultView(APIView):
@@ -12,11 +104,11 @@ class AcrResultView(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, format=None):
-        time_limit = request.query_params.get('time_limit')
+        time_limit = request.query_params.get('timeLimit')
         try:
             time_limit = int(time_limit)
         except:
-            time_limit = 10000
+            time_limit = DEFAULT_TIME_LIMIT
 
         machine = request.query_params.get('machine')
         try:
