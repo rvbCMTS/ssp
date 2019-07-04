@@ -13,10 +13,9 @@
 {% endblock extra-scripts %}
 
 {% block main %}
-  <h1>Persondosimetri</h1>
-  <p>Nedan presenteras uppmätta persondosimetrivärden.</p>
-  <p>Uppmätta värden med dosimeter från Landauer presenteras som 0 mSv om de understiger det lägsta detekterbara värdet. För båldosimetrar betyder det  värden under 0,05 mSv.</p>
-  <p>Vid frågor, kontakta lokal persondosimetriansvarig eller persondosimetriansvarig fysiker (<a href="mailto:josef.lundman@vll.se">Josef Lundman</a>).</p>
+  <h1>MRI - ACR resultat</h1>
+  <p>Nedan presenteras resultaten från mätningar med ACR fantomet.</p>
+  <p>Vid frågor, kontakta ansvarig fysiker.</p>
 
   <!-- Filter -->
   <div class="row">
@@ -31,7 +30,7 @@
                 <label for="idTime">Tidsintervall</label>
                 <select id="idTime" name="TimeInterval" class="update-filter-choices">
                     <option value="30">Senaste månaden</option>
-                    <option value="91">Senaste 3 månaderna</option>
+                    <option value="91" selected>Senaste 3 månaderna</option>
                     <option value="183">Senaste 6 månaderna</option>
                     <option value="365">Senaste 12 månaderna</option>
                     <option value="0">Ingen begränsning</option>
@@ -47,7 +46,6 @@
                   {% for obj in modality %}
                   <option value="{{ obj.id }}">{{ obj.name }}</option>
                   {% endfor %}
-                  <option value="all">Alla</option>
                 </select>
               </div>
             </div>
@@ -131,6 +129,7 @@
     </div>
 
     <div class="hidden">
+        <div id="idFilterData">{{ filterData }}</div>
         <div id="idFilterChoicesUrl">{% url 'mri:mri-update-filter-list' %}</div>
         <div id="idUpdatePlotsUrl">{% url 'mri:acr_result_api' %}</div>
     </div>
