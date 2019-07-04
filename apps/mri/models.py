@@ -51,7 +51,7 @@ class ReportedMachine(models.Model):
             return f'{self.machine.display_name} ({self.machine_model.manufacturer.name}, {self.machine_model.name})'
 
     class Meta:
-        ordering = ['machine', 'machine_model', 'device_serial_number']
+        ordering = ['machine_model', 'device_serial_number']
 
 
 class AcrResult(models.Model):
