@@ -31,6 +31,7 @@ urlpatterns = [
     path('mammo/', include('apps.mammography.urls', namespace='mg')),
     path('skelettprotokoll/', include('apps.skeleton_protocols.urls', namespace='sp')),
     path('radpharmprod/', include('apps.radpharmprod.urls', namespace='radpharmprod')),
+    path('radshielding/', include('apps.radiation_shielding.urls', namespace='radiation_shielding')),
     path('api/routers', include(router.urls)),
     path('admin/', admin.site.urls, name='admin'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

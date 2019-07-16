@@ -98,7 +98,7 @@ $('#idTime').change( function() {
 function updateStatistics() {
     const timeInterval = $("#idTime").val();
     const radiopharmaceutical = $("#idRadiopharmaceutical").val();
-    const resultContainer = $("#resultContainer")
+    const resultContainer = $("#resultContainer");
 
 
     if ( radiopharmaceutical == null || radiopharmaceutical == "null" ){
@@ -158,14 +158,9 @@ function _updateTable(data) {
             data[i].signature,
             data[i].count_patients
         ]);
-        radiopharmaceutical = data[i].radiopharmaceutical.name;
-        x.push(data[i].datum);
-        y.push(data[i].activity_mbq / 1000);
-        annotation.push('Radiofarmaka: ' + radiopharmaceutical + '<br>' + 'Signature: ' + data[i].signature);
     }
 
     table.clear().rows.add(tableData).draw();
-
 }
 
 function _updateRadPharmSelect() {
