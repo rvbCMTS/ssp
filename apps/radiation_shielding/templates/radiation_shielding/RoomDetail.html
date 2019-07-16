@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Strålskärmning{% endblock title %}
+
+{% load static %}
+{% block extra-styles %}
+  <link href="{% static 'radiation_shielding/roomDetail.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+{% endblock extra-scripts %}
+
+{% block main %}
+  <h1>Strålskärmning - {{ room }} ({{ clinic.clinicName }})</h1>
+  <div class="row">
+    <div class="col-lg-4 col-md-4">
+      <table class="list-table">
+        <tbody>
+          <tr>
+            <td class="parameterLabel">Verksamhet:</td><td class="parameterValue">{{ clinic.department.departmentCategory.category }}</td>
+          </tr>
+          <tr>
+            <td class="parameterLabel">Avdelning:</td><td class="parameterValue">{{ clinic.department.departmentName }}</td>
+          </tr>
+          <tr>
+            <td class="parameterLabel">Klinik:</td><td class="parameterValue">{{ clinic.clinicName }}</td>
+          </tr>
+          <tr>
+            <td class="parameterLabel">Ort:</td><td class="parameterValue">{{ clinic.city.name }}</td>
+          </tr>
+          <tr>
+            <td class="parameterLabel"></td><td class="parameterValue"><a target="_blanc" href="{{ drawing }}">Ritning</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-lg-8 col-md-8">
+      <table class="list-table">
+        <tbody>
+          <tr>
+            <td class="parameterLabel">Längd:</td><td class="parameterValue">{{ roomLength }} m</td>
+          </tr>
+          <tr>
+            <td class="parameterLabel">Bredd:</td><td class="parameterValue">{{ roomWidth }} m</td>
+          </tr>
+          <tr>
+            <td class="parameterLabel">Strålskärmning:</td><td class="parameterValue">{{ shielding |safe }}</td>
+          </tr>
+          <tr>
+            <td class="parameterLabel">Klassificering:</td><td class="parameterValue">{{ shieldingClassification.classification }} ({{ shieldingClassification.requiredShielding|floatformat:1 }} {{ shieldingClassification.requiredShieldingUnit }})</td>
+          </tr>
+          <tr>
+            <td class="parameterLabel">Klassificeringsdatum:</td><td class="parameterValue">{{ shieldingClassificationDate }} ({{ shieldingClassificationSignature }})</td>
+          </tr>
+          <tr>
+            <td class="parameterLabel">Klassificeringskommentar:</td><td class="parameterValue">{{ shieldingClassificationComment }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+{% endblock main %}
