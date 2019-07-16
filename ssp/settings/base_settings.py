@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'tempus_dominus',
     'apps.mri',
+    'apps.radiation_shielding',
 ]
 
 MIDDLEWARE = [
