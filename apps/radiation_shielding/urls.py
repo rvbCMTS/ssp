@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (room_list, RoomListApiView, room_details)
+from .views import (room_list, RoomListApiView, room_details, add_room_form)
 
 
 app_name = 'radiation_shielding'

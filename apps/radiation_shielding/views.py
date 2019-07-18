@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.shortcuts import render
 import json
 from rest_framework import permissions, status
@@ -5,7 +6,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from typing import Optional
 
+from .forms import RoomForm
 from .models import Room, Department, Clinic, ShieldingClassification
 from .serializers import RoomSerializer, DepartmentSerializer, ClinicSerializer, ShieldingClassificationSerializer
 
@@ -130,3 +133,29 @@ class RoomListApiView(APIView):
         if ser.data:
             return Response(data=ser.data, status=status.HTTP_200_OK)
         return Response("Found no valid data", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def add_room_form(request, room: Optional[int] = None):
+    if request.method == 'POST':
+        form = RoomForm(request.POST)
+        if form.is_valid():
+            room = Room(
+                clinic=form.cleaned_data.get('clinic'),
+                room=form.cleaned_data.get('room'),
+                roomWidth=form.cleaned_data.get('roomWidth'),
+                roomLength=form.cleaned_data.get('roomLength'),
+                modalityType=form.cleaned_data.get('modalityType'),
+                shielding=form.cleaned_data.get('shielding'),
+                shieldingClassification=form.cleaned_data.get('shieldingClassification'),
+                shieldingClassificationDate=form.cleaned_data.get('shieldingClassificationDate'),
+                shieldingClassificationSignature=form.cleaned_data.get('shieldingClassificationSignature'),
+                shieldingClassificationComment=form.cleaned_data.get('shieldingClassificationComment'),
+                drawing=form.cleaned_data.get('drawing')
+            )
+            room.save()
+            messages.success(request=request,
+                             message='Rumsinformationen har sparats')
+
+    context = {'form': RoomForm()}
+
+    return render(request=request, template_name='radiation_shielding/RoomForm.html', context=context)
