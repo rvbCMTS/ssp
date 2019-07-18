@@ -156,6 +156,6 @@ def add_room_form(request, room: Optional[int] = None):
             messages.success(request=request,
                              message='Rumsinformationen har sparats')
 
-    context = {'form': form}
+    context = {'form': RoomForm()}
 
     return render(request=request, template_name='radiation_shielding/RoomForm.html', context=context)

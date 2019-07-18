@@ -4,12 +4,11 @@
 
 {% load static %}
 {% block extra-styles %}
-    <link href="{% static 'fluoro_times/fluoro_time.css' %}" rel="stylesheet">
+    <link href="{% static 'radiation_shielding/addRoomForm.css' %}" rel="stylesheet">
 {% endblock extra-styles %}
 
 {% block extra-scripts %}
     {{ form.media }}
-    <script src="{% static 'fluoro_times/fluoro_time_form.js' %}"></script>
 {% endblock extra-scripts %}
 
 <!-- Main Content -->
@@ -60,15 +59,15 @@
                   {{ form.roomLength.label_tag }}{{ form.roomLength }}
                 </div>
               </div>
-            </div>
-            <div class="row">
               <div class="col col-lg-6 col-md-6 col-sm-12">
                 <div class="form-group">
                   {{ form.shielding.errors }}
                   {{ form.shielding.label_tag }}{{ form.shielding }}
                 </div>
               </div>
-              <div class="col col-lg-6 col-md-6 col-sm-12">
+            </div>
+            <div class="row">
+              <div class="col col-lg-12 col-md-12 col-sm-12">
                 <div class="form-group">
                   {{ form.shieldingClassification.errors }}
                   {{ form.shieldingClassification.label_tag }}{{ form.shieldingClassification }}
