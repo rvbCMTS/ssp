@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrera genomlysning{% endblock title %}
+
+{% load static %}
+{% block extra-styles %}
+    <link href="{% static 'fluoro_times/fluoro_time.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+    {{ form.media }}
+    <script src="{% static 'fluoro_times/fluoro_time_form.js' %}"></script>
+{% endblock extra-scripts %}
+
+<!-- Main Content -->
+{% block main %}
+  <h1>Lägg till rumsinformation</h1>
+  {% if messages %}
+  {% for message in messages %}
+    <div class="alert{% if message.tags %} alert-{{ message.tags }}{% endif %}">
+      <button type="button" class="close" data-dismiss="alert"></button>
+      {{ message }}
+    </div>
+  {% endfor %}
+  {% endif %}
+  <div class="row">
+    <div class="container card-container">
+      <div class="card text-white bg-dark mb-3 form-card">
+        <div class="card-body">
+          <form action="{% url 'radiation_shielding:roomform' %}" method="post">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col col-lg-4 col-md-6 col-sm-12">
+                <div class="form-group">
+                  {{ form.clinic.errors }}
+                  {{ form.clinic.label_tag }}{{ form.clinic }}
+                </div>
+              </div>
+              <div class="col col-lg-4 col-md-6 col-sm-12">
+                <div class="form-group">
+                  {{ form.modalityType.errors }}
+                  {{ form.modalityType.label_tag }}{{ form.modalityType }}
+                </div>
+              </div>
+              <div class="col col-lg-4 col-md-6 col-sm-12">
+                <div class="form-group">
+                  {{ form.room.errors }}
+                  {{ form.room.label_tag }}{{ form.room }}
+                </div>
+              </div>
+              <div class="col col-lg-4 col-md-6 col-sm-12">
+                <div class="form-group">
+                  {{ form.roomWidth.errors }}
+                  {{ form.roomWidth.label_tag }}{{ form.roomWidth }}
+                </div>
+              </div>
+              <div class="col col-lg-4 col-md-6 col-sm-12">
+                <div class="form-group">
+                  {{ form.roomLength.errors }}
+                  {{ form.roomLength.label_tag }}{{ form.roomLength }}
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col col-lg-6 col-md-6 col-sm-12">
+                <div class="form-group">
+                  {{ form.shielding.errors }}
+                  {{ form.shielding.label_tag }}{{ form.shielding }}
+                </div>
+              </div>
+              <div class="col col-lg-6 col-md-6 col-sm-12">
+                <div class="form-group">
+                  {{ form.shieldingClassification.errors }}
+                  {{ form.shieldingClassification.label_tag }}{{ form.shieldingClassification }}
+                </div>
+              </div>
+              <div class="col col-lg-6 col-md-6 col-sm-12">
+                <div class="form-group">
+                  {{ form.shieldingClassificationDate.errors }}
+                  {{ form.shieldingClassificationDate.label_tag }}{{ form.shieldingClassificationDate }}
+                </div>
+              </div>
+              <div class="col col-lg-6 col-md-6 col-sm-12">
+                <div class="form-group">
+                  {{ form.shieldingClassificationSignature.errors }}
+                  {{ form.shieldingClassificationSignature.label_tag }}{{ form.shieldingClassificationSignature }}
+                </div>
+              </div>
+              <div class="col col-lg-12 col-md-12 col-sm-12">
+                <div class="form-group">
+                  {{ form.shieldingClassificationComment.errors }}
+                  {{ form.shieldingClassificationComment.label_tag }}{{ form.shieldingClassificationComment }}
+                </div>
+              </div>
+              <div class="col col-lg-12 col-md-12 col-sm-12">
+                <div class="form-group">
+                  {{ form.drawing.errors }}
+                  {{ form.drawing.label_tag }}{{ form.drawing }}
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock main %}

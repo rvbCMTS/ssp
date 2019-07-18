@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import (City, ShieldingClassification, Department, Room)
+from .models import (City, ShieldingClassification, Department, Room, Clinic)
 
 
 class CityModelAdmin(admin.ModelAdmin):
@@ -21,9 +21,9 @@ class ShieldingClassificationModelAdmin(admin.ModelAdmin):
 
 
 class DepartmentModelAdmin(admin.ModelAdmin):
-    list_display = ['department']
-    list_display_links = ['department']
-    list_filter = []
+    list_display = ['departmentName', 'departmentCategory']
+    list_display_links = ['departmentName', 'departmentCategory']
+    list_filter = ['departmentCategory']
 
     class Meta:
         model = Department
@@ -42,7 +42,17 @@ class RoomModelAdmin(admin.ModelAdmin):
         model = Room
 
 
+class ClinicModelAdmin(admin.ModelAdmin):
+    list_display = ['city', 'clinicName', 'department']
+    list_display_links = ['city', 'clinicName', 'department']
+    list_filter = ['city', 'department']
+
+    class Meta:
+        model = Clinic
+
+
 admin.site.register(City, CityModelAdmin)
 admin.site.register(ShieldingClassification, ShieldingClassificationModelAdmin)
 admin.site.register(Department, DepartmentModelAdmin)
 admin.site.register(Room, RoomModelAdmin)
+admin.site.register(Clinic, ClinicModelAdmin)
