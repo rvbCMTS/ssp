@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.db.models.functions import TruncYear
 from django.shortcuts import render, redirect
-from django.http import Http404
+from django.http import Http404, HttpResponseServerError
 import json
 from math import ceil
 from rest_framework import permissions
@@ -12,59 +12,23 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .forms import FullBodyMeasurementForm, PersonnelForm
-from .functions import import_personnel_dosimetry_report
+from .functions import (import_personnel_dosimetry_report, get_personnel_dosimetry_filter_data, get_plot_and_table_data,
+                        format_plot_and_table_data)
 from .models import Clinic, Result, FullBodyDosimetry, FULL_BODY_ASSESSMENT, Personnel
 from .serializers import PersonnelDosimetryResultSerializer
+from .helpers import (_add_time_filter, _add_clinic_filter, _add_dosimeter_placement_filter, _add_personnel_filter,
+                      _add_profession_filter, RequestParameterValues)
 
 
-def personnel_dosimatery_results(request):
-    # Get a reversed list of years with dosimetry data
-    years = Result.objects.annotate(year=TruncYear('measurement_period_center')).order_by('-year').values(
-        'year').distinct()
-    years = [obj['year'].year for obj in years]
+def personnel_dosimetry_results(request):
+    try:
+        context = get_personnel_dosimetry_filter_data(user=request.user,
+                                                      time_period_start=(dt.now() - relativedelta(years=1)))
+    except:
+        return HttpResponseServerError()
 
-    # Get a list of the clinics active during the last 12 months
-    clinics = Result.objects.filter(measurement_period_center__gte=(dt.now() - relativedelta(years=1))).values(
-        'clinic__id'
-    )
-    clinic_ids = [obj['clinic__id'] for obj in clinics]
-
-    clinics = Clinic.objects.order_by('display_clinic', 'clinic').all()
-    clinics = [{'id': obj.pk, 'name': obj.display_clinic} for obj in clinics if obj.pk in clinic_ids]
-
-    # Get a list of professions for users present in the database
-    profession = Result.objects.all().filter(measurement_period_center__gte=(dt.now() - relativedelta(years=1))).values(
-        'personnel__profession__profession', 'personnel__profession_id').order_by(
-        'personnel__profession__profession').distinct()
-    profession = [{'id': obj['personnel__profession_id'], 'name': obj['personnel__profession__profession']} for obj in
-                  profession]
-
-    # Get a list of personnel
-
-    personnel = Result.objects.all().filter(measurement_period_center__gte=(dt.now() - relativedelta(years=1))).values(
-        'personnel_id', 'personnel__person_name')
-
-    if request.user.has_perm('personnel_dosimetry.view_personnel_names'):
-        personnel = [{'id': obj['personnel_id'], 'name': obj['personnel__person_name']} for obj in personnel.order_by('personnel__person_name').distinct()]
-    else:
-        personnel = [{'id': obj['personnel_id'], 'name': obj['personnel_id']} for obj in personnel.order_by('personnel_id').distinct()]
-
-    # Get a list of dosimeter placements
-    dp = Result.objects.all().filter(measurement_period_center__gte=(dt.now() - relativedelta(years=1))).values(
-        'vendor_dosimetry_placement__dosimeter_placement__dosimeter_placement',
-        'vendor_dosimetry_placement__dosimeter_placement_id'
-    ).order_by('vendor_dosimetry_placement__dosimeter_placement__dosimeter_placement').distinct()
-    dp = [{'id': obj['vendor_dosimetry_placement__dosimeter_placement_id'],
-           'placement': obj['vendor_dosimetry_placement__dosimeter_placement__dosimeter_placement']} for obj in dp]
-    
     return render(request=request, template_name='personnel_dosimetry/DosimetryResults.html',
-                  context={
-                      'filter_years': years,
-                      'clinic': clinics,
-                      'personnel_category': profession,
-                      'personnel': personnel,
-                      'dosimeter_placement': dp
-                  })
+                  context=context)
 
 
 def full_body_dosimetry_view(request):
@@ -86,12 +50,12 @@ def full_body_dosimetry_view(request):
                                message='Kunde inte spara mätningen')
 
     form = FullBodyMeasurementForm()
-    measurment_result = FullBodyDosimetry.objects.all().prefetch_related('personnel')
-    if measurment_result is not None:
+    measurement_result = FullBodyDosimetry.objects.all().prefetch_related('personnel')
+    if measurement_result is not None:
         result_types = dict(FULL_BODY_ASSESSMENT)
         table_data = [
             [obj.measurement_date.strftime('%Y-%m-%d %H:%M:%S'), obj.personnel.person_name, result_types.get(obj.result), obj.comment]
-            for obj in measurment_result]
+            for obj in measurement_result]
     else:
         table_data = []
 
@@ -136,15 +100,16 @@ class PersonnelDosimetryResultList(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, format=None):
-        time_interval = self.request.query_params.get('timeInterval', None)
-        if time_interval is not None:
-            time_interval = int(time_interval)
-        clinic = self.request.query_params.get('clinic', None)
-        profession = self.request.query_params.get('profession', None)
-        personnel =self.request.query_params.get('personnel', None)
-        dosimeter_placement = self.request.query_params.get('dosimeterPlacement', None)
-        spotcheck = self.request.query_params.get('spotcheck', None)
-        area_measurement = self.request.query_params.get('areameasurement', None)
+        params = RequestParameterValues(request=request)
+
+        data = get_plot_and_table_data(
+            user=request.user, time_interval=params.TimeInterval, clinic=params.Clinic, profession=params.Profession,
+            personnel=params.Personnel, dosimeter_placement=params.DosimeterPlacement,
+            exclude_spot_check=params.SpotCheck, exclude_area_measurement=params.AreaMeasurement)
+
+        output = format_plot_and_table_data(data=data)
+
+        return Response(output)
 
         layout2 = {
             'displayModeBar': False,
@@ -153,15 +118,15 @@ class PersonnelDosimetryResultList(APIView):
 
         results = Result.objects
         # Add time interval filtering (time_interval == 0: last 12 months, time_interval == 1: no time filtering)
-        if time_interval is not None and int(time_interval) > 1:
-            results = results.filter(measurement_period_center__year=int(time_interval))
-        elif time_interval < 1:
+        if params.TimeInterval > 1:
+            results = results.filter(measurement_period_center__year=params.TimeInterval)
+        elif params.TimeInterval < 1:
             # Get only values from the last 12 months
             results = results.filter(measurement_period_center__gte=(dt.now() - relativedelta(years=1)))
 
         # Add clinic filter
-        if clinic is not None and clinic not in ['all', 'null'] and int(clinic) > 0:
-            results = results.filter(clinic_id__exact=int(clinic))
+        if params.Clinic > 0:
+            results = results.filter(clinic_id__exact=params.Clinic)
         else:
             return Response({
                 'plotData': [
@@ -235,24 +200,6 @@ class PersonnelDosimetryResultList(APIView):
                     'data': []
                 }
             })
-
-        # Add profession filter
-        if profession is not None and profession != 'all' and int(profession) > 0:
-            results = results.filter(personnel__profession_id__exact=int(profession))
-
-        # Add personnel filter
-        if personnel is not None and personnel != 'all' and int(personnel) > 0:
-            results = results.filter(personnel_id__exact=int(personnel))
-
-        # Add dosimeter placement filter
-        if dosimeter_placement is not None and dosimeter_placement != 'all' and int(dosimeter_placement) > 0:
-            results = results.filter(vendor_dosimetry_placement__dosimeter_placement_id__exact=int(dosimeter_placement))
-
-        if spotcheck is None or not int(spotcheck) == 0:
-            results = results.filter(spot_check=False)
-
-        if area_measurement is None or int(area_measurement) == 0:
-            results = results.filter(area_measurement=False)
 
         results = results.select_related(
             'vendor_dosimetry_placement__dosimeter_placement'
@@ -441,15 +388,7 @@ class PersonnelDosimetryResultList(APIView):
                     'layout2': layout2
                 }
             ],
-            'tableData': {
-                'data': [[
-                    str(ind),
-                    f"{sum(filter(lambda x: x!=None, obj['hp10'])):.2f}",
-                    f"{sum(filter(lambda x: x!=None, obj['hp007'])):.2f}",
-                    f"{sum(filter(lambda x: x!=None, obj['hp10tn'])):.2f}",
-                    f"{sum(filter(lambda x: x!=None, obj['hp10fn'])):.2f}"
-                ] for ind, obj in table_data.items()]
-            }
+            'tableData': output['tableData']
         }
 
         # serializer = PersonnelDosimetryResultSerializer(results, many=True)
@@ -538,74 +477,3 @@ class FilterList(APIView):
             output.append({'id': '#idDosimeterPlacement', 'choices': dps, 'selectedValue': 0})
 
         return Response(output)
-
-
-# Helper functions
-def _add_time_filter(databaseobject, time_interval: int=None):
-    if time_interval is None or time_interval == 0:
-        return databaseobject.filter(measurement_period_center__gte=(dt.now() - relativedelta(years=1)))
-    elif time_interval > 1:
-        return databaseobject.filter(measurement_period_center__year=time_interval)
-    else:
-        return databaseobject
-
-
-def _add_clinic_filter(databaseobject, clinic):
-    if clinic is not None:
-        if isinstance(clinic, int) and clinic > 0:
-            return databaseobject.filter(clinic_id__exact=clinic)
-        else:
-            try:
-                clinic = int(clinic)
-            except:
-                return databaseobject
-            if clinic > 0:
-                return databaseobject.filter(clinic_id__exact=clinic)
-
-    return databaseobject
-
-
-def _add_profession_filter(databaseobject, profession):
-    if profession is not None:
-        if isinstance(profession, int) and profession > 0:
-            return databaseobject.filter(personnel__profession_id__exact=profession)
-        else:
-            try:
-                profession = int(profession)
-            except:
-                return databaseobject
-            if profession > 0:
-                return databaseobject.filter(personnel__profession_id__exact=profession)
-
-    return databaseobject
-
-
-def _add_personnel_filter(databaseobject, personnel):
-    if personnel is not None:
-        if isinstance(personnel, int) and personnel > 0:
-            return databaseobject.filter(personnel_id__exact=personnel)
-        else:
-            try:
-                personnel = int(personnel)
-            except:
-                return databaseobject
-            if personnel > 0:
-                return databaseobject.filter(personnel_id__exact=personnel)
-
-    return databaseobject
-
-
-def _add_dosimeter_placement_filter(databaseobject, dosimeter_placement):
-    if dosimeter_placement is not None:
-        if isinstance(dosimeter_placement, int) and dosimeter_placement > 0:
-            return databaseobject.filter(vendor_dosimetry_placement__dosimeter_placement_id__exact=dosimeter_placement)
-        else:
-            try:
-                dosimeter_placement = int(dosimeter_placement)
-            except:
-                return databaseobject
-            if dosimeter_placement > 0:
-                return databaseobject.filter(
-                    vendor_dosimetry_placement__dosimeter_placement_id__exact=dosimeter_placement)
-
-    return databaseobject
