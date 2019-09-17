@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    #'django_python3_ldap',
+    'django_python3_ldap',
     'webpack_loader',
     'rest_framework',
     'apps.frontpage',

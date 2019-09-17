@@ -45,3 +45,47 @@ FLUORO_TIME_DB_ENGINE = {
 FLUORO_TIME_ORBIT_TABLE = '<table/view-name-in-orbit>'
 
 RADIOPHARMACEUTICAL_BASE_DIR = '<path-to-radiopharmaceutical-base-dir>'
+
+# ---------------------------------- LDAP authentication ---------------------------------- #
+# These settings will need to be changed for each installation
+LDAP_AUTH_URL = "<LDAP-URL>"
+LDAP_AUTH_USE_TLS = True  # Recommended to use TLS
+LDAP_AUTH_SEARCH_BASE = "DC=vll,DC=se"  # E.g., "DC=<domain>,DC=<other-dc-setting>
+LDAP_AUTH_ACTIVE_DIRECTORY_DOMAIN = '<AD-directoyr-domain>'
+LDAP_AUTH_OBJECT_CLASS = "user"
+
+# User model fields mapped to the LDAP
+# attributes that represent them.
+LDAP_AUTH_USER_FIELDS = {
+    "username": "sAMAccountName",
+    "email": "mail",
+}
+# A tuple of django model fields used to uniquely identify a user.
+LDAP_AUTH_USER_LOOKUP_FIELDS = ("username",)
+# Set connection/receive timeouts (in seconds) on the underlying `ldap3` library.
+# LDAP_AUTH_CONNECT_TIMEOUT = None
+# LDAP_AUTH_RECEIVE_TIMEOUT = None
+#
+LDAP_AUTH_FORMAT_USERNAME = "django_python3_ldap.utils.format_username_active_directory_principal"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django_python3_ldap": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        },
+    },
+}
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    "django_python3_ldap.auth.LDAPBackend",
+)
+# ----------------------------------------------------------------------------------------- #
