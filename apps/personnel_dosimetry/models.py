@@ -55,15 +55,26 @@ class VendorDosimeterPlacement(models.Model):
         return self.vendor_dosimeter_placement
 
 
+class ClinicDisplayName(models.Model):
+    display_name = models.CharField(max_length=400, blank=False, null=False)
+
+    def __str__(self):
+        return self.display_name
+
+    class Meta:
+        ordering = ('display_name',)
+
+
 class Clinic(models.Model):
     clinic = models.CharField(max_length=4000, blank=False, null=False, unique=True)
     display_clinic = models.CharField(max_length=400, blank=False, null=False, default=clinic)
+    display_name = models.ForeignKey(ClinicDisplayName, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         return self.display_clinic
 
     class Meta:
-        ordering = ('display_clinic',)
+        ordering = ('display_name__display_name',)
 
 
 class Result(models.Model):
