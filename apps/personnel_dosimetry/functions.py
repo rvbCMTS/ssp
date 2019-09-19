@@ -178,6 +178,30 @@ def _get_plot_and_table_data_query(time_interval: int, clinic: Optional[int] = N
     return query
 
 
+def _get_dosimeter_placement(qo):
+    """Returns the dosimeter placement if it exists, else returns the vendor dosimeter placement
+
+    :param qo: The query object to check
+    :return:
+    """
+    if qo.vendor_dosimetry_placement.dosimeter_placement is not None:
+        return qo.vendor_dosimetry_placement.dosimeter_placement.dosimeter_placement
+
+    return qo.vendor_dosimetry_placement.vendor_dosimeter_placement
+
+
+def _get_dosimeter_laterality(qo):
+    """Returns the dosimeter laterality if it is set else returns an empty string
+
+    :param qo: The query object to check
+    :return:
+    """
+    if qo.vendor_dosimetry_placement.dosimeter_laterality is not None:
+        return qo.vendor_dosimetry_placement.dosimeter_laterality.dosimeter_laterality
+
+    return ''
+
+
 def get_plot_and_table_data(user, time_interval: int, clinic: Optional[int] = None, profession: Optional[int] = 0,
                             personnel: Optional[int] = 0, dosimeter_placement: Optional[int] = 0,
                             exclude_spot_check: Optional[bool] = True,
@@ -189,9 +213,9 @@ def get_plot_and_table_data(user, time_interval: int, clinic: Optional[int] = No
     df = DataFrame([{
         'Personnel': qo.personnel.person_name,
         'PersonnelAnon': qo.personnel_id,
-        'DosimetryPlacement': qo.vendor_dosimetry_placement.dosimeter_placement.dosimeter_placement,
+        'DosimetryPlacement': _get_dosimeter_placement(qo=qo),
         'VendorDosimetryPlacement': qo.vendor_dosimetry_placement.vendor_dosimeter_placement,
-        'DosimeterLaterality': qo.vendor_dosimetry_placement.dosimeter_laterality.dosimeter_laterality,
+        'DosimeterLaterality': _get_dosimeter_laterality(qo=qo),
         'PeriodCenter': qo.measurement_period_center,
         'Hp10': qo.hp10,
         'Hp007': qo.hp007,
@@ -202,7 +226,7 @@ def get_plot_and_table_data(user, time_interval: int, clinic: Optional[int] = No
     if user.has_perm('personnel_dosimetry.view_personnel_names'):
         df['PersonnelDisplayName'] = df.Personnel + ' (' + df.PersonnelAnon.map(str) + ')' + ' ' + df.DosimetryPlacement + ', ' + df.DosimeterLaterality
     else:
-        df['PersonnelDisplayName'] = df.PersonnelAnon + ' ' + df.DosimetryPlacement + ', ' + df.DosimeterLaterality
+        df['PersonnelDisplayName'] = df.PersonnelAnon.map(str) + ' ' + df.DosimetryPlacement + ', ' + df.DosimeterLaterality
 
     return df
 
@@ -236,6 +260,7 @@ def format_plot_and_table_data(data: DataFrame) -> Dict[str, Any]:
                                          y_range=plot_ranges['Hp10fn']),
     ]
 
+
     # FORMAT TABLE DATA
     table_data = data[['PersonnelDisplayName', 'Hp10', 'Hp007', 'Hp10tn', 'Hp10fn']].groupby(
         by='PersonnelDisplayName'
@@ -253,4 +278,5 @@ def format_plot_and_table_data(data: DataFrame) -> Dict[str, Any]:
         (f"{row.Hp10fn:.2f}" if not np.isnan(row.Hp10fn) else "-")
     ] for row in table_data.itertuples()]
 
-    return {'plotData': output_plots, 'tableData': {'data': output_table_data}}
+    return {'plotData': output_plots, 'tableData': {'data': output_table_data},
+            'showNeutronPlots': (not data.Hp10fn.isnull().all() or not data.Hp10tn.isnull().all())}
