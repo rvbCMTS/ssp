@@ -85,7 +85,8 @@ DOSE_UNITS = (
     ('dgcm', 'dGycm2'),
     ('cgm', 'cGym2'),
     ('cgdm', 'cGydm2'),
-    ('cgcm', 'cGycm2')
+    ('cgcm', 'cGycm2'),
+    ('mgcm', 'mGycm2')
 )
 
 DOSE_CONV_FACTOR = {
