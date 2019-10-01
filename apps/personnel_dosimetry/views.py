@@ -130,8 +130,8 @@ class FilterList(APIView):
             # Get a list of the clinics
             clinics = Result.objects.all()
             clinics = _add_time_filter(databaseobject=clinics, time_interval=time_interval)
-            clinics = clinics.values('clinic_id', 'clinic__display_clinic').distinct()
-            clinics = [{'id': obj['clinic_id'], 'name': obj['clinic__display_clinic']} for obj in clinics]
+            clinics = clinics.values('clinic__display_name_id', 'clinic__display_name__display_name').distinct()
+            clinics = [{'id': obj['clinic__display_name_id'], 'name': obj['clinic__display_name__display_name']} for obj in clinics]
             clinics.append({'id': 'all', 'name': 'Alla'})
             clinics.insert(0, {'id': 'null', 'name': 'Välj klinik'})
 
