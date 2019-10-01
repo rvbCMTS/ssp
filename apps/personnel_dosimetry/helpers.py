@@ -15,14 +15,14 @@ def _add_time_filter(databaseobject, time_interval: int=None):
 def _add_clinic_filter(databaseobject, clinic):
     if clinic is not None:
         if isinstance(clinic, int) and clinic > 0:
-            return databaseobject.filter(clinic_id__exact=clinic)
+            return databaseobject.filter(clinic__display_name_id__exact=clinic)
         else:
             try:
                 clinic = int(clinic)
             except:
                 return databaseobject
             if clinic > 0:
-                return databaseobject.filter(clinic_id__exact=clinic)
+                return databaseobject.filter(clinic__display_name_id__exact=clinic)
 
     return databaseobject
 
