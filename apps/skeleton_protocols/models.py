@@ -34,6 +34,7 @@ class Protocol(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     history = models.ManyToManyField('self', symmetrical=False)
     history_flag = models.BooleanField(blank=False, null=False)
+    group = models.ManyToManyField('self', related_name='linked_protocols', symmetrical=False)
 
     def __str__(self):
         return self.ris_name

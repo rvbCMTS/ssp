@@ -8,67 +8,11 @@ import pandas as pd
 
 def list_exams(request):
     # # query to get the latest backup for each machine
-    # backup_list = [Backup.objects.all().filter(machine=m).latest() for m in Machine.objects.all()]
-    #
-    # # all distinct exams
-    # tt = []
-    # for e in Protocol.objects.values('exam_name').distinct().filter(backup__in=backup_list):
-    #     gg = {}
-    #     gg.update({'exam_name': e['exam_name']})
-    #
-    #     # all protocols and machines for each exam
-    #     p_and_m = list(Protocol.objects.values('ris_name', 'machine__hospital_name').filter(backup__in=backup_list, exam_name=e['exam_name']))
-    #
-    #     # unique dicts in list - machines
-    #     h_names = list({v['machine__hospital_name']: v for v in p_and_m}.values())
-    #
-    #     # sort h_names
-    #     h_names = sorted(h_names, key=lambda k: k['machine__hospital_name'])
-    #
-    #     # build string of h_names
-    #     machines_for_exam = ''
-    #     for m in h_names:
-    #         machines_for_exam += f'{m["machine__hospital_name"]} '
-    #
-    #     gg.update({'machine': machines_for_exam, 'pk':[]})
-    #
-    #     # unique list and sorting of ris_names
-    #     ris_names = list({v['ris_name']: v for v in p_and_m}.values())
-    #     ris_names = sorted(ris_names, key=lambda k: k['ris_name'])
-    #
-    #     protocols = []
-    #     for p in ris_names:
-    #
-    #         # all primary keys for each protocol
-    #         pks = list(Protocol.objects.values('pk').filter(backup__in=backup_list,
-    #                                                         exam_name=e['exam_name'],
-    #                                                         ris_name=p['ris_name']))
-    #         pks = list({v['pk'] for v in pks})
-    #
-    #         # all machines for each protocol
-    #         h_names = list(Protocol.objects.values('machine__hospital_name').filter(backup__in=backup_list,
-    #                                                                                 exam_name=e['exam_name'],
-    #                                                                                 ris_name=p['ris_name']))
-    #
-    #         # sort and build string  for h_names
-    #         h_names = sorted(h_names, key=lambda k: k['machine__hospital_name'])
-    #         machines_for_protocols = ''
-    #         for m in h_names:
-    #             machines_for_protocols += f'{m["machine__hospital_name"]} '
-    #
-    #         protocols.append({'pk': pks, 'exam_name': p['ris_name'], 'machine': machines_for_protocols})
-    #
-    #     gg.update({'children': protocols})
-    #
-    #     # make Json data format for TreeGrid
-    #     tt.append(gg)
-
-    # # query to get the latest backup for each machine
     backup_list = [Backup.objects.all().filter(machine=m).latest() for m in Machine.objects.all()]
 
     aa = []
     # Get data from database
-    df = pd.DataFrame(list(Protocol.objects.filter(backup__in=backup_list).values('ris_name','exam_name','machine__hospital_name','pk')))
+    df = pd.DataFrame(list(Protocol.objects.filter(backup__in=backup_list).values('ris_name','exam_name','machine__hospital_name','kv','mas','technique','filter_cu','pk')))
 
     # all distinct exams
     for exam in df.sort_values('exam_name').exam_name.unique():
@@ -78,13 +22,11 @@ def list_exams(request):
         # build string for machines
         machines_str = ''
         for m in machines:
-            machines_str += f'{m} '
+            machines_str += f'<span class="badge badge-secondary">{m}</span>&nbsp;'
 
-        # unique ris_names for this exam, sorted
-        ris_names = df[df['exam_name']==exam].sort_values('ris_name').ris_name.unique()
-
+        # unique protocols for each exam
         prot = []
-        for p in ris_names:
+        for p in df[df['exam_name']==exam].sort_values('ris_name').ris_name.unique():
 
             # all primary keys for each protocol
             pks = df[(df['ris_name']==p) & (df['exam_name']==exam)].pk.tolist()
@@ -95,13 +37,60 @@ def list_exams(request):
             # build string for machines
             machines_protocols_str = ''
             for m in machines:
-                machines_protocols_str += f'{m} '
+                machines_protocols_str += f'<span class="badge badge-secondary">{m}</span>&nbsp;'
 
-            prot.append({'exam_name': p, 'machine': machines_protocols_str, 'pk': pks})
+            detail = []
+            for machine in machines:
+                info = df[(df['ris_name']==p) & (df['exam_name']==exam) & (df['machine__hospital_name']==machine)].values
+                detail_str = f'{info[0][7]} {info[0][2]} kV {info[0][4]} mAs'
+
+                pk = df[(df['ris_name']==p) & (df['exam_name']==exam) & (df['machine__hospital_name']==machine)].pk.tolist()
+                detail.append({'exam_name': f'<span class="badge badge-secondary">{machine}</span>', 'machine': detail_str, 'pk': pk})
+
+            prot.append({'exam_name': p, 'machine': machines_protocols_str, 'pk': pks, 'children': detail})
 
         aa.append({'exam_name': exam, 'machine': machines_str, 'pk': [], 'children': prot})
 
     return JsonResponse({'data': aa})
+
+    # # # query to get the latest backup for each machine
+    # backup_list = [Backup.objects.all().filter(machine=m).latest() for m in Machine.objects.all()]
+    #
+    # # all distinct exams
+    # tt = []
+    # for exam in Protocol.objects.filter(backup__in=backup_list).values('exam_name').distinct():
+    #
+    #     # unique machines for this exam, sorted
+    #     machines = Protocol.objects.values('machine__hospital_name').distinct().order_by('machine__hospital_name').filter(exam_name=exam['exam_name'], backup__in=backup_list)
+    #
+    #     # build string for machines
+    #     machines_str = ''
+    #     for m in machines:
+    #         machines_str += f'{m["machine__hospital_name"]} '
+    #
+    #
+    #     prot = []
+    #     for protocol in Protocol.objects.values('ris_name').distinct().order_by('ris_name').filter(exam_name=exam['exam_name'], backup__in=backup_list):
+    #
+    #         # all unique machines for each protocol, sorted
+    #         machines_protocols = Protocol.objects.values('machine__hospital_name').order_by('machine__hospital_name').\
+    #                             filter(exam_name=exam['exam_name'], backup__in=backup_list, ris_name=protocol['ris_name'])
+    #
+    #         # build string for machines
+    #         machines_protocols_str = ''
+    #         for m in machines_protocols:
+    #             machines_protocols_str += f'{m["machine__hospital_name"]} '
+    #
+    #         # all pk for each protocol, sorted
+    #         pks = list(Protocol.objects.values('pk').order_by('ris_name').\
+    #                             filter(exam_name=exam['exam_name'], backup__in=backup_list, ris_name=protocol['ris_name']))
+    #         pks = list({v['pk'] for v in pks})
+    #
+    #         prot.append({'exam_name': protocol['ris_name'], 'machine': machines_protocols_str, 'pk': pks})
+    #
+    #     tt.append({'exam_name': exam['exam_name'], 'machine': machines_str, 'pk': [], 'children': prot})
+    #
+    # return JsonResponse({'data': tt})
 
 def skeleton_protocols_results(request):
     # primary keys for protocol comparsion

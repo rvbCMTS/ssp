@@ -419,7 +419,11 @@ def _prot2db(machine, df):
                     protocol_entry.history_flag = True
                     protocol_entry.save()
 
-
+            # Linking similar protocols (same ris_name and exam_name)
+            sim = Protocol.objects.filter(ris_name=row.ris_name, exam_name=row.exam_name).exclude(pk=protocol_entry.pk)
+            if len(sim)>0:
+                for p in sim:
+                    protocol_entry.linked_protocols.add(p)
 
 
 

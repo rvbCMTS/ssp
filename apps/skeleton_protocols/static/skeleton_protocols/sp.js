@@ -71,7 +71,7 @@ $(document).ready(function() {
         ],
 
         treeGrid: {
-            left : 0,
+            left : 10,
             expandIcon: '<i class="fas fa-caret-right"></i>',
             collapseIcon: '<i class="fas fa-caret-down"></i>'
         },
