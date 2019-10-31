@@ -256,12 +256,14 @@ class IndexSummaryData(APIView):
                 ar = row.exam_description__anatomy_region__region
             if row.year == current_year:
                 median_plot_current[anatomy_regions.index(ar)] = dt.combine(dt.date(dt.now()), time(
-                    minute=int(floor(row.total_fluoro_time)),
+                    hour = int(floor(row.total_fluoro_time/60)),
+                    minute=int(floor(row.total_fluoro_time - floor(row.total_fluoro_time/60)*60)),
                     second=int((row.total_fluoro_time - floor(row.total_fluoro_time)) * 60))
                 )
             else:
                 median_plot_previous[anatomy_regions.index(ar)] = dt.combine(dt.date(dt.now()), time(
-                    minute=int(floor(row.total_fluoro_time)),
+                    hour=int(floor(row.total_fluoro_time / 60)),
+                    minute=int(floor(row.total_fluoro_time - floor(row.total_fluoro_time / 60) * 60)),
                     second=int((row.total_fluoro_time - floor(row.total_fluoro_time))*60))
                 )
 
