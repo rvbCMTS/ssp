@@ -82,7 +82,11 @@ class RequestParameterValues:
             time_interval = 0
 
         clinic = request.query_params.get('clinic', None)
-        if clinic is not None:
+        if clinic == 'null':
+            clinic = 0
+        if isinstance(clinic, str) and clinic == 'all':
+            clinic = 0
+        else:
             clinic = int(clinic)
 
         profession = request.query_params.get('profession', 0)

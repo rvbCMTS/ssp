@@ -16,11 +16,15 @@ DATABASES = {
 }
 
 FRONT_PAGE_PARAMETERS = {
-    'OrganisationName': '<custom-organisation-name>',
+    'OrganisationName': 'Region Västerbotten',
     'ContactInformation': [
         {
-            'Name': '<Contact-Name-1>',
-            'Email': '<Contact-Email-1>'
+            'Name': 'Josef Lundman',
+            'Email': 'josef.lundman@regionvasterbotten.se'
+        },
+        {
+            'Name': 'Pontus Svenmarker',
+            'Email': 'pontus.svenmarker@regionvasterbotten.se'
         },
     ]
 }
