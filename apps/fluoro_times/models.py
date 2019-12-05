@@ -86,8 +86,12 @@ DOSE_UNITS = (
     ('cgm', 'cGym2'),
     ('cgdm', 'cGydm2'),
     ('cgcm', 'cGycm2'),
+    ('mgm', 'mGym2'),
+    ('mgdm' 'mGydm2'),
     ('mgcm', 'mGycm2'),
-    ('ugm', 'uGym2')
+    ('ugm', 'uGym2'),
+    ('ugdm', 'uGydm2'),
+    ('ugcm', 'uGycm2')
 )
 
 DOSE_CONV_FACTOR = {
@@ -100,8 +104,12 @@ DOSE_CONV_FACTOR = {
     'cgm': 100,
     'cgdm': 1,
     'cgcm': 0.01,
+    'mgm': 10,
+    'mgdm':0.1,
     'mgcm': 0.001,
-    'ugm': 0.01
+    'ugm': 1,
+    'ugdm': 0.01,
+    'ugcm': 0.0001
 }
 
 
