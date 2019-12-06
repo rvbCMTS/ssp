@@ -87,7 +87,7 @@ DOSE_UNITS = (
     ('cgdm', 'cGydm2'),
     ('cgcm', 'cGycm2'),
     ('mgm', 'mGym2'),
-    ('mgdm' 'mGydm2'),
+    ('mgdm', 'mGydm2'),
     ('mgcm', 'mGycm2'),
     ('ugm', 'uGym2'),
     ('ugdm', 'uGydm2'),
