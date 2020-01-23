@@ -6,9 +6,16 @@ import re
 import pandas
 import datetime
 from ..models import Machine, Protocol, Backup
+from zipfile import ZipFile
 
 
 def parse_db(input_directory: str):
+    # find all .zip backups and copy databases to pex_library directory
+    zips = _find('G:\\Röntgen\\LÄNSKLINIK\\Sektion Skelett (vll)\\PEX-databaser\\','.zip')
+    for zip in zips:
+        with ZipFile(zip, 'r') as z:
+            file_name = [s for s in z.namelist() if '.sqlite' in s] + [s for s in z.namelist() if '.mdb' in s]
+            z.extract(file_name[0], f'apps/skeleton_protocols/tools/pex_library/{file_name[0]}')
 
     # find mdb databases
     mdbs = _find(input_directory, '.mdb')
@@ -18,8 +25,8 @@ def parse_db(input_directory: str):
     if len(mdbs) > 0:
         for mdb in mdbs:
             print(mdb)
-            if not os.path.isfile(mdb.replace('.mdb','.sqlite')):
-                _mdb2sqlite(mdb, mdb.replace('.mdb','.sqlite'))
+            if not os.path.isfile(re.sub('.mdb$','.sqlite',mdb)):
+                _mdb2sqlite(mdb, re.sub('.mdb$','.sqlite',mdb))
     print('klar')
 
 
@@ -35,6 +42,7 @@ def parse_db(input_directory: str):
             [machine, df] = _parse_pex_db(db)
 
             # clean data before insert to new database
+
             [machine, df] = _clean_up(machine, df)
 
             # place dataframe in new database
@@ -190,33 +198,60 @@ def _parse_pex_db(sqlite_database_path):
 def _clean_up(machine, df):
     # Distinct Lut names
     lut_names = {
-        '1':'01 Service Bone Black',
-        '2':'02 Service Bone White',
-        '3':'03 Low Contrast',
-        '4':'04 Skull/Hip',
-        '4 Extremity/Skull':'04 Skull/Hip',
-        '04 skull hip':'04 Skull/Hip',
-        '5':'05 Chest',
-        '5 Chest':'05 Chest',
-        '6':'06 Extremity/Skull',
-        '6 Extremity/Skull': '06 Extremity/Skull',
+        '1':'01',
+        '2':'02',
+        '3':'03',
+        '4':'04',
+        '04 Skull/Hip':'04',
+        '4 Extremity/Skull':'04',
+        '04 skull hip':'04',
+        '5':'05',
+        '5 Chest':'05',
+        '6':'06',
+        '6 Extremity/Skull': '06',
+        '06 shoulder extremities':'06',
         '7':'07',
         '07 cs':'07',
-        '8':'08 Chest',
-        '8 Chest':'08 Chest',
-        '9':'09 Low Contrast',
-        '10':'10 Abdomen/Ribs',
-        '11':'11 Abdomen/Ribs',
-        '11 rips':'11 Abdomen/Ribs',
-        '12':'12 Extremity',
-        '13':'13 Spine/Abdomen',
-        '13 c-spine':'13 Spine/Abdomen',
-        '14':'14 Chest Mediastinum',
-        '15':'15 Spine/Abdomen',
+        '8':'08',
+        '08 lung':'08',
+        '8 Chest':'08',
+        '9':'09',
+        '10 Abdomen/Ribs':'10',
+        '11 rips':'11',
+        '12 Extremity':'12',
+        '13 c-spine':'13',
+        '13 Spine/Abdomen':'13',
+        '14 Chest Mediastinum':'14',
+        '14 chest':'14',
+        '15 Spine/Abdomen':'15',
     }
-
     for ind in lut_names:
         df.lut.replace(ind,lut_names[ind], inplace=True)
+
+    # Distinct Diamond view names
+    diamond_view_names = {
+        '00 Off':'00',
+        '01 Thorax pa - high contrast':'01',
+        '02 Thorax pa':'02',
+        '03 Thorax lateral - high contrast': '03',
+        '04 Thorax lateral':'04',
+        '05 Pelvis - high contrast':'05',
+        '06 Pelvis':'06',
+        '07 Skull - high contrast':'07',
+        '08 Skull':'08',
+        '09 Shoulder - high contrast':'09',
+        '10 Shoulder':'10',
+        '11 Extremities - high contrast':'11',
+        '12 Extremities':'12',
+        '13 Spine - high contrast':'13',
+        '14 Spine':'14',
+        '15 Cervical Spine - high contrast':'15',
+        '16 Cervical Spine':'16',
+        '17 Abdomen - high contrast':'17',
+        '18 Abdomen':'18',
+    }
+    for ind in diamond_view_names:
+        df.diamond_view.replace(ind,diamond_view_names[ind], inplace=True)
 
 
     # Distinct Modality names
@@ -225,10 +260,35 @@ def _clean_up(machine, df):
         'Skellefteå S02':'S02',
         'NUS, U208':'U208',
         'Lycksele L10':'L10',
+        'NUS U207, Umea':'U207',
+        'Lycksele Lasarett Lab2':'L02',
     }
-
     for ind in modality_names:
         machine.hospital_name.replace(ind,modality_names[ind], inplace=True)
+
+    # Short notation for fluoro
+    fluoro_names = {
+        'CP_Positioning':'Pos',
+        'CP_RAD_Positioning':'Pos',
+    }
+    for ind in fluoro_names:
+        df.fp_set.replace(ind,fluoro_names[ind], inplace=True)
+
+    # Short notation for focus
+    focus_names = {
+        1:'FF',
+        2:'GF',
+    }
+    for ind in focus_names:
+        df.focus.replace(ind,focus_names[ind], inplace=True)
+
+    # Short notation for grid
+    grid_names = {
+        0: '',
+        -1: 'U',
+    }
+    for ind in grid_names:
+        df.grid.replace(ind, grid_names[ind], inplace=True)
 
 
     # Short notation for acquisition_system

@@ -31,7 +31,6 @@ def ajax_protocols_results(request):
     tt = []
     for obj in f.qs:
         tt.append([obj.exam_name,
-                   obj.acquisition_system,
                    obj.ris_name,
                    obj.machine.hospital_name,])
         tt[-1] += [obj.technique,]
