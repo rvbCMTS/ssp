@@ -7,6 +7,7 @@ import pandas
 import datetime
 from ..models import Machine, Protocol, Backup
 from zipfile import ZipFile
+from django.conf import settings
 
 
 def parse_db(input_directory: str):
@@ -151,7 +152,7 @@ def _parse_pex_db(sqlite_database_path):
     db_version = global_vars.iloc[:, 1][0]
 
     # Find which machine - query to db and conversion to dataframe
-    fd = open('apps\\skeleton_protocols\\tools\\machine.sql', 'r')
+    fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\machine.sql'), 'r')
     sql_machine = fd.read()
     fd.close()
     machine = pandas.read_sql_query(sql_machine, conn)
@@ -162,7 +163,7 @@ def _parse_pex_db(sqlite_database_path):
 
     # call correct sql-query
     if db_version == '45':
-        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv45.sql', 'r')
+        fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\organ_programs_dbv45.sql'), 'r')
         sql_organ_programs = fd.read()
         fd.close()
         # Read from db to dataframe
@@ -170,13 +171,13 @@ def _parse_pex_db(sqlite_database_path):
         # Add None for grid
         df['grid'] = [float('nan')]*len(df)
     elif db_version == '60':
-        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv60.sql', 'r')
+        fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\organ_programs_dbv60.sql'), 'r')
         sql_organ_programs = fd.read()
         fd.close()
         # Read from db to dataframe
         df = pandas.read_sql_query(sql_organ_programs, conn)
     elif db_version == '72.01':
-        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv7201.sql', 'r')
+        fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\organ_programs_dbv7201.sql'), 'r')
         sql_organ_programs = fd.read()
         fd.close()
         # Read from db to dataframe
