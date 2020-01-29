@@ -1,3 +1,4 @@
+
 // Styling dataTable
 $(document).ready(function() {
     $("#idResultTable").DataTable( {

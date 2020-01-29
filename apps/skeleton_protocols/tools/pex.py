@@ -16,7 +16,7 @@ def parse_db(input_directory: str):
     for zip in zips:
         with ZipFile(zip, 'r') as z:
             file_name = [s for s in z.namelist() if '.sqlite' in s] + [s for s in z.namelist() if '.mdb' in s]
-            z.extract(file_name[0], f'apps/skeleton_protocols/tools/pex_library/{file_name[0]}')
+            z.extract(file_name[0], os.path.join(settings.BASE_DIR, f'apps/skeleton_protocols/tools/pex_library/{file_name[0]}'))
 
     # find mdb databases
     mdbs = _find(input_directory, '.mdb')
@@ -220,6 +220,7 @@ def _clean_up(machine, df):
         '10 Abdomen/Ribs':'10',
         '11 rips':'11',
         '12 Extremity':'12',
+        '12 extremities':'12',
         '13 c-spine':'13',
         '13 Spine/Abdomen':'13',
         '14 Chest Mediastinum':'14',
@@ -263,6 +264,14 @@ def _clean_up(machine, df):
         'Lycksele L10':'L10',
         'NUS U207, Umea':'U207',
         'Lycksele Lasarett Lab2':'L02',
+        'NUS Umeå U220':'U220',
+        'NUS Umeå U222':'U222',
+        'U204 NUS, Umeå':'U204',
+        'U205 NUS':'U205',
+        'NUS Umeå U221':'U221',
+        'U208 NUS, Umeå':'U208',
+        'U207 NUS, Umeå':'U207',
+        'U206 NUS, Umeå':'U206',
     }
     for ind in modality_names:
         machine.hospital_name.replace(ind,modality_names[ind], inplace=True)
@@ -317,6 +326,8 @@ def _prot2db(machine, df):
     # if exits (check only host_identifier), get entry, otherwise create it
     if Machine.objects.filter(host_identifier = machine.host_identifier[0]).exists():
         machine_entry = Machine.objects.get(host_identifier = machine.host_identifier[0])
+        # update with latest hospital name
+        Machine.objects.filter(host_identifier = machine.host_identifier[0]).update(hospital_name = machine.hospital_name[0])
     else:
         machine_entry = Machine.objects.create(hospital_name=machine.hospital_name[0],
                                                host_identifier=machine.host_identifier[0])
