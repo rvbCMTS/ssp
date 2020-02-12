@@ -272,6 +272,9 @@ def _clean_up(machine, df):
         'U208 NUS, Umeå':'U208',
         'U207 NUS, Umeå':'U207',
         'U206 NUS, Umeå':'U206',
+        'Skellefteå S12':'S12',
+        'Skellefteå, S04':'S04',
+        'Skellefteå S01':'S01',
     }
     for ind in modality_names:
         machine.hospital_name.replace(ind,modality_names[ind], inplace=True)
@@ -280,6 +283,7 @@ def _clean_up(machine, df):
     fluoro_names = {
         'CP_Positioning':'Pos',
         'CP_RAD_Positioning':'Pos',
+        'Position Skellefteå':'Pos',
     }
     for ind in fluoro_names:
         df.fp_set.replace(ind,fluoro_names[ind], inplace=True)
