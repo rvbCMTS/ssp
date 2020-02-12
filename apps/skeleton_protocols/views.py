@@ -12,7 +12,7 @@ def list_exams(request):
 
     aa = []
     # Get data from database
-    df = pd.DataFrame(list(Protocol.objects.filter(backup__in=backup_list).values('ris_name','exam_name','machine__hospital_name','kv','mas','technique','filter_cu','pk')))
+    df = pd.DataFrame(list(Protocol.objects.filter(backup__in=backup_list).values('ris_name','exam_name','machine__hospital_name','kv','mas','technique','filter_cu','pk','focus','sensitivity','grid')))
 
     # all distinct exams
     for exam in df.sort_values('exam_name').exam_name.unique():
@@ -42,7 +42,10 @@ def list_exams(request):
             detail = []
             for machine in machines:
                 info = df[(df['ris_name']==p) & (df['exam_name']==exam) & (df['machine__hospital_name']==machine)].values
-                detail_str = f'{info[0][7]} {info[0][2]} kV {info[0][4]} mAs'
+                if info[0][10] == '2 pt':
+                    detail_str = f'{info[0][4]} kV {info[0][6]} mAs F:{info[0][1]} {info[0][2]} R:{info[0][3]}'
+                else:
+                    detail_str = f'{info[0][4]} kV S:{info[0][9]}   F:{info[0][1]} {info[0][2]} R:{info[0][3]}'
 
                 pk = df[(df['ris_name']==p) & (df['exam_name']==exam) & (df['machine__hospital_name']==machine)].pk.tolist()
                 detail.append({'exam_name': f'<span class="badge badge-secondary">{machine}</span>', 'machine': detail_str, 'pk': pk})
