@@ -1,6 +1,7 @@
 from collections import namedtuple
 from datetime import datetime as dt
 from dateutil.relativedelta import relativedelta
+from django.contrib import messages
 from django.db.models import Avg
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, Http404
@@ -43,9 +44,11 @@ def mgqa_measurement_form(request):
                     )
                     roi_value.save()
 
+                messages.success(request=request, message=f'Mammografi QA-resulatet sparat')
                 # Redirect to the result view
-                return HttpResponseRedirect(reverse('mg:mg-weekly-qa-result'))
-        raise Http404
+                # return HttpResponseRedirect(reverse('mg:mg-weekly-qa-result'))
+        else:
+            raise Http404
 
     modality = request.GET.get('modality', None)
     update_form = request.GET.get('updateForm', None)

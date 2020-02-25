@@ -56,9 +56,9 @@ class Operator(models.Model):
 
     def __str__(self):
         if self.clinic is not None:
-            msg = f'{self.last_name}, {self.last_name} ({self.clinic.name})'
+            msg = f'{self.last_name}, {self.first_name} ({self.clinic.name})'
         else:
-            msg = f'{self.last_name}, {self.last_name} ()'
+            msg = f'{self.last_name}, {self.first_name} ()'
         return msg
 
     class Meta:
@@ -85,7 +85,13 @@ DOSE_UNITS = (
     ('dgcm', 'dGycm2'),
     ('cgm', 'cGym2'),
     ('cgdm', 'cGydm2'),
-    ('cgcm', 'cGycm2')
+    ('cgcm', 'cGycm2'),
+    ('mgm', 'mGym2'),
+    ('mgdm', 'mGydm2'),
+    ('mgcm', 'mGycm2'),
+    ('ugm', 'uGym2'),
+    ('ugdm', 'uGydm2'),
+    ('ugcm', 'uGycm2')
 )
 
 DOSE_CONV_FACTOR = {
@@ -97,7 +103,13 @@ DOSE_CONV_FACTOR = {
     'dgcm': 0.1,
     'cgm': 100,
     'cgdm': 1,
-    'cgcm': 100
+    'cgcm': 0.01,
+    'mgm': 10,
+    'mgdm':0.1,
+    'mgcm': 0.001,
+    'ugm': 1,
+    'ugdm': 0.01,
+    'ugcm': 0.0001
 }
 
 

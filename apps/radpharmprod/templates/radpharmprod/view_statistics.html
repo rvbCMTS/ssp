@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Radiofarmakaproduktion{% endblock title %}
+
+{% load static %}
+{% block extra-styles %}
+<link href="{% static 'radpharmprod/radpharmprod.css' %}" rel="stylesheet">
+<link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+<script src="{% static 'js/plotly.min.js' %}"></script>
+<script src="{% static 'js/moment.min.js' %}"></script>
+<script src="{% static 'DataTables/datatables.min.js' %}"></script>
+<script src="{% static 'radpharmprod/radpharmprod.js' %}"></script>
+{% endblock extra-scripts %}
+
+<!-- Main Content -->
+{% block main %}
+<h1>Radiofarmakaproduktion</h1>
+
+<!-- Filter -->
+<div class="row">
+    <div class="container card-container">
+        <div class="card text-white bg-dark mb-3 form-card">
+            <div class="card-header">Filter</div>
+
+            <div class="card-body">
+                <div class="row form-row">
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                        <div class="form-stacked filter-select">
+                            <label for="idTime">Tidsintervall</label>
+                            <select id="idTime" name="TimeInterval" class="update-filter-choices">
+                                <option value="0">Senaste 12 månaderna</option>
+                                {% for year in years %}
+                                <option value="{{ year }}">År {{ year }}</option>
+                                {% endfor %}
+                                <option value="1">Annat</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                        <div class="form-stacked filter-select">
+                            <label for="idRadiopharmaceutical">Radiofarmaka</label>
+                            <select id="idRadiopharmaceutical" name="Radiopharmaceutical" class="update-data update-filter-choices">
+                                <option value="null">Välj radiofarmaka</option>
+                                {% for obj in radpharm %}
+                                <option value="{{ obj }}">{{ obj }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="idLoaderRow" class="row justify-content-center hidden">
+    <div class="loader"></div>
+</div>
+
+<div class="row">
+    <div id="resultContainer" class="container">
+        <div class="col col-lg-12">
+            <div id="productionPlot"></div>
+        </div>
+        <table id="productionTable" class="compact stripe"></table>
+    </div>
+</div>
+
+<div class="hidden">
+    <div id="yearRadpharmRelationship">{{ year_radpharm }}</div>
+    <div id="getStatisticsUrl">{% url 'radpharmprod:radpharmprod-get-statistics' %}</div>
+</div>
+{% endblock main %}

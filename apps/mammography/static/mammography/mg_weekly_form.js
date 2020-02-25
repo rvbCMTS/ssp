@@ -7,14 +7,15 @@ function validateField(event) {
 
     var param = event.target.id.split(/_(.+)/)[1];
 
-    if (event.target.id.includes('entrance')){ param = 'entrance-dose' }
-    if (event.target.id.includes('mean')){ param = 'mean-roi' + param.split(/_(.+)/)[0] }
-    if (event.target.id.includes('stdev')){ param = 'std-roi' + param.split(/_(.+)/)[0] }
-    if (event.target.id.includes('snr')){ param = 'snr-roi' + param.split(/_(.+)/)[0] }
+    if (event.target.id.indexOf('entrance') !== -1 ){ param = 'entrance-dose' }
+    if (event.target.id.indexOf('mean') !== -1 ){ param = 'mean-roi' + param.split(/_(.+)/)[0] }
+    if (event.target.id.indexOf('stdev') !== -1 ){ param = 'std-roi' + param.split(/_(.+)/)[0] }
+    if (event.target.id.indexOf('snr') !== -1 ){ param = 'snr-roi' + param.split(/_(.+)/)[0] }
 
     if (refs.hasOwnProperty(param)) {
-        var param_val = event.target.valueAsNumber;
-        if (!isNaN(param_val) && isFinite(param_val)) {
+        var param_val_id_number = $.isNumeric(event.target.value);
+        var param_val = parseFloat(event.target.value);
+        if (param_val_id_number) {
             removeValidationTags($('#' + event.target.id));
             if (param_val <= refs[param]['max'] && param_val >= refs[param]['min']) {
                 $('#' + event.target.id).addClass('alert-success')
@@ -68,6 +69,12 @@ $('#id_modality').change(function(event) {
                         "<div class=row><div class='col-lg-12'><h4>ROI " + (i+1).toString() + "</h4></div>" +
                         "  <div class='col-lg-4 col-md-4 col-sm-12'>" +
                         "    <div class='form-group'>" +
+                        "      <label for='id_" + (i+1).toString() + "_snr'>SNR:</label>" +
+                        "      <input class='validate-field' type='number' name='" + (i+1).toString() + "_snr' min='0' step='any' required='' id='id_"+ (i+1).toString() + "_snr'>" +
+                        "    </div>" +
+                        "  </div> " +
+                        "  <div class='col-lg-4 col-md-4 col-sm-12'>" +
+                        "    <div class='form-group'>" +
                         "      <label for='id_" + (i+1).toString() + "_mean'>Medel:</label>" +
                         "      <input class='validate-field' type='number' name='" + (i+1).toString() + "_mean' min='0' step='any' required='' id='id_"+ (i+1).toString() + "_mean'>" +
                         "    </div>" +
@@ -76,12 +83,6 @@ $('#id_modality').change(function(event) {
                         "    <div class='form-group'>" +
                         "      <label for='id_" + (i+1).toString() + "_stdev'>Standardavvikelse:</label>" +
                         "      <input class='validate-field' type='number' name='" + (i+1).toString() + "_stdev' min='0' step='any' required='' id='id_"+ (i+1).toString() + "_stdev'>" +
-                        "    </div>" +
-                        "  </div> " +
-                        "  <div class='col-lg-4 col-md-4 col-sm-12'>" +
-                        "    <div class='form-group'>" +
-                        "      <label for='id_" + (i+1).toString() + "_snr'>SNR:</label>" +
-                        "      <input class='validate-field' type='number' name='" + (i+1).toString() + "_snr' min='0' step='any' required='' id='id_"+ (i+1).toString() + "_snr'>" +
                         "    </div>" +
                         "  </div> " +
                         "</div>"

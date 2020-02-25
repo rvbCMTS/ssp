@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Personnel, VendorDosimeterPlacement, DosimeterPlacement, DosimeterLaterality, Clinic,\
-    Profession, Result
+from .models import (Personnel, VendorDosimeterPlacement, DosimeterPlacement, DosimeterLaterality,
+                     Clinic, ClinicDisplayName, Profession, Result, Deviation)
 
 
 class PersonnelModelAdmin(admin.ModelAdmin):
@@ -13,11 +13,21 @@ class PersonnelModelAdmin(admin.ModelAdmin):
         model = Personnel
 
 
+class ClinicDisplayNameModelAdmin(admin.ModelAdmin):
+    list_display = ['display_name']
+    list_display_links = ['display_name']
+    list_filter = ['display_name']
+    search_fields = ['display_name']
+
+    class Meta:
+        model = ClinicDisplayName
+
+
 class ClinicModelAdmin(admin.ModelAdmin):
-    list_display = ['clinic', 'display_clinic']
-    list_display_links = ['clinic', 'display_clinic']
-    list_filter = ['clinic', 'display_clinic']
-    search_fields = ['clinic', 'display_clinic']
+    list_display = ['clinic', 'display_name']
+    list_display_links = ['clinic', 'display_name']
+    list_filter = ['clinic', 'display_name']
+    search_fields = ['clinic', 'display_name']
 
     class Meta:
         model = Clinic
@@ -73,10 +83,22 @@ class ResultModelAdmin(admin.ModelAdmin):
         model = Result
 
 
+class DeviationModelAdmin(admin.ModelAdmin):
+    list_display = ['result', 'reported_to_authority', 'comment']
+    list_display_links = ['result', 'reported_to_authority', 'comment']
+    list_filter = ['reported_to_authority']
+    search_fields = ['comment']
+
+    class Meta:
+        model = Deviation
+
+
 admin.site.register(Personnel, PersonnelModelAdmin)
 admin.site.register(Clinic, ClinicModelAdmin)
+admin.site.register(ClinicDisplayName, ClinicDisplayNameModelAdmin)
 admin.site.register(VendorDosimeterPlacement, VendorDosimeterPlacementModelAdmin)
 admin.site.register(DosimeterPlacement, DosimeterPlacementModelAdmin)
 admin.site.register(DosimeterLaterality, DosimeterLateralityModelAdmin)
 admin.site.register(Profession, ProfessionModelAdmin)
 admin.site.register(Result, ResultModelAdmin)
+admin.site.register(Deviation, DeviationModelAdmin)

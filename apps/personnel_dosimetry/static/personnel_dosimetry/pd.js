@@ -53,7 +53,8 @@ function updatePdData(triggeringId) {
         dataType: 'json',
         success: function(result, status, xhr) {
             _plotPdResults(result.plotData);
-            _updateResultTable(result.tableData)
+            _updateResultTable(result.tableData);
+            _showHideNeutronPlots(result.showNeutronPlots);
         },
         error: function(xhr, status, error){
             alert(error)
@@ -86,4 +87,24 @@ function _updateFilterChoices(data, triggeringId) {
         selectList.val(data[ind].selectedValue);
     }
     updatePdData(triggeringId);
+}
+
+function _showHideNeutronPlots(showNeutronPlots){
+    let neutronPlotTn = $("#hp10tnPlot");
+    let neutronPlotFn = $("#hp10fnPlot");
+    if (showNeutronPlots){
+        if (neutronPlotTn.hasClass('hidden')) {
+            neutronPlotTn.removeClass('hidden')
+        }
+        if (neutronPlotFn.hasClass('hidden')) {
+            neutronPlotFn.removeClass('hidden')
+        }
+    } else {
+        if (!neutronPlotTn.hasClass('hidden')){
+            neutronPlotTn.addClass('hidden');
+        }
+        if (!neutronPlotFn.hasClass('hidden')){
+            neutronPlotFn.addClass('hidden');
+        }
+    }
 }

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Strålskärmning{% endblock title %}
+
+{% load static %}
+{% block extra-styles %}
+  <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+  <link href="{% static 'radiation_shielding/loader.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+  <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+  <script src="{% static 'js/moment.min.js' %}"></script>
+  <script src="{% static 'radiation_shielding/roomlist.js' %}"></script>
+{% endblock extra-scripts %}
+
+<!-- Main Content -->
+{% block main %}
+  <h1>Strålskärmning - Rum</h1>
+
+  <div class="row">
+    <div class="container card-container">
+      <div class="card text-white bg-dark mb-3">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-12">
+              <div class="form-group">
+                <label for="idDepartmentCategory">Avdelningstyp</label>
+                <select id="idDepartmentCategory" name="DepartmentCategory" class="update-filter-choices update-data"></select>
+              </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-12">
+              <div class="form-group">
+                <label for="idDepartment">Avdelning</label>
+                <select id="idDepartment" name="Department" class="update-filter-choices update-data"></select>
+              </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-12">
+              <div class="form-group">
+                <label for="idClinic">Klinik</label>
+                <select id="idClinic" name="Clinic" class="update-data"></select>
+              </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-12">
+              <div class="form-group">
+                <label for="idClassification">Klassificering</label>
+                <select id="idClassification" name="Classification" class="update-data"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="idLoaderRow" class="row justify-content-center hidden">
+    <div class="loader"></div>
+  </div>
+
+  <div class="row">
+    <div id="resultContainer" class="container">
+      <table id="roomTable" class="compact stripe"></table>
+    </div>
+  </div>
+
+  <div class="hidden">
+    <div id="getRoomListUrl">{% url 'radiation_shielding:roomlistapi' %}</div>
+    <div id="idAllDepartments">{{ department }}</div>
+    <div id="idAllClinics">{{ clinic }}</div>
+    <div id="idAllClassifications">{{ classification }}</div>
+  </div>
+{% endblock main %}
