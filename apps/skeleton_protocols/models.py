@@ -17,8 +17,8 @@ class Protocol(models.Model):
     kv = models.DecimalField(null=False, decimal_places=1, max_digits=4)
     mas = models.DecimalField(null=True, decimal_places=2, max_digits=5)
     filter_cu = models.DecimalField(null=False, decimal_places=1, max_digits=2)
-    focus = models.IntegerField(null=False)
-    grid = models.IntegerField(null=True)
+    focus = models.TextField(blank=False, null=False)
+    grid = models.TextField(blank=False, null=False)
     diamond_view = models.TextField(blank=False, null=False)
     edge_filter_kernel_size = models.IntegerField(null=False)
     edge_filter_gain = models.DecimalField(null=False, decimal_places=2, max_digits=4)
@@ -34,7 +34,6 @@ class Protocol(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     history = models.ManyToManyField('self', symmetrical=False)
     history_flag = models.BooleanField(blank=False, null=False)
-    group = models.ManyToManyField('self', related_name='linked_protocols', symmetrical=False)
 
     def __str__(self):
         return self.ris_name

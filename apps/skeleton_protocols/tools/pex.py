@@ -6,9 +6,17 @@ import re
 import pandas
 import datetime
 from ..models import Machine, Protocol, Backup
+from zipfile import ZipFile
+from django.conf import settings
 
 
 def parse_db(input_directory: str):
+    # find all .zip backups and copy databases to pex_library directory
+    zips = _find('G:\\Röntgen\\LÄNSKLINIK\\Sektion Skelett (vll)\\PEX-databaser\\','.zip')
+    for zip in zips:
+        with ZipFile(zip, 'r') as z:
+            file_name = [s for s in z.namelist() if '.sqlite' in s] + [s for s in z.namelist() if '.mdb' in s]
+            z.extract(file_name[0], os.path.join(settings.BASE_DIR, f'apps/skeleton_protocols/tools/pex_library/{file_name[0]}'))
 
     # find mdb databases
     mdbs = _find(input_directory, '.mdb')
@@ -18,8 +26,8 @@ def parse_db(input_directory: str):
     if len(mdbs) > 0:
         for mdb in mdbs:
             print(mdb)
-            if not os.path.isfile(mdb.replace('.mdb','.sqlite')):
-                _mdb2sqlite(mdb, mdb.replace('.mdb','.sqlite'))
+            if not os.path.isfile(re.sub('.mdb$','.sqlite',mdb)):
+                _mdb2sqlite(mdb, re.sub('.mdb$','.sqlite',mdb))
     print('klar')
 
 
@@ -35,6 +43,7 @@ def parse_db(input_directory: str):
             [machine, df] = _parse_pex_db(db)
 
             # clean data before insert to new database
+
             [machine, df] = _clean_up(machine, df)
 
             # place dataframe in new database
@@ -143,7 +152,7 @@ def _parse_pex_db(sqlite_database_path):
     db_version = global_vars.iloc[:, 1][0]
 
     # Find which machine - query to db and conversion to dataframe
-    fd = open('apps\\skeleton_protocols\\tools\\machine.sql', 'r')
+    fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\machine.sql'), 'r')
     sql_machine = fd.read()
     fd.close()
     machine = pandas.read_sql_query(sql_machine, conn)
@@ -154,7 +163,7 @@ def _parse_pex_db(sqlite_database_path):
 
     # call correct sql-query
     if db_version == '45':
-        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv45.sql', 'r')
+        fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\organ_programs_dbv45.sql'), 'r')
         sql_organ_programs = fd.read()
         fd.close()
         # Read from db to dataframe
@@ -162,13 +171,13 @@ def _parse_pex_db(sqlite_database_path):
         # Add None for grid
         df['grid'] = [float('nan')]*len(df)
     elif db_version == '60':
-        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv60.sql', 'r')
+        fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\organ_programs_dbv60.sql'), 'r')
         sql_organ_programs = fd.read()
         fd.close()
         # Read from db to dataframe
         df = pandas.read_sql_query(sql_organ_programs, conn)
     elif db_version == '72.01':
-        fd = open('apps\\skeleton_protocols\\tools\\organ_programs_dbv7201.sql', 'r')
+        fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\organ_programs_dbv7201.sql'), 'r')
         sql_organ_programs = fd.read()
         fd.close()
         # Read from db to dataframe
@@ -189,32 +198,6 @@ def _parse_pex_db(sqlite_database_path):
 
 def _clean_up(machine, df):
     # Distinct Lut names
-    # lut_names = {
-    #     '1':'01 Service Bone Black',
-    #     '2':'02 Service Bone White',
-    #     '3':'03 Low Contrast',
-    #     '4':'04 Skull/Hip',
-    #     '4 Extremity/Skull':'04 Skull/Hip',
-    #     '04 skull hip':'04 Skull/Hip',
-    #     '5':'05 Chest',
-    #     '5 Chest':'05 Chest',
-    #     '6':'06 Extremity/Skull',
-    #     '6 Extremity/Skull': '06 Extremity/Skull',
-    #     '7':'07',
-    #     '07 cs':'07',
-    #     '8':'08 Chest',
-    #     '8 Chest':'08 Chest',
-    #     '9':'09 Low Contrast',
-    #     '10':'10 Abdomen/Ribs',
-    #     '11':'11 Abdomen/Ribs',
-    #     '11 rips':'11 Abdomen/Ribs',
-    #     '12':'12 Extremity',
-    #     '13':'13 Spine/Abdomen',
-    #     '13 c-spine':'13 Spine/Abdomen',
-    #     '14':'14 Chest Mediastinum',
-    #     '15':'15 Spine/Abdomen',
-    # }
-
     lut_names = {
         '1':'01',
         '2':'02',
@@ -234,13 +217,16 @@ def _clean_up(machine, df):
         '08 lung':'08',
         '8 Chest':'08',
         '9':'09',
+        '10 Abdomen/Ribs':'10',
         '11 rips':'11',
         '12 Extremity':'12',
+        '12 extremities':'12',
         '13 c-spine':'13',
         '13 Spine/Abdomen':'13',
+        '14 Chest Mediastinum':'14',
+        '14 chest':'14',
         '15 Spine/Abdomen':'15',
     }
-
     for ind in lut_names:
         df.lut.replace(ind,lut_names[ind], inplace=True)
 
@@ -278,10 +264,45 @@ def _clean_up(machine, df):
         'Lycksele L10':'L10',
         'NUS U207, Umea':'U207',
         'Lycksele Lasarett Lab2':'L02',
+        'NUS Umeå U220':'U220',
+        'NUS Umeå U222':'U222',
+        'U204 NUS, Umeå':'U204',
+        'U205 NUS':'U205',
+        'NUS Umeå U221':'U221',
+        'U208 NUS, Umeå':'U208',
+        'U207 NUS, Umeå':'U207',
+        'U206 NUS, Umeå':'U206',
+        'Skellefteå S12':'S12',
+        'Skellefteå, S04':'S04',
+        'Skellefteå S01':'S01',
     }
-
     for ind in modality_names:
         machine.hospital_name.replace(ind,modality_names[ind], inplace=True)
+
+    # Short notation for fluoro
+    fluoro_names = {
+        'CP_Positioning':'Pos',
+        'CP_RAD_Positioning':'Pos',
+        'Position Skellefteå':'Pos',
+    }
+    for ind in fluoro_names:
+        df.fp_set.replace(ind,fluoro_names[ind], inplace=True)
+
+    # Short notation for focus
+    focus_names = {
+        1:'FF',
+        2:'GF',
+    }
+    for ind in focus_names:
+        df.focus.replace(ind,focus_names[ind], inplace=True)
+
+    # Short notation for grid
+    grid_names = {
+        0: '',
+        -1: 'U',
+    }
+    for ind in grid_names:
+        df.grid.replace(ind, grid_names[ind], inplace=True)
 
 
     # Short notation for acquisition_system
@@ -293,21 +314,9 @@ def _clean_up(machine, df):
     for ind in acq_names:
         df.acquisition_system.replace(ind,acq_names[ind], inplace=True)
 
-    # Short notation for fluoro
-    fluoro_names = {
-        'CP_Positioning':'Pos',
-        'CP_RAD_Positioning':'Pos',
-    }
-    for ind in fluoro_names:
-        df.fp_set.replace(ind,fluoro_names[ind], inplace=True)
-
-
     # Remove full stop from exam_name and ris_name
     df.exam_name.replace('[.]', '', regex=True, inplace=True)
     df.ris_name.replace('[.]', '', regex=True, inplace=True)
-
-    # None exam_name are given the name Annat
-    df.exam_name.fillna(value='ANNAT', inplace=True)
 
     # Upper case letters for exam_name
     df.exam_name = df.exam_name.str.upper()
@@ -321,6 +330,8 @@ def _prot2db(machine, df):
     # if exits (check only host_identifier), get entry, otherwise create it
     if Machine.objects.filter(host_identifier = machine.host_identifier[0]).exists():
         machine_entry = Machine.objects.get(host_identifier = machine.host_identifier[0])
+        # update with latest hospital name
+        Machine.objects.filter(host_identifier = machine.host_identifier[0]).update(hospital_name = machine.hospital_name[0])
     else:
         machine_entry = Machine.objects.create(hospital_name=machine.hospital_name[0],
                                                host_identifier=machine.host_identifier[0])
@@ -419,11 +430,6 @@ def _prot2db(machine, df):
                     protocol_entry.history_flag = True
                     protocol_entry.save()
 
-            # Linking similar protocols (same ris_name and exam_name)
-            sim = Protocol.objects.filter(ris_name=row.ris_name, exam_name=row.exam_name).exclude(pk=protocol_entry.pk)
-            if len(sim)>0:
-                for p in sim:
-                    protocol_entry.linked_protocols.add(p)
 
 
 
