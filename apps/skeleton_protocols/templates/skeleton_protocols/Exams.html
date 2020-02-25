@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Skelletprotokoll{% endblock title %}
+
+{% load static %}
+
+{% block extra-styles %}
+    <link href="{% static 'skeleton_protocols/sp.css' %}" rel="stylesheet">
+    <link href="{% static 'DataTables/datatables.min.css' %}" rel="stylesheet">
+{% endblock extra-styles %}
+
+{% block extra-scripts %}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'DataTables/datatables.min.js' %}"></script>
+    <script src="{% static 'skeleton_protocols/dataTables.treeGrid.js' %}"></script>
+    <script src="{% static 'skeleton_protocols/sp.js' %}"></script>
+{% endblock extra-scripts %}
+
+<!-- Widget-tweaks for form layout -->
+{% load widget_tweaks %}
+
+{% block main %}
+<div class="row">
+
+<!-- Results -->
+    <div class="container">
+
+    <button id="idCompareButton" type="button" class="btn btn-light">Jämför</button>
+
+    <table id="idExamsTable" class="display compact stripe hover compact" style="width:100%">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Exam / Protokoll</th>
+                <th>Modalitet</th>
+                <th>Pk</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th></th>
+                <th>Exam / Protokoll</th>
+                <th>Modalitet</th>
+                <th>Pk</th>
+            </tr>
+        </tfoot>
+    </table>
+    </div>
+ </div>
+<!-- End Results -->
+
+<div id="idLoaderRow" class="row justify-content-center">
+    <div class="loader"></div>
+</div>
+
+<div class="hidden">
+    <div id="idPopulateExams">{% url 'sp:sp-list-exams' %}</div>
+    <div id="idCompareProtocols">{% url 'sp:sp-results' %}</div>
+</div>
+
+{% endblock main %}

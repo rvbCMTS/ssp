@@ -29,3 +29,18 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.hideextra {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow:ellipsis;
+ }
+
+td.details-control {
+    background: url('open_arrow_small.png') no-repeat center center;
+    cursor: pointer;
+}
+
+tr.shown td.details-control {
+    background: url('close_arrow_small.png') no-repeat center center;
+}

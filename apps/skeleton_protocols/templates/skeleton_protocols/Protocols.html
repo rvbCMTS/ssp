@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Skelletprotokoll{% endblock title %}
+{% block title %}Skelettprotokoll{% endblock title %}
 
 {% load static %}
 
@@ -18,8 +18,6 @@
 {% load widget_tweaks %}
 
 {% block main %}
-<h1>Skelettprotokoll</h1>
-<p>Skelettprotokoll på maskiner i VLL</p>
 
 
 <!-- Filter -->
@@ -150,7 +148,7 @@
                 Historik <button type="button" class="btn btn-outline-secondary btn-sm" onClick="closeHistory()">X</button>
             </div>
                 <div class="card-body">
-                    <table id="idHistoryTable" class="stripe hover compact">
+                    <table id="idHistoryTable" class="display compact stripe hover compact"  style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Protokoll</th>
@@ -180,7 +178,9 @@
 
 
 <!-- Results -->
-    <table id="idResultTable" class="stripe hover compact">
+<div class="row">
+    <div class="container">
+    <table id="idResultTable" class="display compact stripe hover compact" style="width:100%">
         <thead>
             <tr>
                 <th>Exam</th>
@@ -224,8 +224,9 @@
             </tr>
         </tfoot>
     </table>
+    </div>
+ </div>
 <!-- End Results -->
-
 
 <div class="hidden">
     <div id="idUpdateResults">{% url 'sp:sp-results-list' %}</div>
