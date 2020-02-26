@@ -37,8 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
-    'django_python3_ldap',
+    #    'django_python3_ldap',
     'webpack_loader',
     'rest_framework',
     'apps.frontpage',
@@ -47,11 +46,11 @@ INSTALLED_APPS = [
     'apps.skeleton_protocols',
     'apps.mammography',
     'apps.radpharmprod',
+    'apps.radiation_shielding',
     'widget_tweaks',
     'ckeditor',
     'ckeditor_uploader',
     'tempus_dominus',
-    'apps.radiation_shielding',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +86,39 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ssp.wsgi.application'
 
 
+# Database
+# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+# ---------------------------------- LDAP authentication ---------------------------------- #
+LDAP_AUTH_URL = "ldap://vll.se"
+LDAP_AUTH_USE_TLS = True
+
+# The LDAP search base for looking up users.
+LDAP_AUTH_SEARCH_BASE = "ou=people,dc=example,dc=com"
+
+# The LDAP class that represents a user.
+LDAP_AUTH_OBJECT_CLASS = "inetOrgPerson"
+
+LDAP_AUTH_FORMAT_USERNAME = "django_python3_ldap.utils.format_username_active_directory"
+# --- FOR DOWN-LEVEL LOGIN NAME FORMATS (e.g. "DOMAIN\username") --- #
+# LDAP_AUTH_FORMAT_USERNAME = "django_python3_ldap.utils.format_username_active_directory"
+# LDAP_AUTH_ACTIVE_DIRECTORY_DOMAIN = "DOMAIN"
+# ------------------------------------------------------------------ #
+
+# ---- FOR USER-PRINCIPAL-NAME FORMATS (e.g. "user@domain.com") ---- #
+# LDAP_AUTH_FORMAT_USERNAME = "django_python3_ldap.utils.format_username_active_directory_principal"
+# LDAP_AUTH_ACTIVE_DIRECTORY_DOMAIN = "domain.com"
+# ------------------------------------------------------------------ #
+
+
+# ----------------------------------------------------------------------------------------- #
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -150,11 +182,26 @@ CKEDITOR_UPLOAD_PATH = 'ckeditor/'
 
 
 FRONT_PAGE_PARAMETERS = {
-    'OrganisationName': '<custom-organisation-name>',
+    'OrganisationName': 'Region Västerbotten',
     'ContactInformation': [
         {
-            'Name': '<Contact-Name-1>',
-            'Email': '<Contact-Email-1>'
+            'Name': 'Josef Lundman',
+            'Email': 'josef.lundman@regionvasterbotten.se'
+        },
+        {
+            'Name': 'Pontus Svenmarker',
+            'Email': 'pontus.svenmarker@regionvasterbotten.se'
         },
     ]
+}
+
+
+# Database
+# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 }
