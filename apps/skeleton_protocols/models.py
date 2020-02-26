@@ -10,7 +10,6 @@ class Machine(models.Model):
 
 class Protocol(models.Model):
     ris_name = models.TextField(blank=False, null=False)
-    exam_name = models.TextField(blank=False, null=True)
     body_part = models.TextField(blank=False, null=False)
     acquisition_system = models.TextField(blank=False, null=False)
     technique = models.TextField(blank=False, null=False)
@@ -48,4 +47,13 @@ class Backup(models.Model):
 
     def __str__(self):
         return f'{self.machine} {self.datum}'
+
+
+class Exam(models.Model):
+    exam_name = models.TextField(blank=False, null=True)
+    protocol = models.ManyToManyField(Protocol)
+
+    def __str__(self):
+        return self.exam_name
+
 

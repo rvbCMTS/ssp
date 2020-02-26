@@ -99,48 +99,49 @@ def skeleton_protocols_results(request):
     # primary keys for protocol comparsion
     pks = request.GET.getlist('pk[]')
 
+    # Protocol question
+    q_prot = Protocol.objects.values('pk', 'exam__exam_name', 'ris_name', 'machine__hospital_name','technique',
+                                     'sensitivity', 'kv', 'mas', 'filter_cu', 'focus', 'grid', 'lut', 'diamond_view',
+                                     'image_auto_amplification', 'image_amplification_gain', 'edge_filter_kernel_size',
+                                     'edge_filter_gain', 'harmonization_kernel_size', 'harmonization_gain', 'fp_set',
+                                     'history_flag')
+
     if not pks:
         # query to get the latest backup for each machine
         backup_list = [Backup.objects.all().filter(machine=m).latest() for m in Machine.objects.all()]
-        db_query = Protocol.objects.all().filter(backup__in=backup_list)
+        db_query = q_prot.filter(backup__in=backup_list)
     else:
-        db_query = Protocol.objects.all().filter(pk__in=pks)
+        db_query = q_prot.filter(pk__in=pks)
 
     # filter using django_filters
     f = ProtocolsFilter(request.GET, queryset=db_query.order_by('ris_name', 'machine'))
 
     # make data format for Json response
     tt = []
+
     for obj in f.qs:
-        tt.append([obj.exam_name,])
-        tt[-1] += [obj.ris_name,]
-        tt[-1] += [obj.machine.hospital_name,]
-        tt[-1] += [obj.technique,]
-        if obj.technique == '2 pt':
-            tt[-1] += ['',]
-        else:
-            tt[-1] += [obj.sensitivity,]
+        # combined strings for edge and harmonization
+        obj.update({'edge': f'{obj["edge_filter_kernel_size"]} | {obj["edge_filter_gain"]}',
+                  'harm': f'{obj["harmonization_kernel_size"]} | {obj["harmonization_gain"]}'})
 
-        tt[-1] += [obj.kv,
-                   obj.mas,
-                   obj.filter_cu,
-                   obj.focus,
-                   obj.grid,
-                   obj.lut,
-                   obj.diamond_view,]
-        if obj.image_auto_amplification:
-            tt[-1] += ['auto',]
+        # image amplification
+        if obj["image_auto_amplification"]:
+            obj.update({'image_amp': 'auto'})
         else:
-            tt[-1] += [obj.image_amplification_gain,]
+            obj.update({'image_amp': obj["image_amplification_gain"]})
 
-        tt[-1] += [f'{obj.edge_filter_kernel_size} | {obj.edge_filter_gain}',
-                   f'{obj.harmonization_kernel_size} | {obj.harmonization_gain}',]
-        tt[-1] += [obj.fp_set,]
-        if obj.history_flag:
-            tt[-1] += [f'<button type="button" class="btn btn-outline-warning btn-sm" onClick="viewHistory({obj.pk})">H</button>',]
+        # history button
+        if obj["history_flag"]:
+            obj.update({'history': f'<button type="button" class="btn btn-outline-warning btn-sm" onClick="viewHistory({obj["pk"]})">H</button>'})
         else:
-            tt[-1] += ['',]
+            obj.update({'history': ''})
 
+        # Remove sensitivity for 2pt
+        if obj["technique"]=='2 pt':
+            obj["sensitivity"]=''
+
+
+        tt.append(obj)
 
     return JsonResponse({'data': tt})
 

@@ -5,7 +5,7 @@ from collections import namedtuple, UserDict
 import re
 import pandas
 import datetime
-from ..models import Machine, Protocol, Backup
+from ..models import Machine, Protocol, Backup, Exam
 from zipfile import ZipFile
 from django.conf import settings
 
@@ -389,7 +389,6 @@ def _prot2db(machine, df):
                                                      )
             else:
                 protocol_entry = Protocol.objects.create(ris_name=row.ris_name,
-                                      exam_name = row.exam_name,
                                       body_part=row.body_part,
                                       technique=row.technique,
                                       acquisition_system=row.acquisition_system,
@@ -417,7 +416,6 @@ def _prot2db(machine, df):
             # associate backup with protocol
             backup_entry.protocol.add(protocol_entry)
 
-
             # filter previous versions of protocol (same ris_name and machine), excluding itself
             previous_versions = Protocol.objects.filter(ris_name=row.ris_name, machine=machine_entry).exclude(pk=protocol_entry.pk)
 
@@ -429,6 +427,12 @@ def _prot2db(machine, df):
                     # switch history_flag
                     protocol_entry.history_flag = True
                     protocol_entry.save()
+
+            # get or create exam entry
+            exam_entry, exam_created = Exam.objects.get_or_create(exam_name=row.exam_name)
+
+            # associate exam with protocol
+            exam_entry.protocol.add(protocol_entry)
 
 
 
