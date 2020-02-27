@@ -234,7 +234,9 @@ def _clean_up(machine, df):
     diamond_view_names = {
         '00 Off':'00',
         '01 Thorax pa - high contrast':'01',
+        '01 Thorax pa':'01',
         '02 Thorax pa':'02',
+        '03 Thorax lateral':'03',
         '03 Thorax lateral - high contrast': '03',
         '04 Thorax lateral':'04',
         '05 Pelvis - high contrast':'05',

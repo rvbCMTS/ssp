@@ -12,12 +12,12 @@ def list_exams(request):
 
     aa = []
     # Get data from database
-    df = pd.DataFrame(list(Protocol.objects.filter(backup__in=backup_list).values('ris_name','exam_name','machine__hospital_name','kv','mas','technique','filter_cu','pk','focus','sensitivity','grid')))
+    df = pd.DataFrame(list(Protocol.objects.filter(backup__in=backup_list).values('ris_name','exam__exam_name','machine__hospital_name','kv','mas','technique','filter_cu','pk','focus','sensitivity','grid')))
 
     # all distinct exams
-    for exam in df.sort_values('exam_name').exam_name.unique():
+    for exam in df.sort_values('exam__exam_name').exam__exam_name.unique():
         # unique machines for this exam, sorted
-        machines = df[df['exam_name']==exam].sort_values('machine__hospital_name').machine__hospital_name.unique()
+        machines = df[df['exam__exam_name']==exam].sort_values('machine__hospital_name').machine__hospital_name.unique()
 
         # build string for machines
         machines_str = ''
@@ -26,13 +26,13 @@ def list_exams(request):
 
         # unique protocols for each exam
         prot = []
-        for p in df[df['exam_name']==exam].sort_values('ris_name').ris_name.unique():
+        for p in df[df['exam__exam_name']==exam].sort_values('ris_name').ris_name.unique():
 
             # all primary keys for each protocol
-            pks = df[(df['ris_name']==p) & (df['exam_name']==exam)].pk.tolist()
+            pks = df[(df['ris_name']==p) & (df['exam__exam_name']==exam)].pk.tolist()
 
             # all machines for each protocol
-            machines = df[(df['ris_name']==p) & (df['exam_name']==exam)].sort_values('machine__hospital_name').machine__hospital_name.unique()
+            machines = df[(df['ris_name']==p) & (df['exam__exam_name']==exam)].sort_values('machine__hospital_name').machine__hospital_name.unique()
 
             # build string for machines
             machines_protocols_str = ''
@@ -41,18 +41,18 @@ def list_exams(request):
 
             detail = []
             for machine in machines:
-                info = df[(df['ris_name']==p) & (df['exam_name']==exam) & (df['machine__hospital_name']==machine)].values
+                info = df[(df['ris_name']==p) & (df['exam__exam_name']==exam) & (df['machine__hospital_name']==machine)].values
                 if info[0][10] == '2 pt':
                     detail_str = f'{info[0][4]} kV {info[0][6]} mAs F:{info[0][1]} {info[0][2]} R:{info[0][3]}'
                 else:
                     detail_str = f'{info[0][4]} kV S:{info[0][9]}   F:{info[0][1]} {info[0][2]} R:{info[0][3]}'
 
-                pk = df[(df['ris_name']==p) & (df['exam_name']==exam) & (df['machine__hospital_name']==machine)].pk.tolist()
+                pk = df[(df['ris_name']==p) & (df['exam__exam_name']==exam) & (df['machine__hospital_name']==machine)].pk.tolist()
                 detail.append({'exam_name': f'<span class="badge badge-secondary">{machine}</span>', 'machine': detail_str, 'pk': pk})
 
-            prot.append({'exam_name': p, 'machine': machines_protocols_str, 'pk': pks, 'children': detail})
+            prot.append({'exam__exam_name': p, 'machine': machines_protocols_str, 'pk': pks, 'children': detail})
 
-        aa.append({'exam_name': exam, 'machine': machines_str, 'pk': [], 'children': prot})
+        aa.append({'exam__exam_name': exam, 'machine': machines_str, 'pk': [], 'children': prot})
 
     return JsonResponse({'data': aa})
 
@@ -118,7 +118,6 @@ def skeleton_protocols_results(request):
 
     # make data format for Json response
     tt = []
-
     for obj in f.qs:
         # combined strings for edge and harmonization
         obj.update({'edge': f'{obj["edge_filter_kernel_size"]} | {obj["edge_filter_gain"]}',
@@ -126,7 +125,7 @@ def skeleton_protocols_results(request):
 
         # image amplification
         if obj["image_auto_amplification"]:
-            obj.update({'image_amp': 'auto'})
+            obj.update({'image_amp': 'A'})
         else:
             obj.update({'image_amp': obj["image_amplification_gain"]})
 
@@ -139,7 +138,6 @@ def skeleton_protocols_results(request):
         # Remove sensitivity for 2pt
         if obj["technique"]=='2 pt':
             obj["sensitivity"]=''
-
 
         tt.append(obj)
 
@@ -161,26 +159,37 @@ def history(request):
 
     # make data format for Json response
     tt = []
-    for obj in all_protocols:
-        tt.append([obj.ris_name,
-                   obj.machine.hospital_name,])
-        tt[-1] += [obj.datum.strftime("%Y%m%d"),]
-        tt[-1] += [obj.technique,
-                   obj.sensitivity,
-                   obj.kv,
-                   obj.mas,
-                   obj.filter_cu,
-                   obj.focus,
-                   obj.grid,
-                   obj.lut,
-                   obj.diamond_view,]
-        if obj.image_auto_amplification:
-            tt[-1] += ['auto',]
-        else:
-            tt[-1] += [obj.image_amplification_gain,]
+    for p in all_protocols:
+        # create dict
+        obj = {'ris_name':p.ris_name,
+               'machine__hospital_name': p.machine.hospital_name,
+               'kv': p.kv,
+               'sensitivity': p.sensitivity,
+               'mas':p.mas,
+               'filter_cu':p.filter_cu,
+               'focus':p.focus,
+               'grid':p.grid,
+               'fp_set':p.fp_set,
+               'lut':p.lut,
+               'diamond_view':p.diamond_view,
+               'datum':p.datum.strftime("%Y%m%d")
+               }
 
-        tt[-1] += [f'{obj.edge_filter_kernel_size} | {obj.edge_filter_gain}',
-                   f'{obj.harmonization_kernel_size} | {obj.harmonization_gain}',]
+        # combined strings for edge and harmonization
+        obj.update({'edge': f'{p.edge_filter_kernel_size} | {p.edge_filter_gain}',
+                  'harm': f'{p.harmonization_kernel_size} | {p.harmonization_gain}'})
+
+        # image amplification
+        if p.image_auto_amplification:
+            obj.update({'image_amp': 'A'})
+        else:
+            obj.update({'image_amp': p.image_amplification_gain})
+
+        # Remove sensitivity for 2pt
+        if p.technique=='2 pt':
+            obj["sensitivity"]=''
+
+        tt.append(obj)
 
     return JsonResponse({'data': tt})
 

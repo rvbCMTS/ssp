@@ -29,11 +29,11 @@ $(document).ready(function() {
         // column 0 equal exam_name. Sorted by, group name and hidden.
         orderFixed: [[0, 'asc'], [1, 'asc']],
         rowGroup: {
-            dataSrc: [ "exam__exam_name" , "ris_name"]
+            dataSrc: [ "exam__exam_name"]
         },
         columnDefs: [
             {
-                "targets": [ 0, 1 ],
+                "targets": [ 0  ],
                 "visible": false,
             }
         ],
@@ -44,6 +44,25 @@ $(document).ready(function() {
         paging: false,
         searching: false,
         responsive: true,
+
+        columns: [
+        {"data": "ris_name"},
+        {"data": "machine__hospital_name"},
+        {"data": "datum"},
+        {"data": "kv"},
+        {"data": "sensitivity"},
+        {"data": "mas"},
+        {"data": "filter_cu"},
+        {"data": "focus"},
+        {"data": "grid"},
+        {"data": "lut"},
+        {"data": "diamond_view"},
+        {"data": "image_amp"},
+        {"data": "edge"},
+        {"data": "harm"},
+        {"data": "fp_set"},
+        ],
+
     } );
 
     // ajax call for ExamsTable
