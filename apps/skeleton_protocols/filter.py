@@ -1,12 +1,12 @@
 import django_filters
-from .models import Protocol, Machine
+from .models import Protocol, Machine, Exam
 
 
 class ProtocolsFilter(django_filters.FilterSet):
     ris_name = django_filters.CharFilter(lookup_expr='icontains', label='Protocol')
-    exam_name = django_filters.AllValuesFilter(field_name='exam__exam_name', label='Exam', empty_label="Exam")
+    exam__exam_name = django_filters.AllValuesFilter(field_name='exam__exam_name',  label='Exam', empty_label="Exam")
     fp_set = django_filters.AllValuesFilter(field_name='fp_set', empty_label='Gml')
-    machine = django_filters.ModelChoiceFilter(queryset=Machine.objects.all().order_by('hospital_name'), empty_label="Alla lab")
+    machine = django_filters.ModelChoiceFilter(queryset=Machine.objects.all(), empty_label="Alla lab")
     technique = django_filters.AllValuesFilter(empty_label="Teknik")
     kv_max = django_filters.AllValuesFilter(field_name='kv', label='kV Max', lookup_expr='lte', empty_label='kV max')
     kv_min = django_filters.AllValuesFilter(field_name='kv', label='Rörspänning', lookup_expr='gte', empty_label='kV min')

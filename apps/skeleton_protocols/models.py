@@ -8,6 +8,9 @@ class Machine(models.Model):
     def __str__(self):
         return self.hospital_name
 
+    class Meta:
+        ordering = ['hospital_name']
+
 class Protocol(models.Model):
     ris_name = models.TextField(blank=False, null=False)
     body_part = models.TextField(blank=False, null=False)
@@ -55,5 +58,8 @@ class Exam(models.Model):
 
     def __str__(self):
         return self.exam_name
+
+    class Meta:
+        ordering = ['exam_name']
 
 

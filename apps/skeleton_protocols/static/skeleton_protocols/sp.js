@@ -27,13 +27,13 @@ $(document).ready(function() {
         ],
 
         // column 0 equal exam_name. Sorted by, group name and hidden.
-        orderFixed: [0, 'asc'],
+        orderFixed: [[0, 'asc'], [1, 'asc']],
         rowGroup: {
-            dataSrc: "exam__exam_name"
+            dataSrc: [ "exam__exam_name" , "ris_name"]
         },
-        "columnDefs": [
+        columnDefs: [
             {
-                "targets": [ 0 ],
+                "targets": [ 0, 1 ],
                 "visible": false,
             }
         ],

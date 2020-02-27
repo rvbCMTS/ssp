@@ -40,4 +40,11 @@ INNER JOIN GradationParameter ON RAD_OGP.Id_imagegradation = GradationParameter.
 LEFT OUTER JOIN FPSet ON FPset.ID = OGP.ID_FPSet
 
 
-WHERE OGP.status=2 AND OGP.Type='SIEMENSDEFAULT' AND exam_name <> '';
+WHERE
+OGP.status=2
+AND OGP.Type='SIEMENSDEFAULT'
+AND exam_name <> '' 
+AND ris_name NOT LIKE '-%'
+AND ris_name NOT LIKE '. _%'
+
+ORDER BY ris_name ;
