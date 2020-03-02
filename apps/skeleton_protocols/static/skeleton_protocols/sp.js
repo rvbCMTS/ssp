@@ -103,8 +103,9 @@ $(document).ready(function() {
 
         columns: [
             {title: '', target: 0, className: 'treegrid-control', width: '1em', data: function (item) { if (item.children) { return '<i class="fas fa-caret-right"></i>'; } return ''; }},
-            {title: 'Exam / Protokoll',  width: '5em', data: function (item) { return item.exam_name }},
-            {title: 'Modalitet',  width: '18em', data: function (item) { return item.machine }},
+            {title: 'Exam / Protokoll',  width: '5em', data: function (item) { return item.fc }},
+            {title: 'Modalitet',  width: '18em', data: function (item) { return item.sc }},
+            {title: 'Senast ändrad',  width: '18em', data: function (item) { return item.date_latest }},
             {title: 'Pk', width: '18em', visible: false, data: function (item) { return item.pk }},
         ],
 
