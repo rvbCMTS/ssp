@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.db.models import Count, Max, F
-from collections import OrderedDict
+from django.db.models import Max
 from .models import Protocol, Machine, Backup
 from .filter import ProtocolsFilter
 from .tools.pex import parse_db
