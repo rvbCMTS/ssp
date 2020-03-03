@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models import Count, Max, F
+from collections import OrderedDict
 from .models import Protocol, Machine, Backup
 from .filter import ProtocolsFilter
 from .tools.pex import parse_db
@@ -61,37 +62,60 @@ def list_exams(request):
     # # query to get the latest backup for each machine
     backup_list = [Backup.objects.all().filter(machine=m).latest() for m in Machine.objects.all()]
 
-    # sql group by to get all examns and machines
-    exam_and_machine = pd.DataFrame(list(Protocol.objects.filter(backup__in=backup_list).values('exam__exam_name', 'machine__hospital_name').annotate(Max('datum')).order_by('exam__exam_name', 'machine__hospital_name')))
+    # -- Third level
+    # sql-question
+    df = pd.DataFrame(list(
+        Protocol.objects.filter(backup__in=backup_list).values('ris_name', 'exam__exam_name', 'machine__hospital_name',
+                                                               'kv', 'mas', 'technique', 'filter_cu', 'pk', 'focus',
+                                                               'sensitivity', 'grid', 'datum')
+                                                       .order_by('exam__exam_name', 'ris_name', 'machine__hospital_name')))
+    # format machine names and date
+    df['date_latest'] = df['datum'].dt.strftime('%Y-%m-%d')
+    df['machine__hospital_name'] = df['machine__hospital_name'].apply(lambda x: f'<span class="badge badge-secondary">{x}</span>')
 
-    # Pandas group by to build machine string
-    machines = exam_and_machine.groupby(['exam__exam_name'])['machine__hospital_name'].apply(' '.join).reset_index()
+    # detail string
+    def details(kv, mas, technique, filter_cu, focus, sensitivity, grid):
+        if technique == '2 pt':
+            return f'{kv} kV {mas} mAs F:{filter_cu} {focus} R:{grid}'
+        else:
+            return f'{kv} kV S:{sensitivity} F:{filter_cu} {focus} R:{grid}'
+    df['details'] = df.apply (lambda x: details(x['kv'], x['mas'], x['technique'], x['filter_cu'], x['focus'], x['sensitivity'], x['grid']), axis=1)
 
-    # Pandas group by to get max_datum
-    date_latest = exam_and_machine.groupby(['exam__exam_name']).max().reset_index()
 
-    # Structure for Treegrid, fc and sc, -- first level
-    machines['date_latest'] = date_latest.datum__max
-    main_df = machines.rename(columns={'exam__exam_name': 'fc', 'machine__hospital_name': 'sc'})
+    # -- Second level
+    # Pandas group by to get list of pk and build machine string
+    s_pk = df.groupby(['exam__exam_name', 'ris_name'])['pk'].apply(list).reset_index()
+    s_machine = df.groupby(['exam__exam_name', 'ris_name'])['machine__hospital_name'].apply(' '.join).reset_index()
+    s_date_latest = df.groupby(['exam__exam_name', 'ris_name'])['date_latest'].max().reset_index()
+
+
+
+    # -- first level
+    # sql-question
+    f_df = pd.DataFrame(list(
+        Protocol.objects.filter(backup__in=backup_list).values('exam__exam_name', 'machine__hospital_name')
+                                                       .annotate(Max('datum'))
+                                                       .order_by('exam__exam_name', 'machine__hospital_name')))
+    # format machine names
+    f_df['machine__hospital_name'] = f_df['machine__hospital_name'].apply(lambda x: f'<span class="badge badge-secondary">{x}</span>')
+
+    # Pandas group by to build machine string and date_latest
+    f_machine = f_df.groupby(['exam__exam_name'])['machine__hospital_name'].apply(' '.join).reset_index()
+    f_date_latest = df.groupby(['exam__exam_name'])['date_latest'].max().reset_index()
+
+
+    # Structure for Treegrid
+    f_machine['date_latest'] = f_date_latest.date_latest
+    main_df = f_machine.rename(columns={'exam__exam_name': 'fc', 'machine__hospital_name': 'sc'})
     main_df['pk'] = ''
 
-    # sql for all protocols and machines
-    p = pd.DataFrame(list(
-        Protocol.objects.filter(backup__in=backup_list).values('ris_name', 'exam__exam_name', 'machine__hospital_name',
-                                                               'pk').annotate(Max('datum')).order_by('exam__exam_name')))
-
-    # Pandas group by to get list of pk and build machine string
-    pk = p.groupby(['exam__exam_name', 'ris_name'])['pk'].apply(list).reset_index()
-    machines = p.groupby(['exam__exam_name', 'ris_name'])['machine__hospital_name'].apply(' '.join).reset_index()
-    date_latest = p.groupby(['exam__exam_name', 'ris_name']).max().reset_index()
-
-    # Structure for Treegrid, fc and sc, -- second level
-    machines['pk'] = pk.pk
-    machines['date_latest'] = date_latest.datum__max
-    second_df = machines.rename(columns={'ris_name': 'fc', 'machine__hospital_name': 'sc'})
+    s_machine['date_latest'] = s_date_latest.date_latest
+    s_machine['pk'] = s_pk.pk
+    second_df = s_machine.rename(columns={'ris_name': 'fc', 'machine__hospital_name': 'sc'})
+    df['fc'] = df['machine__hospital_name']
+    df['sc'] = df['details']
+    second_df['children'] = df.groupby(['exam__exam_name', 'ris_name']).apply(lambda x: x.drop("exam__exam_name", 1).to_dict('records')).tolist()
     main_df['children'] = second_df.groupby(['exam__exam_name']).apply(lambda x: x.drop("exam__exam_name", 1).to_dict('records')).tolist()
-
-
 
 
 
