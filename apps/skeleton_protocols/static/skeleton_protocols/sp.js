@@ -7,14 +7,34 @@ $(document).ready(function() {
         fixedHeader: true,
         responsive: true,
 
+        columns: [
+        {"data": "exam_name"},
+        {"data": "ris_name", width: '15em'},
+        {"data": "machine__hospital_name"},
+        {"data": "kv"},
+        {"data": "sensitivity"},
+        {"data": "mas"},
+        {"data": "filter_cu"},
+        {"data": "focus"},
+        {"data": "grid"},
+        {"data": "lut"},
+        {"data": "diamond_view"},
+        {"data": "image_amp"},
+        {"data": "edge"},
+        {"data": "harm"},
+        {"data": "fp_set"},
+        {"data": "datum"},
+        {"data": "history"},
+        ],
+
         // column 0 equal exam_name. Sorted by, group name and hidden.
-        orderFixed: [0, 'asc'],
+        orderFixed: [[0, 'asc'], [1, 'asc']],
         rowGroup: {
-            dataSrc: 0
+            dataSrc: [ "exam_name"]
         },
-        "columnDefs": [
+        columnDefs: [
             {
-                "targets": [ 0 ],
+                "targets": [ 0  ],
                 "visible": false,
             }
         ],
@@ -25,6 +45,25 @@ $(document).ready(function() {
         paging: false,
         searching: false,
         responsive: true,
+
+        columns: [
+        {"data": "ris_name"},
+        {"data": "machine__hospital_name"},
+        {"data": "datum"},
+        {"data": "kv"},
+        {"data": "sensitivity"},
+        {"data": "mas"},
+        {"data": "filter_cu"},
+        {"data": "focus"},
+        {"data": "grid"},
+        {"data": "lut"},
+        {"data": "diamond_view"},
+        {"data": "image_amp"},
+        {"data": "edge"},
+        {"data": "harm"},
+        {"data": "fp_set"},
+        ],
+
     } );
 
     // ajax call for ExamsTable
@@ -65,8 +104,9 @@ $(document).ready(function() {
 
         columns: [
             {title: '', target: 0, className: 'treegrid-control', width: '1em', data: function (item) { if (item.children) { return '<i class="fas fa-caret-right"></i>'; } return ''; }},
-            {title: 'Exam / Protokoll',  width: '5em', data: function (item) { return item.exam_name }},
-            {title: 'Modalitet',  width: '18em', data: function (item) { return item.machine }},
+            {title: 'Exam / Protokoll',  width: '5em', data: function (item) { return item.fc }},
+            {title: 'Modalitet',  width: '18em', data: function (item) { return item.sc }},
+            {title: 'Senast ändrad',  width: '6em', data: function (item) { return item.date_latest }},
             {title: 'Pk', width: '18em', visible: false, data: function (item) { return item.pk }},
         ],
 

@@ -161,6 +161,7 @@ def _parse_pex_db(sqlite_database_path):
         machine['last_modification'] = datetime.datetime.utcfromtimestamp(machine['last_modification'][0]/1000).strftime('%Y-%m-%d %H:%M:%S')
 
 
+
     # call correct sql-query
     if db_version == '45':
         fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\organ_programs_dbv45.sql'), 'r')
@@ -190,6 +191,9 @@ def _parse_pex_db(sqlite_database_path):
 
     # Replacing NaN with None
     df = df.where(pandas.notnull(df), None)
+
+    # add filename
+    machine['filename'] = sqlite_database_path
 
     # close database
     conn.close()
@@ -234,7 +238,9 @@ def _clean_up(machine, df):
     diamond_view_names = {
         '00 Off':'00',
         '01 Thorax pa - high contrast':'01',
+        '01 Thorax pa':'01',
         '02 Thorax pa':'02',
+        '03 Thorax lateral':'03',
         '03 Thorax lateral - high contrast': '03',
         '04 Thorax lateral':'04',
         '05 Pelvis - high contrast':'05',
@@ -339,11 +345,13 @@ def _prot2db(machine, df):
 
     # get or create backup entry
     backup_entry, backup_created = Backup.objects.get_or_create(machine=machine_entry,
-                                                       datum=tzdate)
+                                                                datum=tzdate,
+                                                                filename=machine['filename'][0])
     if backup_created:
         for index, row in df.iterrows():
             # check if exists (all fields except datum), get it, otherwise create it.
             if Protocol.objects.filter(ris_name=row.ris_name,
+                                      exam_name=row.exam_name,
                                       body_part=row.body_part,
                                       technique=row.technique,
                                       acquisition_system = row.acquisition_system,
@@ -366,6 +374,7 @@ def _prot2db(machine, df):
                                       machine=machine_entry,
                                      ).exists():
                 protocol_entry = Protocol.objects.get(ris_name=row.ris_name,
+                                                      exam_name=row.exam_name,
                                                       body_part=row.body_part,
                                                       technique=row.technique,
                                                       acquisition_system=row.acquisition_system,
@@ -411,25 +420,18 @@ def _prot2db(machine, df):
                                       fp_set=row.fp_set,
                                       datum = tzdate,
                                       machine=machine_entry,
-                                      history_flag = False,
                                       )
 
             # associate backup with protocol
             backup_entry.protocol.add(protocol_entry)
 
-
-            # filter previous versions of protocol (same ris_name and machine), excluding itself
-            previous_versions = Protocol.objects.filter(ris_name=row.ris_name, machine=machine_entry).exclude(pk=protocol_entry.pk)
+            # filter previous versions of protocol (same ris_name, machine and exam_name), excluding itself
+            previous_versions = Protocol.objects.filter(ris_name=row.ris_name, machine=machine_entry, exam_name=row.exam_name).exclude(pk=protocol_entry.pk)
 
             # if more than one version
-            if len(previous_versions)>0:
-                for entry in previous_versions:
-                    # associate versions
-                    protocol_entry.history.add(entry)
-                    # switch history_flag
-                    protocol_entry.history_flag = True
-                    protocol_entry.save()
-
+            for entry in previous_versions:
+                # associate versions
+                protocol_entry.history.add(entry)
 
 
 
