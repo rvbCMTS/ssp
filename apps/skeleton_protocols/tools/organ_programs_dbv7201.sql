@@ -21,8 +21,8 @@ SELECT 	OGP.Name AS ris_name,
 		FPSet.Name AS fp_set
 FROM OGP
 
-LEFT OUTER JOIN Exam_OGP ON OGP.Id = Exam_OGP.Id_ogp
-LEFT OUTER JOIN Exam ON Exam.Id = Exam_OGP.Id_exam
+INNER JOIN Exam_OGP ON OGP.Id = Exam_OGP.Id_ogp
+INNER JOIN Exam ON Exam.Id = Exam_OGP.Id_exam
 INNER JOIN BodyPart ON BodyPart.Id = OGP.Id_bodypart
 INNER JOIN AcquisitionSystem ON AcquisitionSystem.Id = OGP.Id_acqsystem
 INNER JOIN OGP_kV  ON OGP_kV.ID = OGP.ID_kV
@@ -43,8 +43,8 @@ LEFT OUTER JOIN FPSet ON FPset.ID = OGP.ID_FPSet
 WHERE
 OGP.status=2
 AND OGP.Type='SIEMENSDEFAULT'
-AND exam_name <> '' 
 AND ris_name NOT LIKE '-%'
 AND ris_name NOT LIKE '. _%'
+AND ris_name NOT LIKE '%\_%' ESCAPE '\'
 
-ORDER BY ris_name ;
+ORDER BY exam_name ;

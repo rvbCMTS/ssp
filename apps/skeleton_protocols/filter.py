@@ -1,10 +1,10 @@
 import django_filters
-from .models import Protocol, Machine, Exam
+from .models import Protocol, Machine
 
 
 class ProtocolsFilter(django_filters.FilterSet):
     ris_name = django_filters.CharFilter(lookup_expr='icontains', label='Protocol')
-    exam__exam_name = django_filters.AllValuesFilter(field_name='exam__exam_name',  label='Exam', empty_label="Exam")
+    exam_name = django_filters.AllValuesFilter(field_name='exam_name',  label='Exam', empty_label="Exam")
     fp_set = django_filters.AllValuesFilter(field_name='fp_set', empty_label='Gml')
     machine = django_filters.ModelChoiceFilter(queryset=Machine.objects.all(), empty_label="Alla lab")
     technique = django_filters.AllValuesFilter(empty_label="Teknik")

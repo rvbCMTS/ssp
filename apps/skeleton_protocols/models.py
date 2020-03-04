@@ -13,6 +13,7 @@ class Machine(models.Model):
 
 class Protocol(models.Model):
     ris_name = models.TextField(blank=False, null=False)
+    exam_name = models.TextField(blank=False, null=False)
     body_part = models.TextField(blank=False, null=False)
     acquisition_system = models.TextField(blank=False, null=False)
     technique = models.TextField(blank=False, null=False)
@@ -40,9 +41,13 @@ class Protocol(models.Model):
     def __str__(self):
         return self.ris_name
 
+    class Meta:
+        ordering = ['exam_name', 'ris_name', 'machine']
+
 class Backup(models.Model):
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     protocol = models.ManyToManyField(Protocol)
+    filename = models.TextField(blank=False, null=False)
     datum = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
 
     class Meta:
@@ -52,14 +57,6 @@ class Backup(models.Model):
         return f'{self.machine} {self.datum}'
 
 
-class Exam(models.Model):
-    exam_name = models.TextField(blank=False, null=True)
-    protocol = models.ManyToManyField(Protocol)
 
-    def __str__(self):
-        return self.exam_name
-
-    class Meta:
-        ordering = ['exam_name']
 
 

@@ -8,7 +8,7 @@ $(document).ready(function() {
         responsive: true,
 
         columns: [
-        {"data": "exam__exam_name"},
+        {"data": "exam_name"},
         {"data": "ris_name"},
         {"data": "machine__hospital_name"},
         {"data": "kv"},
@@ -23,13 +23,14 @@ $(document).ready(function() {
         {"data": "edge"},
         {"data": "harm"},
         {"data": "fp_set"},
+        {"data": "datum"},
         {"data": "history"},
         ],
 
         // column 0 equal exam_name. Sorted by, group name and hidden.
         orderFixed: [[0, 'asc'], [1, 'asc']],
         rowGroup: {
-            dataSrc: [ "exam__exam_name"]
+            dataSrc: [ "exam_name"]
         },
         columnDefs: [
             {

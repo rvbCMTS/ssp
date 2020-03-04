@@ -5,7 +5,7 @@ from collections import namedtuple, UserDict
 import re
 import pandas
 import datetime
-from ..models import Machine, Protocol, Backup, Exam
+from ..models import Machine, Protocol, Backup
 from zipfile import ZipFile
 from django.conf import settings
 
@@ -161,6 +161,7 @@ def _parse_pex_db(sqlite_database_path):
         machine['last_modification'] = datetime.datetime.utcfromtimestamp(machine['last_modification'][0]/1000).strftime('%Y-%m-%d %H:%M:%S')
 
 
+
     # call correct sql-query
     if db_version == '45':
         fd = open(os.path.join(settings.BASE_DIR,'apps\\skeleton_protocols\\tools\\organ_programs_dbv45.sql'), 'r')
@@ -190,6 +191,9 @@ def _parse_pex_db(sqlite_database_path):
 
     # Replacing NaN with None
     df = df.where(pandas.notnull(df), None)
+
+    # add filename
+    machine['filename'] = sqlite_database_path
 
     # close database
     conn.close()
@@ -341,11 +345,13 @@ def _prot2db(machine, df):
 
     # get or create backup entry
     backup_entry, backup_created = Backup.objects.get_or_create(machine=machine_entry,
-                                                       datum=tzdate)
+                                                                datum=tzdate,
+                                                                filename=machine['filename'][0])
     if backup_created:
         for index, row in df.iterrows():
             # check if exists (all fields except datum), get it, otherwise create it.
             if Protocol.objects.filter(ris_name=row.ris_name,
+                                      exam_name=row.exam_name,
                                       body_part=row.body_part,
                                       technique=row.technique,
                                       acquisition_system = row.acquisition_system,
@@ -368,6 +374,7 @@ def _prot2db(machine, df):
                                       machine=machine_entry,
                                      ).exists():
                 protocol_entry = Protocol.objects.get(ris_name=row.ris_name,
+                                                      exam_name=row.exam_name,
                                                       body_part=row.body_part,
                                                       technique=row.technique,
                                                       acquisition_system=row.acquisition_system,
@@ -391,6 +398,7 @@ def _prot2db(machine, df):
                                                      )
             else:
                 protocol_entry = Protocol.objects.create(ris_name=row.ris_name,
+                                      exam_name = row.exam_name,
                                       body_part=row.body_part,
                                       technique=row.technique,
                                       acquisition_system=row.acquisition_system,
@@ -418,8 +426,8 @@ def _prot2db(machine, df):
             # associate backup with protocol
             backup_entry.protocol.add(protocol_entry)
 
-            # filter previous versions of protocol (same ris_name and machine), excluding itself
-            previous_versions = Protocol.objects.filter(ris_name=row.ris_name, machine=machine_entry).exclude(pk=protocol_entry.pk)
+            # filter previous versions of protocol (same ris_name, machine and exam_name), excluding itself
+            previous_versions = Protocol.objects.filter(ris_name=row.ris_name, machine=machine_entry, exam_name=row.exam_name).exclude(pk=protocol_entry.pk)
 
             # if more than one version
             if len(previous_versions)>0:
@@ -430,13 +438,14 @@ def _prot2db(machine, df):
                     protocol_entry.history_flag = True
                     protocol_entry.save()
 
-            # get or create exam entry
-            exam_entry, exam_created = Exam.objects.get_or_create(exam_name=row.exam_name)
-
-            # associate exam with protocol
-            exam_entry.protocol.add(protocol_entry)
-
-
+            # # get or create exam entry
+            # exam_entry, exam_created = Exam.objects.get_or_create(exam_name=row.exam_name)
+            #
+            # # associate exam with protocol
+            # exam_entry.protocol.add(protocol_entry)
+            #
+            # # associate backup with exam
+            # backup_entry.exam.add(exam_entry)
 
 
 

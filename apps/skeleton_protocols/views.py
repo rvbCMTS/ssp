@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from django.db.models import Max
+from django.db.models import Max, Q
 from .models import Protocol, Machine, Backup
 from .filter import ProtocolsFilter
 from .tools.pex import parse_db
@@ -64,10 +64,10 @@ def list_exams(request):
     # -- Third level
     # sql-question
     df = pd.DataFrame(list(
-        Protocol.objects.filter(backup__in=backup_list).values('ris_name', 'exam__exam_name', 'machine__hospital_name',
+        Protocol.objects.filter(backup__in=backup_list).values('ris_name', 'exam_name', 'machine__hospital_name',
                                                                'kv', 'mas', 'technique', 'filter_cu', 'pk', 'focus',
                                                                'sensitivity', 'grid', 'datum')
-                                                       .order_by('exam__exam_name', 'ris_name', 'machine__hospital_name')))
+                                                       .order_by('exam_name', 'ris_name', 'machine__hospital_name')))
     # format machine names and date
     df['date_latest'] = df['datum'].dt.strftime('%Y-%m-%d')
     df['machine__hospital_name'] = df['machine__hospital_name'].apply(lambda x: f'<span class="badge badge-secondary">{x}</span>')
@@ -83,29 +83,29 @@ def list_exams(request):
 
     # -- Second level
     # Pandas group by to get list of pk and build machine string
-    s_pk = df.groupby(['exam__exam_name', 'ris_name'])['pk'].apply(list).reset_index()
-    s_machine = df.groupby(['exam__exam_name', 'ris_name'])['machine__hospital_name'].apply(' '.join).reset_index()
-    s_date_latest = df.groupby(['exam__exam_name', 'ris_name'])['date_latest'].max().reset_index()
+    s_pk = df.groupby(['exam_name', 'ris_name'])['pk'].apply(list).reset_index()
+    s_machine = df.groupby(['exam_name', 'ris_name'])['machine__hospital_name'].apply(' '.join).reset_index()
+    s_date_latest = df.groupby(['exam_name', 'ris_name'])['date_latest'].max().reset_index()
 
 
 
     # -- first level
     # sql-question
     f_df = pd.DataFrame(list(
-        Protocol.objects.filter(backup__in=backup_list).values('exam__exam_name', 'machine__hospital_name')
+        Protocol.objects.filter(backup__in=backup_list).values('exam_name', 'machine__hospital_name')
                                                        .annotate(Max('datum'))
-                                                       .order_by('exam__exam_name', 'machine__hospital_name')))
+                                                       .order_by('exam_name', 'machine__hospital_name')))
     # format machine names
     f_df['machine__hospital_name'] = f_df['machine__hospital_name'].apply(lambda x: f'<span class="badge badge-secondary">{x}</span>')
 
     # Pandas group by to build machine string and date_latest
-    f_machine = f_df.groupby(['exam__exam_name'])['machine__hospital_name'].apply(' '.join).reset_index()
-    f_date_latest = df.groupby(['exam__exam_name'])['date_latest'].max().reset_index()
+    f_machine = f_df.groupby(['exam_name'])['machine__hospital_name'].apply(' '.join).reset_index()
+    f_date_latest = df.groupby(['exam_name'])['date_latest'].max().reset_index()
 
 
     # Structure for Treegrid
     f_machine['date_latest'] = f_date_latest.date_latest
-    main_df = f_machine.rename(columns={'exam__exam_name': 'fc', 'machine__hospital_name': 'sc'})
+    main_df = f_machine.rename(columns={'exam_name': 'fc', 'machine__hospital_name': 'sc'})
     main_df['pk'] = ''
 
     s_machine['date_latest'] = s_date_latest.date_latest
@@ -113,8 +113,8 @@ def list_exams(request):
     second_df = s_machine.rename(columns={'ris_name': 'fc', 'machine__hospital_name': 'sc'})
     df['fc'] = df['machine__hospital_name']
     df['sc'] = df['details']
-    second_df['children'] = df.groupby(['exam__exam_name', 'ris_name']).apply(lambda x: x.drop("exam__exam_name", 1).to_dict('records')).tolist()
-    main_df['children'] = second_df.groupby(['exam__exam_name']).apply(lambda x: x.drop("exam__exam_name", 1).to_dict('records')).tolist()
+    second_df['children'] = df.groupby(['exam_name', 'ris_name']).apply(lambda x: x.drop("exam_name", 1).to_dict('records')).tolist()
+    main_df['children'] = second_df.groupby(['exam_name']).apply(lambda x: x.drop("exam_name", 1).to_dict('records')).tolist()
 
 
 
@@ -161,11 +161,12 @@ def skeleton_protocols_results(request):
     pks = request.GET.getlist('pk[]')
 
     # Protocol question
-    q_prot = Protocol.objects.values('pk', 'exam__exam_name', 'ris_name', 'machine__hospital_name','technique',
+    q_prot = Protocol.objects.values('pk', 'exam_name','ris_name', 'machine__hospital_name','technique',
                                      'sensitivity', 'kv', 'mas', 'filter_cu', 'focus', 'grid', 'lut', 'diamond_view',
                                      'image_auto_amplification', 'image_amplification_gain', 'edge_filter_kernel_size',
                                      'edge_filter_gain', 'harmonization_kernel_size', 'harmonization_gain', 'fp_set',
-                                     'history_flag')
+                                     'history_flag','datum')
+
 
     if not pks:
         # query to get the latest backup for each machine
@@ -175,7 +176,7 @@ def skeleton_protocols_results(request):
         db_query = q_prot.filter(pk__in=pks)
 
     # filter using django_filters
-    f = ProtocolsFilter(request.GET, queryset=db_query.order_by('ris_name', 'machine'))
+    f = ProtocolsFilter(request.GET, queryset=db_query)
 
     # make data format for Json response
     tt = []
@@ -199,6 +200,9 @@ def skeleton_protocols_results(request):
         # Remove sensitivity for 2pt
         if obj["technique"]=='2 pt':
             obj["sensitivity"]=''
+
+        # format date
+        obj["datum"] = obj["datum"].strftime("%Y-%m-%d")
 
         tt.append(obj)
 
