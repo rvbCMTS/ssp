@@ -228,9 +228,32 @@
  </div>
 <!-- End Results -->
 
+<!-- Backup -->
+<div class="row">
+    <div class="container">
+    <table id="idBackupTable" class="display compact stripe hover compact" style="width:100%">
+        <thead>
+            <tr>
+                <th>Lab</th>
+                <th>Senaste uppdaterad</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Lab</th>
+                <th>Senaste backup</th>
+            </tr>
+        </tfoot>
+    </table>
+    </div>
+ </div>
+<!-- End Backup -->
+
+
 <div class="hidden">
     <div id="idUpdateResults">{% url 'sp:sp-results-list' %}</div>
     <div id="idViewHistory">{% url 'sp:sp-history' %}</div>
+    <div id="idUpdateBackup">{% url 'sp:sp-backup' %}</div>
 </div>
 
 {% endblock main %}

@@ -66,6 +66,31 @@ $(document).ready(function() {
 
     } );
 
+    $("#idBackupTable").DataTable( {
+        paging: false,
+        searching: false,
+        responsive: false,
+
+        columns: [
+        {"data": "machine__hospital_name"},
+        {"data": "datum"},
+        ],
+
+    } );
+
+    // ajax call for BackupTable
+    $.ajax({
+            type: "GET",
+            url: $("#idUpdateBackup").html(),
+            dataType: 'json',
+            success: function(data) {
+                var table = $("#idBackupTable").DataTable();
+                table.clear().rows.add(data.data).draw();;
+            },
+    })
+
+
+
     // ajax call for ExamsTable
     $.ajax({
             type: "GET",
