@@ -420,7 +420,6 @@ def _prot2db(machine, df):
                                       fp_set=row.fp_set,
                                       datum = tzdate,
                                       machine=machine_entry,
-                                      history_flag = False,
                                       )
 
             # associate backup with protocol
@@ -430,22 +429,10 @@ def _prot2db(machine, df):
             previous_versions = Protocol.objects.filter(ris_name=row.ris_name, machine=machine_entry, exam_name=row.exam_name).exclude(pk=protocol_entry.pk)
 
             # if more than one version
-            if len(previous_versions)>0:
-                for entry in previous_versions:
-                    # associate versions
-                    protocol_entry.history.add(entry)
-                    # switch history_flag
-                    protocol_entry.history_flag = True
-                    protocol_entry.save()
+            for entry in previous_versions:
+                # associate versions
+                protocol_entry.history.add(entry)
 
-            # # get or create exam entry
-            # exam_entry, exam_created = Exam.objects.get_or_create(exam_name=row.exam_name)
-            #
-            # # associate exam with protocol
-            # exam_entry.protocol.add(protocol_entry)
-            #
-            # # associate backup with exam
-            # backup_entry.exam.add(exam_entry)
 
 
 

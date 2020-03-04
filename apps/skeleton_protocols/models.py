@@ -36,7 +36,6 @@ class Protocol(models.Model):
     datum = models.DateTimeField(auto_now=False, auto_now_add=False, blank=False, null=False)
     machine = models.ForeignKey(Machine, on_delete=models.CASCADE)
     history = models.ManyToManyField('self', symmetrical=False)
-    history_flag = models.BooleanField(blank=False, null=False)
 
     def __str__(self):
         return self.ris_name

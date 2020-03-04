@@ -165,7 +165,7 @@ def skeleton_protocols_results(request):
                                      'sensitivity', 'kv', 'mas', 'filter_cu', 'focus', 'grid', 'lut', 'diamond_view',
                                      'image_auto_amplification', 'image_amplification_gain', 'edge_filter_kernel_size',
                                      'edge_filter_gain', 'harmonization_kernel_size', 'harmonization_gain', 'fp_set',
-                                     'history_flag','datum')
+                                     'history','datum')
 
 
     if not pks:
@@ -192,7 +192,7 @@ def skeleton_protocols_results(request):
             obj.update({'image_amp': obj["image_amplification_gain"]})
 
         # history button
-        if obj["history_flag"]:
+        if obj["history"] is not None:
             obj.update({'history': f'<button type="button" class="btn btn-outline-warning btn-sm" onClick="viewHistory({obj["pk"]})">H</button>'})
         else:
             obj.update({'history': ''})
@@ -203,6 +203,10 @@ def skeleton_protocols_results(request):
 
         # format date
         obj["datum"] = obj["datum"].strftime("%Y-%m-%d")
+
+        # format machine
+        obj["machine__hospital_name"] = f'<span class="badge badge-secondary">{obj["machine__hospital_name"]}</span>'
+
 
         tt.append(obj)
 
@@ -237,7 +241,7 @@ def history(request):
                'fp_set':p.fp_set,
                'lut':p.lut,
                'diamond_view':p.diamond_view,
-               'datum':p.datum.strftime("%Y%m%d")
+               'datum':p.datum.strftime("%Y-%m-%d")
                }
 
         # combined strings for edge and harmonization
@@ -253,6 +257,9 @@ def history(request):
         # Remove sensitivity for 2pt
         if p.technique=='2 pt':
             obj["sensitivity"]=''
+
+        # format machine
+        obj["machine__hospital_name"] = f'<span class="badge badge-secondary">{obj["machine__hospital_name"]}</span>'
 
         tt.append(obj)
 

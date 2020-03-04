@@ -9,7 +9,7 @@ $(document).ready(function() {
 
         columns: [
         {"data": "exam_name"},
-        {"data": "ris_name"},
+        {"data": "ris_name", width: '15em'},
         {"data": "machine__hospital_name"},
         {"data": "kv"},
         {"data": "sensitivity"},
