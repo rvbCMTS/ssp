@@ -274,9 +274,11 @@ def backup(request):
     backup_data = list(Backup.objects.values('machine__hospital_name', 'datum').filter(pk__in=pks).order_by('machine__hospital_name'))
 
     for obj in backup_data:
-
         # format date
         obj["datum"] = obj["datum"].strftime("%Y-%m-%d %H:%M:%S")
+
+        # format machine
+        obj["machine__hospital_name"] = f'<span class="badge badge-secondary">{obj["machine__hospital_name"]}</span>'
 
     return JsonResponse({'data': backup_data})
 
