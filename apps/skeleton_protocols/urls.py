@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import skeleton_protocols, skeleton_protocols_results, pex, pex_read, history, list_exams, exams
+from .views import skeleton_protocols, skeleton_protocols_results, pex, pex_read, history, list_exams, exams, backup
 
 
 app_name = 'skeleton_protocols'
@@ -7,6 +7,7 @@ urlpatterns = [
     path('', skeleton_protocols, name='sp-results'),
     path('protocols', skeleton_protocols_results, name='sp-results-list'),
     path('history', history, name='sp-history'),
+    path('backup', backup, name='sp-backup'),
     path('list_exams', list_exams, name='sp-list-exams'),
     path('exams', exams, name='sp-exams'),
     path('pex', pex, name='sp-pex'),

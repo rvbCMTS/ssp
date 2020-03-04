@@ -265,6 +265,24 @@ def history(request):
 
     return JsonResponse({'data': tt})
 
+def backup(request):
+
+    # List of latest backups
+    backup_list = [Backup.objects.all().values('pk').filter(machine=m).latest() for m in Machine.objects.all()]
+    pks = [b['pk'] for b in backup_list]
+    # lab and date
+    backup_data = list(Backup.objects.values('machine__hospital_name', 'datum').filter(pk__in=pks).order_by('machine__hospital_name'))
+
+    for obj in backup_data:
+        # format date
+        obj["datum"] = obj["datum"].strftime("%Y-%m-%d %H:%M:%S")
+
+        # format machine
+        obj["machine__hospital_name"] = f'<span class="badge badge-secondary">{obj["machine__hospital_name"]}</span>'
+
+    return JsonResponse({'data': backup_data})
+
+
 
 def pex(request):
     return render (request,
