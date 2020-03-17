@@ -22,8 +22,7 @@ from .helpers import (_add_time_filter, _add_clinic_filter, _add_dosimeter_place
 
 def personnel_dosimetry_results(request):
     try:
-        context = get_personnel_dosimetry_filter_data(user=request.user,
-                                                      time_period_start=(dt.now() - relativedelta(years=1)))
+        context = get_personnel_dosimetry_filter_data(user=request.user)
     except:
         return HttpResponseServerError()
 
