@@ -23,8 +23,8 @@ def import_personnel_dosimetry_report(vendor: str, input_file_directory: str, ou
     return True
 
 
-def get_personnel_dosimetry_filter_data(user, time_period_start: dt):
-    base_query = Result.objects.filter(measurement_period_center__gte=time_period_start)
+def get_personnel_dosimetry_filter_data(user):
+    base_query = Result.objects.all()
 
     years = [obj['year'].year for obj in
              base_query.annotate(year=TruncYear('measurement_period_center')).order_by(
@@ -148,7 +148,7 @@ def _get_plot_and_table_data_query(time_interval: int, clinic: Optional[int] = N
 
     # Add profession filter
     if profession > 0:
-        query = query.filtetr(personnel__profession_id__exact=profession)
+        query = query.filter(personnel__profession_id__exact=profession)
 
     # Add personnel filter
     if personnel > 0:
