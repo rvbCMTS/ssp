@@ -73,19 +73,28 @@ class OrbitGML:
     def format_data(self):
         """ Reformat the data to fit the output format
         """
+        # O-arms report fluoro times in seconds only
+        # C-båge report fluoro times in minutes and seconds
         output_data = [[i.Behandlingsnr, i.Opkort_huvudgrupp + ', ' + i.Opkort_undergrupp + ', ' + i.Opkortsbenämning,
                         i.Opdatum, i.Opererande_enhet + ', ' + i.Opavdelning, i.Huvudoperatör, i.C_båge, i.O_arm,
-                        i.Minuter + i.Sekunder / 60, i.Minuter_o + i.Sekunder_o / 60, i.Total_dos_mGym2_, i.DAP_mGycm2_]
+                        i.Minuter * 60  + i.Sekunder, i.Minuter, i.Sekunder,
+                        i.Minuter_o * 60 + i.Sekunder_o, int(time.strftime('%M', time.gmtime(i.Sekunder_o))), int(time.strftime('%S', time.gmtime(i.Sekunder_o))),
+                        i.Total_dos_mGym2_, i.DAP_mGycm2_]
                        for i in self.orbit_data.itertuples()]
         column_names = ['examNo', 'examDescId', 'examDate', 'clinicId', 'operatorId', 'idModality1', 'idModality2',
-                        'fluoroTime1', 'fluoroTime2', 'dose1', 'dose2']
+                        'fluoroTime1', 'fluoroTime1_m', 'fluoroTime1_s',
+                        'fluoroTime2', 'fluoroTime2_m', 'fluoroTime2_s', 'dose1', 'dose2']
 
         self.output_data = pd.DataFrame(data=output_data, columns=column_names)
         replace_rows = self.output_data.idModality1[self.output_data.idModality1.isnull()].index.tolist()
         self.output_data.ix[replace_rows, 'idModality1'] = self.output_data.idModality2[replace_rows].values
         self.output_data.ix[replace_rows, 'idModality2'] = None
         self.output_data.ix[replace_rows, 'fluoroTime1'] = self.output_data.fluoroTime2[replace_rows].values
+        self.output_data.ix[replace_rows, 'fluoroTime1_m'] = self.output_data.fluoroTime2_m[replace_rows].values
+        self.output_data.ix[replace_rows, 'fluoroTime1_s'] = self.output_data.fluoroTime2_s[replace_rows].values
         self.output_data.ix[replace_rows, 'fluoroTime2'] = None
+        self.output_data.ix[replace_rows, 'fluoroTime2_m'] = None
+        self.output_data.ix[replace_rows, 'fluoroTime2_s'] = None
         self.output_data.ix[replace_rows, 'dose1'] = self.output_data.dose2[replace_rows].values
         self.output_data.ix[replace_rows, 'dose2'] = None
 
@@ -97,9 +106,13 @@ class OrbitGML:
         replace_rows = self.output_data.fluoroTime1[self.output_data.fluoroTime1 == 0].index.tolist()
         if len(replace_rows) > 0:
             self.output_data.ix[replace_rows, 'fluoroTime1'] = None
+            self.output_data.ix[replace_rows, 'fluoroTime1_m'] = None
+            self.output_data.ix[replace_rows, 'fluoroTime1_s'] = None
         replace_rows = self.output_data.fluoroTime2[self.output_data.fluoroTime2 == 0].index.tolist()
         if len(replace_rows) > 0:
             self.output_data.ix[replace_rows, 'fluoroTime2'] = None
+            self.output_data.ix[replace_rows, 'fluoroTime2_m'] = None
+            self.output_data.ix[replace_rows, 'fluoroTime2_s'] = None
         replace_rows = self.output_data.dose1[self.output_data.dose1 == 0].index.tolist()
         if len(replace_rows) > 0:
             self.output_data.ix[replace_rows, 'dose1'] = None
@@ -234,6 +247,8 @@ class OrbitGML:
                     dirty_operator=DirtyOperator.objects.get(pk=row.operatorId),
                     dirty_modality=DirtyModality.objects.get(pk=row.idModality1),
                     fluoro_time=(None if math.isnan(row.fluoroTime1) else row.fluoroTime1),
+                    fluoro_time_minutes=(None if math.isnan(row.fluoroTime1_m) else row.fluoroTime1_m),
+                    fluoro_time_seconds=(None if math.isnan(row.fluoroTime1_s) else row.fluoroTime1_s),
                     dose=(None if math.isnan(row.dose1) else row.dose1)
                 )
 
@@ -246,6 +261,8 @@ class OrbitGML:
                     dirty_operator=DirtyOperator.objects.get(pk=row.operatorId),
                     dirty_modality=DirtyModality.objects.get(pk=row.idModality2),
                     fluoro_time=(None if math.isnan(row.fluoroTime2) else row.fluoroTime2),
+                    fluoro_time_minutes=(None if math.isnan(row.fluoroTime2_m) else row.fluoroTime2_m),
+                    fluoro_time_seconds=(None if math.isnan(row.fluoroTime2_s) else row.fluoroTime2_s),
                     dose=(None if math.isnan(row.dose2) else row.dose2)
                 )
 
