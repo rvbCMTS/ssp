@@ -161,7 +161,7 @@ def register_exam_form(request, clinic: Optional[int] = None):
     if len(mdu) > 0:
         modality_dose_unit = {obj.id: obj.dose_unit for obj in mdu}
 
-    form = FluoroTimeForm(initial={'clinicName': clinic})
+    form = FluoroTimeForm(initial={'clinic': clinic})
 
     all_operators = [{'operatorId': obj.id, 'operatorName': f'{obj.last_name}, {obj.first_name}'} for obj in Operator.objects.all()]
     all_modalities = [{'modalityId': obj.id, 'modalityName': obj.name} for obj in Modality.objects.all().filter(active=True)]
