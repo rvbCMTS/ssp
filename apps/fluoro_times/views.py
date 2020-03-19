@@ -10,6 +10,7 @@ from django.utils.translation import gettext as _
 from datetime import date, time, datetime as dt, timedelta
 import json
 from math import floor, isnan
+import time as timetime
 import numpy as np
 import pandas as pd
 from rest_framework import permissions
@@ -106,10 +107,14 @@ def register_exam_form(request, clinic: Optional[int] = None):
                 exam_description.save()
 
             fluoro_time = 0
+            fluoro_time_minutes = 0
+            fluoro_time_seconds = 0
             if form.cleaned_data.get('fluoro_time_minutes') is not None:
                 fluoro_time += form.cleaned_data.get('fluoro_time_minutes') * 60
+                fluoro_time_minutes = form.cleaned_data.get('fluoro_time_minutes')
             if form.cleaned_data.get('fluoro_time_seconds') is not None:
                 fluoro_time += form.cleaned_data.get('fluoro_time_seconds')
+                fluoro_time_seconds = form.cleaned_data.get('fluoro_time_seconds')
 
             fluoro_dose = 0
             if form.cleaned_data.get('fluoro_dose') is not None:
@@ -126,6 +131,8 @@ def register_exam_form(request, clinic: Optional[int] = None):
                 dirty_operator=dirty_operator,
                 dirty_modality=dirty_modality,
                 fluoro_time=fluoro_time,
+                fluoro_time_minutes = fluoro_time_minutes,
+                fluoro_time_seconds = fluoro_time_seconds,
                 dose=fluoro_dose
             )
 
@@ -256,15 +263,15 @@ class IndexSummaryData(APIView):
                 ar = row.exam_description__anatomy_region__region
             if row.year == current_year:
                 median_plot_current[anatomy_regions.index(ar)] = dt.combine(dt.date(dt.now()), time(
-                    hour = int(floor(row.total_fluoro_time/60)),
-                    minute=int(floor(row.total_fluoro_time - floor(row.total_fluoro_time/60)*60)),
-                    second=int((row.total_fluoro_time - floor(row.total_fluoro_time)) * 60))
+                    hour = int(timetime.strftime('%H', timetime.gmtime(row.total_fluoro_time))),
+                    minute=int(timetime.strftime('%M', timetime.gmtime(row.total_fluoro_time))),
+                    second=int(timetime.strftime('%S', timetime.gmtime(row.total_fluoro_time))))
                 )
             else:
                 median_plot_previous[anatomy_regions.index(ar)] = dt.combine(dt.date(dt.now()), time(
-                    hour=int(floor(row.total_fluoro_time / 60)),
-                    minute=int(floor(row.total_fluoro_time - floor(row.total_fluoro_time / 60) * 60)),
-                    second=int((row.total_fluoro_time - floor(row.total_fluoro_time))*60))
+                    hour = int(timetime.strftime('%H', timetime.gmtime(row.total_fluoro_time))),
+                    minute=int(timetime.strftime('%M', timetime.gmtime(row.total_fluoro_time))),
+                    second=int(timetime.strftime('%S', timetime.gmtime(row.total_fluoro_time))))
                 )
 
         # Format response data
@@ -318,7 +325,7 @@ class IndexSummaryData(APIView):
                     row.dirty_clinic__clinic__hospital__name]['count'] = row['count']
                 context['tableData'][row.exam_description__anatomy_region__region][
                     row.dirty_clinic__clinic__hospital__name][
-                    'median_time'] = f"{floor(row['median']):02}:{round((row['median'] - floor(row['median'])) * 60):02}"
+                    'median_time'] = timetime.strftime('%M:%S', timetime.gmtime(row['median']))
 
         # Create layouts for the plots
         context['layouts'] = {
@@ -397,12 +404,13 @@ class YearlyReportData(APIView):
             {'FluoroTime': ['count', 'median', lambda x: np.percentile(x, q=95)]})
         anatomy_region_table = [[
             ar, row['FluoroTime']['count'],
-            time(hour=int(floor(row['FluoroTime']['median'] / 60)),
-                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60) * 60)),
-                 second=int((row['FluoroTime']['median'] - floor(row['FluoroTime']['median'])) * 60)),
-            time(hour=int(floor(row['FluoroTime']['<lambda>'] / 60)),
-                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60) * 60)),
-                 second=int((row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'])) * 60))
+            time(hour=int(timetime.strftime('%H', timetime.gmtime(row['FluoroTime']['median']))),
+                 minute=int(timetime.strftime('%M', timetime.gmtime(row['FluoroTime']['median']))),
+                 second=int(timetime.strftime('%S', timetime.gmtime(row['FluoroTime']['median']))))
+            ,
+            time(hour=int(timetime.strftime('%H', timetime.gmtime(row['FluoroTime']['<lambda>']))),
+                 minute=int(timetime.strftime('%M', timetime.gmtime(row['FluoroTime']['<lambda>']))),
+                 second=int(timetime.strftime('%S', timetime.gmtime(row['FluoroTime']['<lambda>']))))
         ] for ar, row in anatomy_region_data.iterrows()]
 
         # Operator statistics
@@ -415,15 +423,17 @@ class YearlyReportData(APIView):
 
         operator_table = [[
             op, row['FluoroTime']['count'],
-            time(hour=int(floor(row['FluoroTime']['sum'] / 60)),
-                 minute=int(floor(row['FluoroTime']['sum'] - floor(row['FluoroTime']['sum'] / 60) * 60)),
-                 second=int((row['FluoroTime']['sum'] - floor(row['FluoroTime']['sum'])) * 60)),
-            time(hour=int(floor(row['FluoroTime']['median'] / 60)),
-                 minute=int(floor(row['FluoroTime']['median'] - floor(row['FluoroTime']['median'] / 60) * 60)),
-                 second=int((row['FluoroTime']['median'] - floor(row['FluoroTime']['median'])) * 60)),
-            time(hour=int(floor(row['FluoroTime']['<lambda>'] / 60)),
-                 minute=int(floor(row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'] / 60) * 60)),
-                 second=int((row['FluoroTime']['<lambda>'] - floor(row['FluoroTime']['<lambda>'])) * 60))
+            time(hour=int(timetime.strftime('%H', timetime.gmtime(row['FluoroTime']['sum']))),
+                 minute=int(timetime.strftime('%M', timetime.gmtime(row['FluoroTime']['sum']))),
+                 second=int(timetime.strftime('%S', timetime.gmtime(row['FluoroTime']['sum']))))
+            ,
+            time(hour=int(timetime.strftime('%H', timetime.gmtime(row['FluoroTime']['median']))),
+                 minute=int(timetime.strftime('%M', timetime.gmtime(row['FluoroTime']['median']))),
+                 second=int(timetime.strftime('%S', timetime.gmtime(row['FluoroTime']['median']))))
+            ,
+            time(hour=int(timetime.strftime('%H', timetime.gmtime(row['FluoroTime']['<lambda>']))),
+                 minute=int(timetime.strftime('%M', timetime.gmtime(row['FluoroTime']['<lambda>']))),
+                 second=int(timetime.strftime('%S', timetime.gmtime(row['FluoroTime']['<lambda>']))))
         ] for op, row in operator_statistic_data.iterrows()]
 
         # Bubble plot
@@ -449,11 +459,10 @@ class YearlyReportData(APIView):
                                     'sizemode': 'area',
                                     'opacity': 0.6
                                 }})
-            plot[row.AnatomyRegion]['y'][x.index(row.ExamDate)] = dt.combine(dt.date(dt.now()), time(
-                hour=int(floor(row['FluoroTime'] / 60)),
-                minute=int(floor(row['FluoroTime'] - floor(row['FluoroTime'] / 60) * 60)),
-                second=int((row['FluoroTime'] - floor(row['FluoroTime'])) * 60)))
-
+            plot[row.AnatomyRegion]['y'][x.index(row.ExamDate)] = dt.combine(dt.date(dt.now()),
+                    time(hour=int(timetime.strftime('%H', timetime.gmtime(row['FluoroTime']))),
+                         minute=int(timetime.strftime('%M', timetime.gmtime(row['FluoroTime']))),
+                         second=int(timetime.strftime('%S', timetime.gmtime(row['FluoroTime'])))))
         # Set the marker size
         for _, row in df_count.iterrows():
             plot[row.AnatomyRegion]['marker']['size'][x.index(row.ExamDate)] = row.FluoroTime
@@ -528,11 +537,10 @@ class SsmPlotData(APIView):
         }
         for _, row in median_all.iterrows():
             plot_data_median_year['y'][years.index(row.year.year)] = dt.combine(
-                dt.date(dt.now()), time(
-                    hour=int(floor(row.fluoro_time) / 60),
-                    minute=int(floor(row.fluoro_time) - (floor(row.fluoro_time) / 60) * 60),
-                    second=int((row.fluoro_time - floor(row.fluoro_time)) * 60))
-                )
+                dt.date(dt.now()),
+                    time(hour=int(timetime.strftime('%H', timetime.gmtime(row.fluoro_time))),
+                         minute=int(timetime.strftime('%M', timetime.gmtime(row.fluoro_time))),
+                         second=int(timetime.strftime('%S', timetime.gmtime(row.fluoro_time)))))
 
         plot_data_median_clinic_category = {}
         for year in years:
@@ -546,12 +554,10 @@ class SsmPlotData(APIView):
         for _, row in median_clinic_category.iterrows():
             plot_data_median_clinic_category[str(row.year.year)]['y'][
                 clinic_categories.index(row.clinic_category)] = dt.combine(
-                dt.date(dt.now()), time(
-                    hour=int(floor(row.fluoro_time) / 60),
-                    minute=int(floor(row.fluoro_time) - (floor(row.fluoro_time) / 60) * 60),
-                    second=int((row.fluoro_time - floor(row.fluoro_time)) * 60))
-                )
-
+                dt.date(dt.now()),
+                        time(hour=int(timetime.strftime('%H', timetime.gmtime(row.fluoro_time))),
+                             minute=int(timetime.strftime('%M', timetime.gmtime(row.fluoro_time))),
+                             second=int(timetime.strftime('%S', timetime.gmtime(row.fluoro_time)))))
         plot_data = {}
         for year in years:
             plot_data[str(year)] = {
@@ -566,11 +572,10 @@ class SsmPlotData(APIView):
         for _, row in median_anatomy_region.iterrows():
             plot_data_median_anatomy_region[str(row.year.year)]['y'][
                 anatomy_regions.index(row.anatomy_region)] = dt.combine(
-                dt.date(dt.now()), time(
-                    hour=int(floor(row.fluoro_time) / 60),
-                    minute=int(floor(row.fluoro_time) - (floor(row.fluoro_time) / 60) * 60),
-                    second=int((row.fluoro_time - floor(row.fluoro_time)) * 60))
-                )
+                dt.date(dt.now()),
+                        time(hour=int(timetime.strftime('%H', timetime.gmtime(row.fluoro_time))),
+                             minute=int(timetime.strftime('%M', timetime.gmtime(row.fluoro_time))),
+                             second=int(timetime.strftime('%S', timetime.gmtime(row.fluoro_time)))))
 
         plot_data_count_anatomy_region = deepcopy(plot_data)
         for _, row in count_anatomy_region.iterrows():

@@ -166,6 +166,8 @@ class Exam(models.Model):
     dirty_operator = models.ForeignKey(DirtyOperator, on_delete=models.PROTECT)
     dirty_modality = models.ForeignKey(DirtyModality, on_delete=models.PROTECT)
     fluoro_time = models.FloatField(blank=False, null=False)
+    fluoro_time_seconds = models.FloatField(null=True, blank=True)
+    fluoro_time_minutes = models.FloatField(null=True, blank=True)
     dose = models.DecimalField(max_digits=16, decimal_places=4, null=True)
 
     def __str__(self):
