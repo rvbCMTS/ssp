@@ -1,5 +1,6 @@
 $(document).ready(function() {
     $('#id_clinic').change();
+    $('#id_modality').change();
     let timeObj = new Date();
     $('#id_exam_id').val("SSP_" + timeObj.getTime() );
 });

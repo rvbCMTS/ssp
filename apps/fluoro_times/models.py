@@ -178,6 +178,21 @@ class Exam(models.Model):
         unique_together = ('exam_no', 'exam_date', 'dirty_operator', 'dirty_modality')
 
 
+class Exposure(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    dirty_modality = models.ForeignKey(DirtyModality, on_delete=models.CASCADE)
+    fluoro_time = models.FloatField(blank=False, null=False)
+    fluoro_time_seconds = models.FloatField(null=True, blank=True)
+    fluoro_time_minutes = models.FloatField(null=True, blank=True)
+    dose = models.DecimalField(max_digits=16, decimal_places=4, null=True)
+
+    def __str__(self):
+        return f'{self.exam.exam_no} - {self.dirty_modality.modality.name}'
+
+    class Meta:
+        ordering = ['exam', 'dirty_modality']
+
+
 class ModalityClinicMap(models.Model):
     modality = models.ForeignKey(Modality, on_delete=models.CASCADE)
     clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE)
@@ -198,7 +213,6 @@ class OperatorClinicMap(models.Model):
 
     class Meta:
         ordering = ['clinic', 'operator']
-
 
 class Updates(models.Model):
     updated = models.DateTimeField()
