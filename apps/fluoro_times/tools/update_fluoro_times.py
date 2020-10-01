@@ -8,7 +8,7 @@ import pandas as pd
 import pyodbc
 import time
 
-from ..models import Exam, ExamDescription, DirtyClinic, DirtyOperator, DirtyModality, Updates
+from ..models import Exam, ExamDescription, DirtyClinic, DirtyOperator, DirtyModality, Updates, Exposure
 
 
 class OrbitGML:
@@ -52,19 +52,32 @@ class OrbitGML:
         self.orbit_data = pd.read_sql_query(query, conn)
         self.orbit_data.columns = [c.replace(' ', '_').replace('-', '_').replace('(', '_').replace(')', '_')
                                    for c in self.orbit_data.columns]
-        self.orbit_data = self.orbit_data[self.orbit_data.C_båge.notnull() | self.orbit_data.O_arm.notnull()]
+        # self.orbit_data = self.orbit_data[self.orbit_data.C_båge1.notnull() | self.orbit_data.O_arm1.notnull()]
         replacements = {
-            'Minuter': {',': '.'},
-            'Sekunder': {',': '.'},
-            'Total_dos_mGym2_': {',': '.'},
-            'Minuter_o': {',': '.'},
-            'Sekunder_o': {',': '.'},
-            'DAP_mGycm2_': {',': '.'},
-            'DLP_mGycm_': {',': '.'}
+            'Minuter1': {',': '.'},
+            'Sekunder1': {',': '.'},
+            'Total_dos1_mGym2_': {',': '.'},
+            'Minuter2': {',': '.'},
+            'Sekunder2': {',': '.'},
+            'Total_dos2_mGym2_': {',': '.'},
+            'Minuter3': {',': '.'},
+            'Sekunder3': {',': '.'},
+            'Total_dos3_mGym2_': {',': '.'},
+            'Minuter_o1': {',': '.'},
+            'Sekunder_o1': {',': '.'},
+            'DAP1_mGycm2_': {',': '.'},
+            'DLP1_mGycm_': {',': '.'},
+            'Minuter_o2': {',': '.'},
+            'Sekunder_o2': {',': '.'},
+            'DAP2_mGycm2_': {',': '.'},
+            'DLP2_mGycm_': {',': '.'}
         }
         self.orbit_data.replace(replacements, regex=True, inplace=True)
-        convert_columns = ['Minuter', 'Sekunder', 'Total_dos_mGym2_',
-                           'Minuter_o', 'Sekunder_o', 'DAP_mGycm2_', 'DLP_mGycm_']
+        convert_columns = ['Minuter1', 'Sekunder1', 'Total_dos1_mGym2_',
+                           'Minuter2', 'Sekunder2', 'Total_dos2_mGym2_',
+                           'Minuter3', 'Sekunder3', 'Total_dos3_mGym2_',
+                           'Minuter_o1', 'Sekunder_o1', 'DAP1_mGycm2_', 'DLP1_mGycm_',
+                           'Minuter_o2', 'Sekunder_o2', 'DAP2_mGycm2_', 'DLP2_mGycm_']
         for colname in convert_columns:
             self.orbit_data[colname] = pd.to_numeric(self.orbit_data[colname], errors='coerce')
 
@@ -76,49 +89,42 @@ class OrbitGML:
         # O-arms report fluoro times in seconds only
         # C-båge report fluoro times in minutes and seconds
         output_data = [[i.Behandlingsnr, i.Opkort_huvudgrupp + ', ' + i.Opkort_undergrupp + ', ' + i.Opkortsbenämning,
-                        i.Opdatum, i.Opererande_enhet + ', ' + i.Opavdelning, i.Huvudoperatör, i.C_båge, i.O_arm,
-                        i.Minuter * 60  + i.Sekunder, i.Minuter, i.Sekunder,
-                        i.Minuter_o * 60 + i.Sekunder_o, int(time.strftime('%M', time.gmtime(i.Sekunder_o))), int(time.strftime('%S', time.gmtime(i.Sekunder_o))),
-                        i.Total_dos_mGym2_, i.DAP_mGycm2_]
+                        i.Opdatum, i.Opererande_enhet + ', ' + i.Opavdelning, i.Huvudoperatör,
+                        i.C_båge1, i.C_båge2, i.C_båge3,
+                        i.O_arm1, i.O_arm2,
+                        i.Minuter1 * 60 + i.Sekunder1, i.Minuter1, i.Sekunder1,
+                        i.Minuter2 * 60 + i.Sekunder2, i.Minuter2, i.Sekunder2,
+                        i.Minuter3 * 60 + i.Sekunder3, i.Minuter3, i.Sekunder3,
+                        i.Minuter_o1 * 60 + i.Sekunder_o1, int(time.strftime('%M', time.gmtime(i.Sekunder_o1))), int(time.strftime('%S', time.gmtime(i.Sekunder_o1))),
+                        i.Minuter_o2 * 60 + i.Sekunder_o2, int(time.strftime('%M', time.gmtime(i.Sekunder_o2))), int(time.strftime('%S', time.gmtime(i.Sekunder_o2))),
+                        i.Total_dos1_mGym2_, i.Total_dos2_mGym2_, i.Total_dos3_mGym2_,
+                        i.DAP1_mGycm2_, i.DAP2_mGycm2_]
                        for i in self.orbit_data.itertuples()]
-        column_names = ['examNo', 'examDescId', 'examDate', 'clinicId', 'operatorId', 'idModality1', 'idModality2',
+        column_names = ['examNo', 'examDescId', 'examDate', 'clinicId', 'operatorId',
+                        'idModality1', 'idModality2', 'idModality3', 'idModality4', 'idModality5',
                         'fluoroTime1', 'fluoroTime1_m', 'fluoroTime1_s',
-                        'fluoroTime2', 'fluoroTime2_m', 'fluoroTime2_s', 'dose1', 'dose2']
-
+                        'fluoroTime2', 'fluoroTime2_m', 'fluoroTime2_s',
+                        'fluoroTime3', 'fluoroTime3_m', 'fluoroTime3_s',
+                        'fluoroTime4', 'fluoroTime4_m', 'fluoroTime4_s',
+                        'fluoroTime5', 'fluoroTime5_m', 'fluoroTime5_s',
+                        'dose1', 'dose2', 'dose3', 'dose4', 'dose5']
         self.output_data = pd.DataFrame(data=output_data, columns=column_names)
-        replace_rows = self.output_data.idModality1[self.output_data.idModality1.isnull()].index.tolist()
-        self.output_data.ix[replace_rows, 'idModality1'] = self.output_data.idModality2[replace_rows].values
-        self.output_data.ix[replace_rows, 'idModality2'] = None
-        self.output_data.ix[replace_rows, 'fluoroTime1'] = self.output_data.fluoroTime2[replace_rows].values
-        self.output_data.ix[replace_rows, 'fluoroTime1_m'] = self.output_data.fluoroTime2_m[replace_rows].values
-        self.output_data.ix[replace_rows, 'fluoroTime1_s'] = self.output_data.fluoroTime2_s[replace_rows].values
-        self.output_data.ix[replace_rows, 'fluoroTime2'] = None
-        self.output_data.ix[replace_rows, 'fluoroTime2_m'] = None
-        self.output_data.ix[replace_rows, 'fluoroTime2_s'] = None
-        self.output_data.ix[replace_rows, 'dose1'] = self.output_data.dose2[replace_rows].values
-        self.output_data.ix[replace_rows, 'dose2'] = None
 
+        # None Operator given name 'Ej angivet'
         self.output_data.operatorId.fillna(value='Ej angivet', inplace=True)
-        # Remove rows with no fluoro time or fluoro dose values
-        self.output_data = \
-            self.output_data[self.output_data[['fluoroTime1', 'fluoroTime2', 'dose1', 'dose2']].sum(axis=1) > 0]
 
-        replace_rows = self.output_data.fluoroTime1[self.output_data.fluoroTime1 == 0].index.tolist()
-        if len(replace_rows) > 0:
-            self.output_data.ix[replace_rows, 'fluoroTime1'] = None
-            self.output_data.ix[replace_rows, 'fluoroTime1_m'] = None
-            self.output_data.ix[replace_rows, 'fluoroTime1_s'] = None
-        replace_rows = self.output_data.fluoroTime2[self.output_data.fluoroTime2 == 0].index.tolist()
-        if len(replace_rows) > 0:
-            self.output_data.ix[replace_rows, 'fluoroTime2'] = None
-            self.output_data.ix[replace_rows, 'fluoroTime2_m'] = None
-            self.output_data.ix[replace_rows, 'fluoroTime2_s'] = None
-        replace_rows = self.output_data.dose1[self.output_data.dose1 == 0].index.tolist()
-        if len(replace_rows) > 0:
-            self.output_data.ix[replace_rows, 'dose1'] = None
-        replace_rows = self.output_data.dose2[self.output_data.dose2 == 0].index.tolist()
-        if len(replace_rows) > 0:
-            self.output_data.ix[replace_rows, 'dose2'] = None
+        # Remove rows with no fluoro time or fluoro dose values
+        for m in [1, 2, 3, 4, 5]:
+            replace_rows = self.output_data[self.output_data[f'fluoroTime{m}'] == 0].index.tolist()
+            if len(replace_rows) > 0:
+                self.output_data.ix[replace_rows, f'fluoroTime{m}'] = None
+                self.output_data.ix[replace_rows, f'fluoroTime{m}_m'] = None
+                self.output_data.ix[replace_rows, f'fluoroTime{m}_s'] = None
+            replace_rows = self.output_data[self.output_data[f'dose{m}'] == 0].index.tolist()
+            if len(replace_rows) > 0:
+                self.output_data.ix[replace_rows, f'dose{m}'] = None
+
+        # Remove duplicates
         self.output_data = self.output_data.drop_duplicates(keep='first')
 
     def assert_new_in_db(self):
@@ -156,9 +162,13 @@ class OrbitGML:
         # Go through the modalities and insert new modalities into the db
         modalities = DirtyModality.objects.all().values('dirty_name', 'pk')
         modalities = {obj['dirty_name']: obj['pk'] for obj in modalities}
-        new_modalities = [i for i in np.unique(
-            [i for i in np.append(self.output_data.idModality1,self.output_data.idModality2) if i is not None]
-        )if i not in modalities.keys()]
+        # unique list of new modalities not including None
+        list_new_modalites = np.unique([self.output_data.idModality1[self.output_data.idModality1.notnull()].tolist() +
+                                        self.output_data.idModality2[self.output_data.idModality2.notnull()].tolist() +
+                                        self.output_data.idModality3[self.output_data.idModality3.notnull()].tolist() +
+                                        self.output_data.idModality4[self.output_data.idModality4.notnull()].tolist() +
+                                        self.output_data.idModality5[self.output_data.idModality5.notnull()].tolist()])
+        new_modalities = [i for i in list_new_modalites if i not in modalities.keys()]
         self.log.debug(f'Found {len(new_modalities)} new modalities.')
         if len(new_modalities) > 0:
             self.log.info('Inserting new modalities into the database')
@@ -170,10 +180,16 @@ class OrbitGML:
 
         # Replace the modality name with the dirty modality id in the output data frame
         self.log.info('Replacing modality names in the orbit DataFrame with pk from the ssp db')
-        for modality in np.unique(
-                [i for i in np.append(self.output_data.idModality1, self.output_data.idModality2) if i is not None]):
+        for modality in np.unique([i for i in self.output_data.idModality1[self.output_data.idModality1.notnull()]]):
             self.output_data.idModality1.replace(modality, modalities[modality], inplace=True)
+        for modality in np.unique([i for i in self.output_data.idModality2[self.output_data.idModality2.notnull()]]):
             self.output_data.idModality2.replace(modality, modalities[modality], inplace=True)
+        for modality in np.unique([i for i in self.output_data.idModality3[self.output_data.idModality3.notnull()]]):
+            self.output_data.idModality3.replace(modality, modalities[modality], inplace=True)
+        for modality in np.unique([i for i in self.output_data.idModality4[self.output_data.idModality4.notnull()]]):
+            self.output_data.idModality4.replace(modality, modalities[modality], inplace=True)
+        for modality in np.unique([i for i in self.output_data.idModality5[self.output_data.idModality5.notnull()]]):
+            self.output_data.idModality5.replace(modality, modalities[modality], inplace=True)
 
         # ------- #
         # Clinics #
@@ -226,6 +242,10 @@ class OrbitGML:
         if len(self.output_data.examNo) < 1:
             return
 
+        # ----------------- #
+        # Exam              #
+        # ----------------- #
+
         self.log.info(f'Checking for exams not already in the db')
         ssp_exam_numbers = Exam.objects.all().values('exam_no').distinct()
         ssp_exam_numbers = [obj['exam_no'] for obj in ssp_exam_numbers]
@@ -235,35 +255,93 @@ class OrbitGML:
         if len(self.output_data.examNo) < 1:
             return
 
+        # Remove nan rows
+        self.output_data = self.output_data[self.output_data.fluoroTime1.notnull() |
+                                            self.output_data.fluoroTime2.notnull() |
+                                            self.output_data.fluoroTime3.notnull() |
+                                            self.output_data.fluoroTime4.notnull() |
+                                            self.output_data.fluoroTime5.notnull()]
+
         self.log.info(f'Inserting {len(self.output_data.examNo)} exams into the db')
 
+        # writing 99 and DirtyModality pk=1 as placeholder. After migrations delete these columns.
         for row in self.output_data.itertuples():
-            if not math.isnan(row.fluoroTime1) and row.fluoroTime1 is not None:
                 query = Exam.objects.get_or_create(
                     exam_no=row.examNo,
                     exam_description=ExamDescription.objects.get(pk=row.examDescId),
                     exam_date=row.examDate,
                     dirty_clinic=DirtyClinic.objects.get(pk=row.clinicId),
                     dirty_operator=DirtyOperator.objects.get(pk=row.operatorId),
+                    dirty_modality=DirtyModality.objects.get(pk=1),
+                    fluoro_time=99,
+                    fluoro_time_minutes=99,
+                    fluoro_time_seconds=99,
+                    dose=99
+                )
+
+        # Replace the exam with the exam id in the output_data data frame
+        self.log.info('Replacing Exam names in the orbit DataFrame with pk from the ssp db')
+        exams = Exam.objects.all().values('pk', 'exam_no')
+        exams = {obj['exam_no']: obj['pk'] for obj in exams}
+
+        for exam_no in self.output_data.examNo.tolist():
+            if exam_no in exams.keys():
+                self.output_data.examNo.replace(exam_no, exams[exam_no], inplace=True)
+            else:
+                self.output_data.examNo.replace(exam_no, np.nan, inplace=True)
+
+        # remove nan rows
+        self.output_data = self.output_data[self.output_data.examNo.notnull()]
+
+        # ----------------- #
+        # Exposure          #
+        # ----------------- #
+
+        for row in self.output_data.itertuples():
+            if not math.isnan(row.idModality1) and row.idModality1 is not None and not math.isnan(row.fluoroTime1) and row.fluoroTime1 is not None:
+                query = Exposure.objects.get_or_create(
+                    exam=Exam.objects.get(pk=row.examNo),
                     dirty_modality=DirtyModality.objects.get(pk=row.idModality1),
                     fluoro_time=(None if math.isnan(row.fluoroTime1) else row.fluoroTime1),
                     fluoro_time_minutes=(None if math.isnan(row.fluoroTime1_m) else row.fluoroTime1_m),
                     fluoro_time_seconds=(None if math.isnan(row.fluoroTime1_s) else row.fluoroTime1_s),
                     dose=(None if math.isnan(row.dose1) else row.dose1)
                 )
-
             if not math.isnan(row.idModality2) and row.idModality2 is not None and not math.isnan(row.fluoroTime2) and row.fluoroTime2 is not None:
-                query = Exam.objects.get_or_create(
-                    exam_no=row.examNo,
-                    exam_description=ExamDescription.objects.get(pk=row.examDescId),
-                    exam_date=row.examDate,
-                    dirty_clinic=DirtyClinic.objects.get(pk=row.clinicId),
-                    dirty_operator=DirtyOperator.objects.get(pk=row.operatorId),
+                query = Exposure.objects.get_or_create(
+                    exam=Exam.objects.get(pk=row.examNo),
                     dirty_modality=DirtyModality.objects.get(pk=row.idModality2),
                     fluoro_time=(None if math.isnan(row.fluoroTime2) else row.fluoroTime2),
                     fluoro_time_minutes=(None if math.isnan(row.fluoroTime2_m) else row.fluoroTime2_m),
                     fluoro_time_seconds=(None if math.isnan(row.fluoroTime2_s) else row.fluoroTime2_s),
                     dose=(None if math.isnan(row.dose2) else row.dose2)
+                )
+            if not math.isnan(row.idModality3) and row.idModality3 is not None and not math.isnan(row.fluoroTime3) and row.fluoroTime3 is not None:
+                query = Exposure.objects.get_or_create(
+                    exam=Exam.objects.get(pk=row.examNo),
+                    dirty_modality=DirtyModality.objects.get(pk=row.idModality3),
+                    fluoro_time=(None if math.isnan(row.fluoroTime3) else row.fluoroTime3),
+                    fluoro_time_minutes=(None if math.isnan(row.fluoroTime3_m) else row.fluoroTime3_m),
+                    fluoro_time_seconds=(None if math.isnan(row.fluoroTime3_s) else row.fluoroTime3_s),
+                    dose=(None if math.isnan(row.dose3) else row.dose3)
+                )
+            if not math.isnan(row.idModality4) and row.idModality4 is not None and not math.isnan(row.fluoroTime4) and row.fluoroTime4 is not None:
+                query = Exposure.objects.get_or_create(
+                    exam=Exam.objects.get(pk=row.examNo),
+                    dirty_modality=DirtyModality.objects.get(pk=row.idModality4),
+                    fluoro_time=(None if math.isnan(row.fluoroTime4) else row.fluoroTime4),
+                    fluoro_time_minutes=(None if math.isnan(row.fluoroTime4_m) else row.fluoroTime4_m),
+                    fluoro_time_seconds=(None if math.isnan(row.fluoroTime4_s) else row.fluoroTime4_s),
+                    dose=(None if math.isnan(row.dose4) else row.dose4)
+                )
+            if not math.isnan(row.idModality5) and row.idModality5 is not None and not math.isnan(row.fluoroTime5) and row.fluoroTime5 is not None:
+                query = Exposure.objects.get_or_create(
+                    exam=Exam.objects.get(pk=row.examNo),
+                    dirty_modality=DirtyModality.objects.get(pk=row.idModality5),
+                    fluoro_time=(None if math.isnan(row.fluoroTime5) else row.fluoroTime5),
+                    fluoro_time_minutes=(None if math.isnan(row.fluoroTime5_m) else row.fluoroTime5_m),
+                    fluoro_time_seconds=(None if math.isnan(row.fluoroTime5_s) else row.fluoroTime5_s),
+                    dose=(None if math.isnan(row.dose5) else row.dose5)
                 )
 
         self.success = True

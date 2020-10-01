@@ -21,7 +21,7 @@ from typing import Optional
 
 from .forms import FluoroTimeForm
 from .helpers import fluoro_dose_convert
-from .models import Exam, Operator, Clinic, Hospital, AnatomyRegion, Modality, ModalityClinicMap, OperatorClinicMap, DirtyClinic, DirtyModality, DirtyOperator, ExamDescription
+from .models import Exam, Operator, Clinic, Hospital, AnatomyRegion, Modality, ModalityClinicMap, OperatorClinicMap, DirtyClinic, DirtyModality, DirtyOperator, ExamDescription, Exposure
 from .tools.update_fluoro_times import OrbitGML
 
 
@@ -123,6 +123,7 @@ def register_exam_form(request, clinic: Optional[int] = None):
                     form.cleaned_data.get('fluoro_dose_unit')
                 )
 
+            # writing 99 as placeholder. After migrations delete these columns.
             fluoro_exam = Exam(
                 exam_no=form.cleaned_data.get('exam_id'),
                 exam_description=exam_description,
@@ -130,13 +131,24 @@ def register_exam_form(request, clinic: Optional[int] = None):
                 dirty_clinic=dirty_clinic,
                 dirty_operator=dirty_operator,
                 dirty_modality=dirty_modality,
+                fluoro_time=99,
+                fluoro_time_minutes = 99,
+                fluoro_time_seconds = 99,
+                dose=99
+            )
+            fluoro_exam.save()
+
+            exam = Exam.objects.filter(exam_no=form.cleaned_data.get('exam_id')).first()
+            fluoro_exposure = Exposure(
+                exam=exam,
+                dirty_modality=dirty_modality,
                 fluoro_time=fluoro_time,
-                fluoro_time_minutes = fluoro_time_minutes,
-                fluoro_time_seconds = fluoro_time_seconds,
+                fluoro_time_minutes=fluoro_time_minutes,
+                fluoro_time_seconds=fluoro_time_seconds,
                 dose=fluoro_dose
             )
+            fluoro_exposure.save()
 
-            fluoro_exam.save()
             messages.success(request=request,
                              message=f'Genomlysningsundersökningen {form.cleaned_data.get("exam_id")} har sparats')
 
@@ -242,7 +254,7 @@ class IndexSummaryData(APIView):
         ).values(
             'year', 'exam_description__anatomy_region__region', 'exam_no'
         ).annotate(
-            total_fluoro_time=Sum('fluoro_time')
+            total_fluoro_time=Sum('exposure__fluoro_time')
         ).values('year', 'exam_description__anatomy_region__region', 'total_fluoro_time')
 
         if not query:
@@ -298,7 +310,7 @@ class IndexSummaryData(APIView):
         ).values(
             'exam_description__anatomy_region__region', 'dirty_clinic__clinic__hospital__name', 'exam_no'
         ).annotate(
-            total_fluoro_time=Sum('fluoro_time')
+            total_fluoro_time=Sum('exposure__fluoro_time')
         ).values('exam_description__anatomy_region__region', 'dirty_clinic__clinic__hospital__name', 'total_fluoro_time')
 
         if not query:
@@ -377,7 +389,7 @@ class YearlyReportData(APIView):
             exam_date__lte=dt(year=int(year), month=12, day=31),
             dirty_clinic__clinic_id=int(clinic)
         ).values('exam_no', 'exam_date', 'dirty_operator__operator__first_name', 'dirty_operator__operator__last_name',
-                 'exam_description__anatomy_region__region', 'fluoro_time')
+                 'exam_description__anatomy_region__region', 'exposure__fluoro_time')
 
         # Create a pandas data frame from the query response
         df = pd.DataFrame(list(query))
@@ -386,7 +398,7 @@ class YearlyReportData(APIView):
                            'dirty_operator__operator__first_name': 'FirstName',
                            'dirty_operator__operator__last_name': 'LastName',
                            'exam_description__anatomy_region__region': 'AnatomyRegion',
-                           'fluoro_time': 'FluoroTime'},
+                           'exposure__fluoro_time': 'FluoroTime'},
                   inplace=True)
 
         df.AnatomyRegion[df.AnatomyRegion.isnull()] = 'Ej Klacificerat'
@@ -513,7 +525,7 @@ class SsmPlotData(APIView):
             anatomy_region=F('exam_description__anatomy_region__region'),
             clinic_category=F('dirty_clinic__clinic__clinic_category__name')
         ).values(
-            'year', 'anatomy_region', 'clinic_category', 'fluoro_time'
+            'year', 'anatomy_region', 'clinic_category', 'exposure__fluoro_time'
         ).order_by('year', 'anatomy_region')
 
         db_data = pd.DataFrame.from_records(q1)
@@ -538,9 +550,9 @@ class SsmPlotData(APIView):
         for _, row in median_all.iterrows():
             plot_data_median_year['y'][years.index(row.year.year)] = dt.combine(
                 dt.date(dt.now()),
-                    time(hour=int(timetime.strftime('%H', timetime.gmtime(row.fluoro_time))),
-                         minute=int(timetime.strftime('%M', timetime.gmtime(row.fluoro_time))),
-                         second=int(timetime.strftime('%S', timetime.gmtime(row.fluoro_time)))))
+                    time(hour=int(timetime.strftime('%H', timetime.gmtime(row.exposure__fluoro_time))),
+                         minute=int(timetime.strftime('%M', timetime.gmtime(row.exposure__fluoro_time))),
+                         second=int(timetime.strftime('%S', timetime.gmtime(row.exposure__fluoro_time)))))
 
         plot_data_median_clinic_category = {}
         for year in years:
@@ -555,9 +567,9 @@ class SsmPlotData(APIView):
             plot_data_median_clinic_category[str(row.year.year)]['y'][
                 clinic_categories.index(row.clinic_category)] = dt.combine(
                 dt.date(dt.now()),
-                        time(hour=int(timetime.strftime('%H', timetime.gmtime(row.fluoro_time))),
-                             minute=int(timetime.strftime('%M', timetime.gmtime(row.fluoro_time))),
-                             second=int(timetime.strftime('%S', timetime.gmtime(row.fluoro_time)))))
+                        time(hour=int(timetime.strftime('%H', timetime.gmtime(row.exposure__fluoro_time))),
+                             minute=int(timetime.strftime('%M', timetime.gmtime(row.exposure__fluoro_time))),
+                             second=int(timetime.strftime('%S', timetime.gmtime(row.exposure__fluoro_time)))))
         plot_data = {}
         for year in years:
             plot_data[str(year)] = {
@@ -573,14 +585,14 @@ class SsmPlotData(APIView):
             plot_data_median_anatomy_region[str(row.year.year)]['y'][
                 anatomy_regions.index(row.anatomy_region)] = dt.combine(
                 dt.date(dt.now()),
-                        time(hour=int(timetime.strftime('%H', timetime.gmtime(row.fluoro_time))),
-                             minute=int(timetime.strftime('%M', timetime.gmtime(row.fluoro_time))),
-                             second=int(timetime.strftime('%S', timetime.gmtime(row.fluoro_time)))))
+                        time(hour=int(timetime.strftime('%H', timetime.gmtime(row.exposure__fluoro_time))),
+                             minute=int(timetime.strftime('%M', timetime.gmtime(row.exposure__fluoro_time))),
+                             second=int(timetime.strftime('%S', timetime.gmtime(row.exposure__fluoro_time)))))
 
         plot_data_count_anatomy_region = deepcopy(plot_data)
         for _, row in count_anatomy_region.iterrows():
             plot_data_count_anatomy_region[str(row.year.year)]['y'][
-                anatomy_regions.index(row.anatomy_region)] = row.fluoro_time
+                anatomy_regions.index(row.anatomy_region)] = row.exposure__fluoro_time
 
         return Response({
             'medianTimePerYear': {
