@@ -1,6 +1,51 @@
 from django.db import models
 
 
+class Exam(models.Model):
+    uid = models.TextField(blank=False, null=False)
+    name = models.TextField(blank=False, null=False)
+    machine = models.TextField(blank=False, null=False)
+    manufacturer = models.TextField(blank=False, null=False)
+    time_stamp = models.DateTimeField(blank=False, null=False)
+
+
+class Sequence(models.Model):
+    uid = models.TextField(blank=False, null=False)
+    name = models.TextField(blank=False, null=False)
+    duration = models.DurationField(blank=False, null=True)
+    imaging_information = models.JSONField()
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE,
+                             related_name="sequences", related_query_name="sequence")
+
+
+class Image(models.Model):
+    image = models.ImageField(upload_to='mr_book_images')
+    sequence = models.ForeignKey(Sequence, on_delete=models.CASCADE,
+                                 related_name="images", related_query_name="image")
+
+
+class Chapter(models.Model):
+    title = models.TextField(blank=False, null=False)
+    exam_number = models.IntegerField(blank=False, null=False)
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-title']
+
+
+class BookTitle(models.Model):
+    title = models.TextField(blank=False, null=False)
+
+
+class MrBook(models.Model):
+    title = models.ForeignKey(BookTitle, on_delete=models.CASCADE)
+    chapter_number = models.IntegerField(blank=False, null=False)
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-title']
+
+
 class AcrLog(models.Model):
     log_date = models.DateTimeField(blank=False, null=False)
     folder = models.TextField(blank=True, null=True)
